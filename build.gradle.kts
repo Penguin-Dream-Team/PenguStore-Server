@@ -1,5 +1,6 @@
 @file:Suppress("PropertyName")
 
+import org.flywaydb.gradle.task.FlywayMigrateTask
 import nu.studer.gradle.jooq.JooqGenerate
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -19,6 +20,7 @@ plugins {
     kotlin("jvm") version "1.4.31"
     id("nu.studer.jooq") version "5.2.1"
     id("com.bmuschko.docker-java-application") version "6.7.0"
+    id("org.flywaydb.flyway") version "7.6.0"
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -80,7 +82,7 @@ dependencies {
 
 
     jooqGenerator("mysql", "mysql-connector-java", mysql_version)
-    runtimeOnly("mysql", "mysql-connector-java", mysql_version)
+    implementation("mysql", "mysql-connector-java", mysql_version)
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("io.kotest:kotest-runner-junit5:${kotest_version}")
@@ -98,6 +100,15 @@ val DatabasePassword = System.getenv("DB_PASSWORD") ?: ""
 
 sourceSets {
     getByName("main").java.srcDirs("src/main/jooqPengustore")
+}
+
+flyway {
+    driver = "com.mysql.cj.jdbc.Driver"
+    url = "jdbc:mysql://${DatabaseHost}:${DatabasePort}/${DatabaseDatabase}"
+    user = DatabaseUser
+    password = DatabasePassword
+    baselineOnMigrate = true
+    locations = arrayOf("filesystem:src/main/resources/db/migrations")
 }
 
 jooq {
@@ -118,6 +129,7 @@ jooq {
                         name = "org.jooq.meta.mysql.MySQLDatabase"
                         inputSchema = DatabaseDatabase
                         withOutputSchemaToDefault(true)
+                        excludes = "flyway_schema_history"
                     }
                     generate.apply {
                         isDeprecated = false
@@ -134,4 +146,9 @@ jooq {
             }
         }
     }
+}
+
+task("migrateDatabase") {
+    dependsOn(tasks.named<FlywayMigrateTask>("flywayMigrate"))
+    dependsOn(tasks.named<JooqGenerate>("generatePengustoreJooq"))
 }

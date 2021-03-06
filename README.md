@@ -20,6 +20,20 @@ to the databases.
 | DB_PASSWORD | The password of the db |
 
 
+### Migrate Database Schema Files
+
+The API is using [flyway](https://flyway.org/) to migrate the database schemas.
+This will allow the application to automatically create the tables and populate them accordingly.
+The files for the migrations can be found in the `resources/db/migrations` folder and need to be prepended with
+the version in the format of `V{#}__migration_name`.
+To migrate the files to the database, you can use the following gradle task:
+```bash
+flywayMigrate
+```
+For this to work, gradle needs to know the database credentials for the database server that is being
+scanned. They are passed as environment variables with the same names as in the [Database Setup](#database-setup) section.
+After running the migrations you will need to regenerate the Database files as in the [Database files](#generate-database-files)
+
 ### Generate Database Files
 
 The API is using [jooq](https://www.jooq.org/) to create database queries, which requires
@@ -30,7 +44,15 @@ are required in the API, they can be generated using the following gradle task:
 generatePengustoreJooq
 ```
 For this to work, gradle needs to know the database credentials for the database server that is being
-scanned. They are passed as environment variables with the same names as in the [Database Setup](#Database-Setup) section.
+scanned. They are passed as environment variables with the same names as in the [Database Setup](#database-setup) section.
+
+
+### Database Full Setup
+
+If you want to run both the migrations and generate the resulting files you can use the following gradle task:
+```bash
+migrateDatabase
+```
 
 
 ## Running

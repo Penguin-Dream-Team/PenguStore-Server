@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Row2;
@@ -20,6 +21,7 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.types.ULong;
 
 import store.pengu.server.db.pengustore.DefaultSchema;
 import store.pengu.server.db.pengustore.Keys;
@@ -50,12 +52,12 @@ public class Users extends TableImpl<UsersRecord> {
     /**
      * The column <code>users.userid</code>.
      */
-    public final TableField<UsersRecord, Integer> USERID = createField(DSL.name("userid"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<UsersRecord, ULong> USERID = createField(DSL.name("userid"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>users.name</code>.
+     * The column <code>users.username</code>.
      */
-    public final TableField<UsersRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(50).nullable(false).defaultValue(DSL.inline("''", SQLDataType.VARCHAR)), this, "");
+    public final TableField<UsersRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.VARCHAR(16).nullable(false), this, "");
 
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, null);
@@ -93,6 +95,11 @@ public class Users extends TableImpl<UsersRecord> {
     @Override
     public Schema getSchema() {
         return DefaultSchema.DEFAULT_SCHEMA;
+    }
+
+    @Override
+    public Identity<UsersRecord, ULong> getIdentity() {
+        return (Identity<UsersRecord, ULong>) super.getIdentity();
     }
 
     @Override
@@ -136,7 +143,7 @@ public class Users extends TableImpl<UsersRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row2<Integer, String> fieldsRow() {
+    public Row2<ULong, String> fieldsRow() {
         return (Row2) super.fieldsRow();
     }
 }
