@@ -135,7 +135,3 @@ jooq {
         }
     }
 }
-
-task("jooqGenerateAll") {
-    dependsOn(tasks.named<JooqGenerate>("generatePengustoreJooq"))
-}
