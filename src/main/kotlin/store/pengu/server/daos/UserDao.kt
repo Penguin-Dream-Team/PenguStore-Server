@@ -16,8 +16,8 @@ class UserDao(
             .from(USERS)
             .fetch().map {
                 User(
-                    id = it[USERS.USERID],
-                    name = it[USERS.NAME]
+                    id = it[USERS.USERID].toLong(),
+                    name = it[USERS.USERNAME]
                 )
             }
 

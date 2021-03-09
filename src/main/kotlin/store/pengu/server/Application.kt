@@ -18,6 +18,7 @@ import io.ktor.util.*
 import io.ktor.websocket.*
 import org.koin.core.context.startKoin
 import org.slf4j.event.Level
+import store.pengu.server.application.features.ResourceAccessControl
 import java.time.Duration
 import java.time.Instant
 
@@ -148,6 +149,17 @@ fun Application.module(testing: Boolean = false) {
                 message = "Oops, something went wrong with your request.\nPlease try again later.",
                 status = HttpStatusCode.InternalServerError
             )
+        }
+    }
+
+    install(ResourceAccessControl) {
+        whitelistAddresses {
+            +"8.8.8.8"
+            -"8.8.8.8"
+        }
+
+        apiKeys {
+            +"B5B65B1FBDB32AB359479D861AF2D"
         }
     }
 
