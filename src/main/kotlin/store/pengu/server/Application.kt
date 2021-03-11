@@ -2,9 +2,10 @@ package store.pengu.server
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import store.pengu.server.application.loadRoutes
 import store.pengu.server.utils.CommaSeparatedList
 import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
@@ -18,7 +19,10 @@ import io.ktor.util.*
 import io.ktor.websocket.*
 import org.koin.core.context.startKoin
 import org.slf4j.event.Level
+import store.pengu.server.application.*
+import store.pengu.server.application.features.GuestRoutes
 import store.pengu.server.application.features.ResourceAccessControl
+import store.pengu.server.application.features.guestOnly
 import java.time.Duration
 import java.time.Instant
 
@@ -116,32 +120,14 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(StatusPages) {
-        exception<ForbiddenException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.Forbidden)
-        }
-        exception<UnauthorizedException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.Unauthorized)
-        }
-        exception<BadRequestException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.BadRequest)
-        }
-        exception<NotFoundException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.NotFound)
-        }
-        exception<ConflictException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.Conflict)
-        }
-        exception<NotAcceptableException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.NotAcceptable)
-        }
-        exception<InternalServerErrorException> { cause ->
-            call.respond(message = cause.content, status = HttpStatusCode.InternalServerError)
-        }
         exception<TooManyRequestsException> { cause ->
             cause.retryAfter?.let {
                 call.response.header("Retry-After", it)
             }
-            call.respond(message = cause.content, status = HttpStatusCode.TooManyRequests)
+            call.respond(message = cause.content, status = cause.statusCode)
+        }
+        exception<PenguStoreException> { cause ->
+            call.respond(message = cause.content, status = cause.statusCode)
         }
         exception<Exception> { cause ->
             cause.printStackTrace()
@@ -149,6 +135,17 @@ fun Application.module(testing: Boolean = false) {
                 message = "Oops, something went wrong with your request.\nPlease try again later.",
                 status = HttpStatusCode.InternalServerError
             )
+        }
+    }
+
+    install(GuestRoutes)
+
+    install(Authentication) {
+        jwt {
+            verifier(JWTAuthenticationConfig.verifier)
+            realm = JWTAuthenticationConfig.issuer
+            validate { JWTAuthenticationConfig.validate(it) }
+            challenge { _, _ -> throw UnauthorizedException("You need to be logged in to access this resource") }
         }
     }
 
@@ -168,8 +165,10 @@ fun Application.module(testing: Boolean = false) {
         loadRoutes(koin)
 
         /* LANDING PAGE */
-        get("/") {
-            call.respondText("Welcome to the PenguStore API!!")
+        authenticate {
+            get<Home> {
+                call.respondText("Welcome to the PenguStore API!!")
+            }
         }
 
         /* STATIC FILES */
@@ -180,11 +179,12 @@ fun Application.module(testing: Boolean = false) {
     }
 }
 
-data class ForbiddenException(val content: Any) : RuntimeException("")
-data class UnauthorizedException(val content: Any) : RuntimeException("")
-data class BadRequestException(val content: Any) : RuntimeException("")
-data class NotFoundException(val content: Any) : RuntimeException("")
-data class ConflictException(val content: Any) : RuntimeException("")
-data class NotAcceptableException(val content: Any) : RuntimeException("")
-data class InternalServerErrorException(val content: Any) : RuntimeException("")
-data class TooManyRequestsException(val content: Any, val retryAfter: Instant? = null) : RuntimeException("")
+abstract class PenguStoreException(val statusCode: HttpStatusCode, open val content: Any) : RuntimeException("")
+data class ForbiddenException(override val content: Any) : PenguStoreException(HttpStatusCode.Forbidden, content)
+data class UnauthorizedException(override val content: Any) : PenguStoreException(HttpStatusCode.Unauthorized, content)
+data class BadRequestException(override val content: Any) : PenguStoreException(HttpStatusCode.BadRequest, content)
+data class NotFoundException(override val content: Any) : PenguStoreException(HttpStatusCode.NotFound, content)
+data class ConflictException(override val content: Any) : PenguStoreException(HttpStatusCode.Conflict, content)
+data class NotAcceptableException(override val content: Any) : PenguStoreException(HttpStatusCode.NotAcceptable, content)
+data class InternalServerErrorException(override val content: Any) : PenguStoreException(HttpStatusCode.InternalServerError, content)
+data class TooManyRequestsException(override val content: Any, val retryAfter: Instant? = null) : PenguStoreException(HttpStatusCode.TooManyRequests, content)
