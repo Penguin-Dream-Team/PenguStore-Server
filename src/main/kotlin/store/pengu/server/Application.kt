@@ -136,6 +136,13 @@ fun Application.module(testing: Boolean = false) {
                 status = HttpStatusCode.InternalServerError
             )
         }
+
+        status(HttpStatusCode.NotFound) { status ->
+            call.respond(
+                message = "The requested resource cannot be found",
+                status = status
+            )
+        }
     }
 
     install(GuestRoutes)
@@ -169,6 +176,10 @@ fun Application.module(testing: Boolean = false) {
             get<Home> {
                 call.respondText("Welcome to the PenguStore API!!")
             }
+        }
+
+        get<Dashboard> {
+            call.respond(mapOf("data" to "Welcome to the dashboard"))
         }
 
         /* STATIC FILES */
