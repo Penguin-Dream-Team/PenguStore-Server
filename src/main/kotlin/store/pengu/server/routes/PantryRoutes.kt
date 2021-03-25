@@ -101,4 +101,12 @@ fun Route.pantryRoutes(
         call.respond(response)
     }
 
+    get<PantryGetProducts> { param ->
+        val entries = withContext(Dispatchers.IO) {
+            pantryDao.getProductsInPantry(param.id)
+        }
+
+        call.respond(entries)
+    }
+
 }

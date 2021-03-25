@@ -52,6 +52,9 @@ object PantryPutProduct
 @Location("/pantries/deleteProduct")
 object PantryDeleteProduct
 
+@Location("/pantries/{id}/products")
+data class  PantryGetProducts(val id: Long)
+
 
 
 @Location("/products")
