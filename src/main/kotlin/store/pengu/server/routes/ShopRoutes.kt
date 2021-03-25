@@ -10,37 +10,37 @@ import kotlinx.coroutines.withContext
 import store.pengu.server.*
 import store.pengu.server.application.features.ResourceAccessControl
 import store.pengu.server.application.features.controlledAccess
-import store.pengu.server.daos.PantryDao
+import store.pengu.server.daos.ShopDao
 import store.pengu.server.daos.UserDao
-import store.pengu.server.data.Pantry_x_User
-import store.pengu.server.data.Pantry_x_User_Request
+import store.pengu.server.data.Shop
+import store.pengu.server.data.Shop_x_Product
 import store.pengu.server.data.User
 
-fun Route.userRoutes(
-    userDao: UserDao,
+fun Route.shopRoutes(
+    shopDao: ShopDao,
 ) {
 
-    get<UsersList> {
+    get<ShopsList> {
         val entries = withContext(Dispatchers.IO) {
-            userDao.getUsers()
+            shopDao.getShops()
         }
 
         call.respond(entries)
     }
 
-    get<UserGet> { param ->
-        val user = withContext(Dispatchers.IO) {
-            userDao.getUser(param.id)
-        } ?: throw NotFoundException("User with specified id not found")
+    get<ShopGet> { param ->
+        val shop = withContext(Dispatchers.IO) {
+            shopDao.getShop(param.id)
+        } ?: throw NotFoundException("Shop with specified id not found")
 
-        call.respond(user)
+        call.respond(shop)
     }
 
-    post<UserPost> {
-        val user = call.receive<User>()
+    post<ShopPost> {
+        val shop = call.receive<Shop>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.addUser(user)
+                shopDao.addShop(shop)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -49,11 +49,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    put<UserPut> {
-        val user = call.receive<User>()
+    put<ShopPut> {
+        val shop = call.receive<Shop>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.updateUser(user)
+                shopDao.updateShop(shop)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -62,11 +62,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    post<UserLogin>{
-        val user = call.receive<User>()
+    post<ShopPostProduct> {
+        val shop_x_product = call.receive<Shop_x_Product>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.loginUser(user)
+                shopDao.addProductToShop(shop_x_product)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -75,14 +75,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    post<UserPostPantry> {
-        val request = call.receive<Pantry_x_User_Request>()
-        val pantry = userDao.getPantryByCode(request.code) ?: throw NotFoundException("Pantry with specified code not found")
-        val pantry_x_user = Pantry_x_User(request.user_id, pantry.id)
+    put<ShopPutProduct> {
+        val shop_x_product = call.receive<Shop_x_Product>()
         val response = withContext(Dispatchers.IO) {
             try {
-
-                userDao.addPantryToUser(pantry_x_user)
+                shopDao.updateProductShop(shop_x_product)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -91,11 +88,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    delete<UserDeletePantry>{
-        val pantry_x_user = call.receive<Pantry_x_User>()
+    delete<ShopDeleteProduct> {
+        val shop_x_product = call.receive<Shop_x_Product>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.deletePantryUser(pantry_x_user)
+                shopDao.deleteProductShop(shop_x_product)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -103,5 +100,6 @@ fun Route.userRoutes(
         }
         call.respond(response)
     }
+
 
 }

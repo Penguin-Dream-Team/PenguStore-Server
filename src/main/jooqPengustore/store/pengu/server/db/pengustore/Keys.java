@@ -9,7 +9,21 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
+import store.pengu.server.db.pengustore.tables.Pantries;
+import store.pengu.server.db.pengustore.tables.PantryXUser;
+import store.pengu.server.db.pengustore.tables.ProductXImage;
+import store.pengu.server.db.pengustore.tables.ProductXPantry;
+import store.pengu.server.db.pengustore.tables.Products;
+import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.Shops;
 import store.pengu.server.db.pengustore.tables.Users;
+import store.pengu.server.db.pengustore.tables.records.PantriesRecord;
+import store.pengu.server.db.pengustore.tables.records.PantryXUserRecord;
+import store.pengu.server.db.pengustore.tables.records.ProductXImageRecord;
+import store.pengu.server.db.pengustore.tables.records.ProductXPantryRecord;
+import store.pengu.server.db.pengustore.tables.records.ProductsRecord;
+import store.pengu.server.db.pengustore.tables.records.ShopXProductRecord;
+import store.pengu.server.db.pengustore.tables.records.ShopsRecord;
 import store.pengu.server.db.pengustore.tables.records.UsersRecord;
 
 
@@ -24,5 +38,13 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.USERID }, true);
+    public static final UniqueKey<PantriesRecord> KEY_PANTRIES_CODE = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_code"), new TableField[] { Pantries.PANTRIES.CODE }, true);
+    public static final UniqueKey<PantriesRecord> KEY_PANTRIES_PRIMARY = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_PRIMARY"), new TableField[] { Pantries.PANTRIES.PANTRY_ID }, true);
+    public static final UniqueKey<PantryXUserRecord> KEY_PANTRY_X_USER_PRIMARY = Internal.createUniqueKey(PantryXUser.PANTRY_X_USER, DSL.name("KEY_pantry_x_user_PRIMARY"), new TableField[] { PantryXUser.PANTRY_X_USER.PANTRY_ID, PantryXUser.PANTRY_X_USER.USER_ID }, true);
+    public static final UniqueKey<ProductXImageRecord> KEY_PRODUCT_X_IMAGE_PRIMARY = Internal.createUniqueKey(ProductXImage.PRODUCT_X_IMAGE, DSL.name("KEY_product_x_image_PRIMARY"), new TableField[] { ProductXImage.PRODUCT_X_IMAGE.PRODUCT_ID }, true);
+    public static final UniqueKey<ProductXPantryRecord> KEY_PRODUCT_X_PANTRY_PRIMARY = Internal.createUniqueKey(ProductXPantry.PRODUCT_X_PANTRY, DSL.name("KEY_product_x_pantry_PRIMARY"), new TableField[] { ProductXPantry.PRODUCT_X_PANTRY.PANTRY_ID, ProductXPantry.PRODUCT_X_PANTRY.PRODUCT_ID }, true);
+    public static final UniqueKey<ProductsRecord> KEY_PRODUCTS_PRIMARY = Internal.createUniqueKey(Products.PRODUCTS, DSL.name("KEY_products_PRIMARY"), new TableField[] { Products.PRODUCTS.PRODUCT_ID }, true);
+    public static final UniqueKey<ShopXProductRecord> KEY_SHOP_X_PRODUCT_PRIMARY = Internal.createUniqueKey(ShopXProduct.SHOP_X_PRODUCT, DSL.name("KEY_shop_x_product_PRIMARY"), new TableField[] { ShopXProduct.SHOP_X_PRODUCT.SHOP_ID, ShopXProduct.SHOP_X_PRODUCT.PRODUCT_ID }, true);
+    public static final UniqueKey<ShopsRecord> KEY_SHOPS_PRIMARY = Internal.createUniqueKey(Shops.SHOPS, DSL.name("KEY_shops_PRIMARY"), new TableField[] { Shops.SHOPS.SHOP_ID }, true);
+    public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.USER_ID }, true);
 }

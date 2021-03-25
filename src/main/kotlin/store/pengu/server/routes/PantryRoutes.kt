@@ -12,35 +12,35 @@ import store.pengu.server.application.features.ResourceAccessControl
 import store.pengu.server.application.features.controlledAccess
 import store.pengu.server.daos.PantryDao
 import store.pengu.server.daos.UserDao
-import store.pengu.server.data.Pantry_x_User
-import store.pengu.server.data.Pantry_x_User_Request
+import store.pengu.server.data.Pantry
+import store.pengu.server.data.Product_x_Pantry
 import store.pengu.server.data.User
 
-fun Route.userRoutes(
-    userDao: UserDao,
+fun Route.pantryRoutes(
+    pantryDao: PantryDao,
 ) {
 
-    get<UsersList> {
+    get<PantriesList> {
         val entries = withContext(Dispatchers.IO) {
-            userDao.getUsers()
+            pantryDao.getPantries()
         }
 
         call.respond(entries)
     }
 
-    get<UserGet> { param ->
-        val user = withContext(Dispatchers.IO) {
-            userDao.getUser(param.id)
-        } ?: throw NotFoundException("User with specified id not found")
+    get<PantryGet> { param ->
+        val pantry = withContext(Dispatchers.IO) {
+            pantryDao.getPantry(param.id)
+        } ?: throw NotFoundException("Pantry with specified id not found")
 
-        call.respond(user)
+        call.respond(pantry)
     }
 
-    post<UserPost> {
-        val user = call.receive<User>()
+    post<PantryPost> {
+        val pantry = call.receive<Pantry>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.addUser(user)
+                pantryDao.addPantry(pantry)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -49,11 +49,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    put<UserPut> {
-        val user = call.receive<User>()
+    put<PantryPut> {
+        val pantry = call.receive<Pantry>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.updateUser(user)
+                pantryDao.updatePantry(pantry)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -62,11 +62,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    post<UserLogin>{
-        val user = call.receive<User>()
+    post<PantryPostProduct> {
+        val product_x_pantry = call.receive<Product_x_Pantry>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.loginUser(user)
+                pantryDao.addProductToPantry(product_x_pantry)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -75,14 +75,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    post<UserPostPantry> {
-        val request = call.receive<Pantry_x_User_Request>()
-        val pantry = userDao.getPantryByCode(request.code) ?: throw NotFoundException("Pantry with specified code not found")
-        val pantry_x_user = Pantry_x_User(request.user_id, pantry.id)
+    put <PantryPutProduct> {
+        val product_x_pantry = call.receive<Product_x_Pantry>()
         val response = withContext(Dispatchers.IO) {
             try {
-
-                userDao.addPantryToUser(pantry_x_user)
+                pantryDao.updateProductPantry(product_x_pantry)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
@@ -91,11 +88,11 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    delete<UserDeletePantry>{
-        val pantry_x_user = call.receive<Pantry_x_User>()
+    delete <PantryDeleteProduct> {
+        val product_x_pantry = call.receive<Product_x_Pantry>()
         val response = withContext(Dispatchers.IO) {
             try {
-                userDao.deletePantryUser(pantry_x_user)
+                pantryDao.deleteProductPantry(product_x_pantry)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)

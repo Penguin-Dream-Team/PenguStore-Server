@@ -1,0 +1,3 @@
+O User tem q escolher um codigo unico pa sua pantry
+
+Como e q eu testo as imagens?
