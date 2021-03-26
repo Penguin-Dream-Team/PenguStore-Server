@@ -4,10 +4,12 @@ import org.jetbrains.annotations.NotNull
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.data.ProductInShop
 import store.pengu.server.data.Shop
 import store.pengu.server.data.Shop_x_Product
 import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.tables.PantryXUser
+import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
 import store.pengu.server.db.pengustore.tables.Shops.SHOPS
 import store.pengu.server.db.pengustore.tables.Users.USERS
@@ -88,6 +90,25 @@ class ShopDao(
         return create.delete(SHOP_X_PRODUCT)
             .where(condition)
             .execute() == 1
+    }
+
+    fun getShopProducts(shop_id: Long, create: DSLContext = dslContext): List<ProductInShop> {
+        return create.select()
+            .from(SHOPS)
+            .join(SHOP_X_PRODUCT).using(SHOPS.SHOP_ID)
+            .join(PRODUCTS).using(SHOP_X_PRODUCT.PRODUCT_ID)
+            .where(SHOPS.SHOP_ID.eq(ULong.valueOf(shop_id)))
+            .fetch().map {
+                ProductInShop(
+                    product_id = it[PRODUCTS.PRODUCT_ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE],
+                    review_score = it[PRODUCTS.REVIEW_SCORE],
+                    review_number = it[PRODUCTS.REVIEW_NUMBER],
+                    price = it[SHOP_X_PRODUCT.PRICE]
+
+                )
+            }
     }
 
 }

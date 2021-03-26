@@ -29,6 +29,9 @@ object UserPostPantry
 @Location("/users/deletePantry")
 object UserDeletePantry
 
+@Location("/users/{id}/pantries")
+data class UserGetPantries(val id: Long)
+
 
 
 @Location("/pantries")
@@ -92,3 +95,6 @@ object  ShopPutProduct
 
 @Location("/shops/deleteProduct")
 object  ShopDeleteProduct
+
+@Location("/shops/{id}/products")
+data class  ShopGetProducts(val id: Long)

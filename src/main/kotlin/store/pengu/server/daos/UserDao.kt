@@ -6,10 +6,13 @@ import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.data.Pantry
 import store.pengu.server.data.Pantry_x_User
+import store.pengu.server.data.ProductInPantry
 import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.tables.Pantries
+import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantryXUser.PANTRY_X_USER
 import store.pengu.server.db.pengustore.tables.ProductXPantry
+import store.pengu.server.db.pengustore.tables.Products
 import store.pengu.server.db.pengustore.tables.Users.USERS
 import store.pengu.server.db.pengustore.tables.records.UsersRecord
 
@@ -110,4 +113,21 @@ class UserDao(
             .where(condition)
             .execute() == 1
     }
+
+    fun getUserPantries (user_id: Long, create: DSLContext = dslContext): List<Pantry> {
+        return create.select()
+            .from(USERS)
+            .join(PANTRY_X_USER).using(USERS.USER_ID)
+            .join(PANTRIES).using(PANTRY_X_USER.PANTRY_ID)
+            .where(USERS.USER_ID.eq(ULong.valueOf(user_id)))
+            .fetch().map {
+                Pantry(
+                    id = it[PANTRIES.PANTRY_ID].toLong(),
+                    code = it[PANTRIES.CODE],
+                    name = it[PANTRIES.NAME]
+                )
+            }
+    }
+
+
 }

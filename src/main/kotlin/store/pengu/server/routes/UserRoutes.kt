@@ -104,4 +104,12 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
+    get<UserGetPantries>{ param ->
+        val entries = withContext(Dispatchers.IO) {
+            userDao.getUserPantries(param.id)
+        }
+
+        call.respond(entries)
+    }
+
 }

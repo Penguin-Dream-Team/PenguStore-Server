@@ -101,5 +101,12 @@ fun Route.shopRoutes(
         call.respond(response)
     }
 
+    get<ShopGetProducts> { param ->
+        val entries = withContext(Dispatchers.IO) {
+            shopDao.getShopProducts(param.id)
+        }
+
+        call.respond(entries)
+    }
 
 }
