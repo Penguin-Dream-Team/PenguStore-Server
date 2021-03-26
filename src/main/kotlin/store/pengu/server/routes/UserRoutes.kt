@@ -112,4 +112,12 @@ fun Route.userRoutes(
         call.respond(entries)
     }
 
+    get<UserGenerateShoppingList>{ param ->
+        val entries = withContext(Dispatchers.IO) {
+            userDao.generateShoppingList(param.id)
+        }
+
+        call.respond(entries)
+    }
+
 }

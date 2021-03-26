@@ -32,6 +32,9 @@ object UserDeletePantry
 @Location("/users/{id}/pantries")
 data class UserGetPantries(val id: Long)
 
+@Location("/users/{id}/shoppingList")
+data class UserGenerateShoppingList(val id: Long)
+
 
 
 @Location("/pantries")
