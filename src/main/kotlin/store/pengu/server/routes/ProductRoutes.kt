@@ -8,23 +8,18 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import store.pengu.server.*
-import store.pengu.server.application.features.ResourceAccessControl
-import store.pengu.server.application.features.controlledAccess
 import store.pengu.server.daos.ProductDao
-import store.pengu.server.daos.UserDao
 import store.pengu.server.data.Product
-import store.pengu.server.data.User
 
 fun Route.productRoutes(
     productDao: ProductDao,
 ) {
-
     get<ProductsList> {
         val entries = withContext(Dispatchers.IO) {
             productDao.getProducts()
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
 
     get<ProductGet> { param ->
@@ -32,7 +27,7 @@ fun Route.productRoutes(
             productDao.getProduct(param.id)
         } ?: throw NotFoundException("Product with specified id not found")
 
-        call.respond(product)
+        call.respond("data" to product)
     }
 
     post<ProductPost> {
@@ -45,7 +40,7 @@ fun Route.productRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     put<ProductPut> {
@@ -58,8 +53,6 @@ fun Route.productRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
-
-
 }

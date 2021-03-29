@@ -8,24 +8,19 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import store.pengu.server.*
-import store.pengu.server.application.features.ResourceAccessControl
-import store.pengu.server.application.features.controlledAccess
 import store.pengu.server.daos.PantryDao
-import store.pengu.server.daos.UserDao
 import store.pengu.server.data.Pantry
 import store.pengu.server.data.Product_x_Pantry
-import store.pengu.server.data.User
 
 fun Route.pantryRoutes(
     pantryDao: PantryDao,
 ) {
-
     get<PantriesList> {
         val entries = withContext(Dispatchers.IO) {
             pantryDao.getPantries()
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
 
     get<PantryGet> { param ->
@@ -33,7 +28,7 @@ fun Route.pantryRoutes(
             pantryDao.getPantry(param.id)
         } ?: throw NotFoundException("Pantry with specified id not found")
 
-        call.respond(pantry)
+        call.respond("data" to pantry)
     }
 
     post<PantryPost> {
@@ -46,7 +41,7 @@ fun Route.pantryRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     put<PantryPut> {
@@ -59,7 +54,7 @@ fun Route.pantryRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     post<PantryPostProduct> {
@@ -72,7 +67,7 @@ fun Route.pantryRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     put <PantryPutProduct> {
@@ -85,7 +80,7 @@ fun Route.pantryRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     delete <PantryDeleteProduct> {
@@ -98,7 +93,7 @@ fun Route.pantryRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     get<PantryGetProducts> { param ->
@@ -106,7 +101,6 @@ fun Route.pantryRoutes(
             pantryDao.getProductsInPantry(param.id)
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
-
 }

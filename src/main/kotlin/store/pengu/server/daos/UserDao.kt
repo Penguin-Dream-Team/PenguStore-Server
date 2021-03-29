@@ -1,6 +1,5 @@
 package store.pengu.server.daos
 
-import org.jetbrains.annotations.NotNull
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
@@ -11,12 +10,9 @@ import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantryXUser.PANTRY_X_USER
-import store.pengu.server.db.pengustore.tables.ProductXPantry
 import store.pengu.server.db.pengustore.tables.ProductXPantry.PRODUCT_X_PANTRY
-import store.pengu.server.db.pengustore.tables.Products
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.Users.USERS
-import store.pengu.server.db.pengustore.tables.records.UsersRecord
 
 class UserDao(
     conf: Configuration
@@ -146,14 +142,14 @@ class UserDao(
             .where(condition)
             .fetch().map {
                 ProductInPantry(
-                    product_id = it[PRODUCTS.PRODUCT_ID].toLong(),
-                    pantry_id = it[PANTRIES.PANTRY_ID].toLong(),
+                    productId = it[PRODUCTS.PRODUCT_ID].toLong(),
+                    pantryId = it[PANTRIES.PANTRY_ID].toLong(),
                     barcode = it[PRODUCTS.BARCODE],
                     name = it[PRODUCTS.NAME],
-                    review_number = it[PRODUCTS.REVIEW_NUMBER],
-                    review_score = it[PRODUCTS.REVIEW_SCORE],
-                    have_qty = it[PRODUCT_X_PANTRY.HAVE_QTY],
-                    want_qty = it[PRODUCT_X_PANTRY.WANT_QTY]
+                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER],
+                    reviewScore = it[PRODUCTS.REVIEW_SCORE],
+                    amountAvailable = it[PRODUCT_X_PANTRY.HAVE_QTY],
+                    amountNeeded = it[PRODUCT_X_PANTRY.WANT_QTY]
                 )
             }
 

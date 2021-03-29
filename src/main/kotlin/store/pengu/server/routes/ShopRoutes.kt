@@ -8,24 +8,19 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import store.pengu.server.*
-import store.pengu.server.application.features.ResourceAccessControl
-import store.pengu.server.application.features.controlledAccess
 import store.pengu.server.daos.ShopDao
-import store.pengu.server.daos.UserDao
 import store.pengu.server.data.Shop
 import store.pengu.server.data.Shop_x_Product
-import store.pengu.server.data.User
 
 fun Route.shopRoutes(
     shopDao: ShopDao,
 ) {
-
     get<ShopsList> {
         val entries = withContext(Dispatchers.IO) {
             shopDao.getShops()
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
 
     get<ShopGet> { param ->
@@ -33,7 +28,7 @@ fun Route.shopRoutes(
             shopDao.getShop(param.id)
         } ?: throw NotFoundException("Shop with specified id not found")
 
-        call.respond(shop)
+        call.respond("data" to shop)
     }
 
     post<ShopPost> {
@@ -46,7 +41,7 @@ fun Route.shopRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     put<ShopPut> {
@@ -59,7 +54,7 @@ fun Route.shopRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     post<ShopPostProduct> {
@@ -72,7 +67,7 @@ fun Route.shopRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     put<ShopPutProduct> {
@@ -85,7 +80,7 @@ fun Route.shopRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     delete<ShopDeleteProduct> {
@@ -98,7 +93,7 @@ fun Route.shopRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     get<ShopGetProducts> { param ->
@@ -106,7 +101,6 @@ fun Route.shopRoutes(
             shopDao.getShopProducts(param.id)
         }
 
-        call.respond(entries)
+        call.respond("data" to entries)
     }
-
 }

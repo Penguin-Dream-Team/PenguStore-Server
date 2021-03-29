@@ -4,12 +4,7 @@ import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.data.Product
-import store.pengu.server.data.Product_x_Image
-import store.pengu.server.data.User
-import store.pengu.server.db.pengustore.tables.ProductXImage.PRODUCT_X_IMAGE
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.Users.USERS
-import store.pengu.server.db.pengustore.tables.records.UsersRecord
 
 class ProductDao(
     conf: Configuration
@@ -24,8 +19,8 @@ class ProductDao(
                     id = it[PRODUCTS.PRODUCT_ID].toLong(),
                     name = it[PRODUCTS.NAME],
                     barcode = it[PRODUCTS.BARCODE],
-                    review_score = it[PRODUCTS.REVIEW_SCORE].toDouble(),
-                    review_number = it[PRODUCTS.REVIEW_NUMBER]
+                    reviewScore = it[PRODUCTS.REVIEW_SCORE]?.toDouble(),
+                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER]
                 )
             }
 
@@ -40,8 +35,8 @@ class ProductDao(
                     id = it[PRODUCTS.PRODUCT_ID].toLong(),
                     name = it[PRODUCTS.NAME],
                     barcode = it[PRODUCTS.BARCODE],
-                    review_score = it[PRODUCTS.REVIEW_SCORE].toDouble(),
-                    review_number = it[PRODUCTS.REVIEW_NUMBER]
+                    reviewScore = it[PRODUCTS.REVIEW_SCORE].toDouble(),
+                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER]
                 )
             }
     }
@@ -49,7 +44,7 @@ class ProductDao(
     fun addProduct(product: Product, create: DSLContext = dslContext): Boolean {
         return create.insertInto(PRODUCTS,
                 PRODUCTS.NAME, PRODUCTS.BARCODE, PRODUCTS.REVIEW_SCORE, PRODUCTS.REVIEW_NUMBER)
-            .values(product.name, product.barcode, product.review_score, product.review_number)
+            .values(product.name, product.barcode, product.reviewScore, product.reviewNumber)
             .execute() == 1
     }
 
@@ -57,8 +52,8 @@ class ProductDao(
         return create.update(PRODUCTS)
             .set(PRODUCTS.NAME, product.name)
             .set(PRODUCTS.BARCODE, product.barcode)
-            .set(PRODUCTS.REVIEW_SCORE, product.review_score)
-            .set(PRODUCTS.REVIEW_NUMBER, product.review_number)
+            .set(PRODUCTS.REVIEW_SCORE, product.reviewScore)
+            .set(PRODUCTS.REVIEW_NUMBER, product.reviewNumber)
             .where(PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(product.id)))
             .execute() == 1
     }

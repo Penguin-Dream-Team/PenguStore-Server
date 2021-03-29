@@ -8,9 +8,6 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import store.pengu.server.*
-import store.pengu.server.application.features.ResourceAccessControl
-import store.pengu.server.application.features.controlledAccess
-import store.pengu.server.daos.PantryDao
 import store.pengu.server.daos.UserDao
 import store.pengu.server.data.Pantry_x_User
 import store.pengu.server.data.Pantry_x_User_Request
@@ -19,13 +16,12 @@ import store.pengu.server.data.User
 fun Route.userRoutes(
     userDao: UserDao,
 ) {
-
     get<UsersList> {
         val entries = withContext(Dispatchers.IO) {
             userDao.getUsers()
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
 
     get<UserGet> { param ->
@@ -33,7 +29,7 @@ fun Route.userRoutes(
             userDao.getUser(param.id)
         } ?: throw NotFoundException("User with specified id not found")
 
-        call.respond(user)
+        call.respond("data" to user)
     }
 
     post<UserPost> {
@@ -46,7 +42,7 @@ fun Route.userRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     put<UserPut> {
@@ -59,7 +55,7 @@ fun Route.userRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     post<UserLogin>{
@@ -72,7 +68,7 @@ fun Route.userRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     post<UserPostPantry> {
@@ -88,7 +84,7 @@ fun Route.userRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     delete<UserDeletePantry>{
@@ -101,7 +97,7 @@ fun Route.userRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond(response)
+        call.respond("data" to response)
     }
 
     get<UserGetPantries>{ param ->
@@ -109,7 +105,7 @@ fun Route.userRoutes(
             userDao.getUserPantries(param.id)
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
 
     get<UserGenerateShoppingList>{ param ->
@@ -117,7 +113,6 @@ fun Route.userRoutes(
             userDao.generateShoppingList(param.id)
         }
 
-        call.respond(entries)
+        call.respond(mapOf("data" to entries))
     }
-
 }
