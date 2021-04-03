@@ -3,15 +3,18 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
-import store.pengu.server.data.Pantry
-import store.pengu.server.data.Pantry_x_User
-import store.pengu.server.data.ProductInPantry
+import store.pengu.server.data.*
 import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantryXUser.PANTRY_X_USER
 import store.pengu.server.db.pengustore.tables.ProductXPantry.PRODUCT_X_PANTRY
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.db.pengustore.tables.ShopXProduct
+import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
+import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
+import store.pengu.server.db.pengustore.tables.Shops
+import store.pengu.server.db.pengustore.tables.Shops.SHOPS
 import store.pengu.server.db.pengustore.tables.Users.USERS
 
 class UserDao(
@@ -90,7 +93,9 @@ class UserDao(
                 Pantry(
                     id = it[Pantries.PANTRIES.PANTRY_ID].toLong(),
                     code = it[Pantries.PANTRIES.CODE],
-                    name = it[Pantries.PANTRIES.NAME]
+                    name = it[Pantries.PANTRIES.NAME],
+                    latitude = it[PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[PANTRIES.LONGITUDE].toFloat()
                 )
             }
     }
@@ -122,7 +127,9 @@ class UserDao(
                 Pantry(
                     id = it[PANTRIES.PANTRY_ID].toLong(),
                     code = it[PANTRIES.CODE],
-                    name = it[PANTRIES.NAME]
+                    name = it[PANTRIES.NAME],
+                    latitude = it[PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[PANTRIES.LONGITUDE].toFloat()
                 )
             }
     }
@@ -155,5 +162,78 @@ class UserDao(
 
     }
 
+    fun addShoppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+        return create.insertInto(SHOPPING_LIST,
+            SHOPPING_LIST.SHOP_ID, SHOPPING_LIST.USER_ID, SHOPPING_LIST.NAME)
+            .values(shopping_list.shop_id, shopping_list.user_id, shopping_list.name)
+            .execute() == 1
+    }
+
+    fun updateShopppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shop_id))
+        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.user_id))
+
+        return create.update(SHOPPING_LIST)
+            .set(SHOPPING_LIST.SHOP_ID, shopping_list.shop_id)
+            .set(SHOPPING_LIST.USER_ID, shopping_list.user_id)
+            .set(SHOPPING_LIST.NAME, shopping_list.name)
+            .where(condition)
+            .execute() == 1
+    }
+
+    fun deleteShoppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shop_id))
+        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.user_id))
+
+        return create.delete(SHOPPING_LIST)
+            .where(condition)
+            .execute() == 1
+    }
+
+    fun getShoppingLists (user_id: Long, create: DSLContext = dslContext): List<Shopping_list> {
+        return create.select()
+            .from(SHOPPING_LIST)
+            .where(SHOPPING_LIST.USER_ID.eq(user_id))
+            .fetch().map {
+                Shopping_list(
+                    shop_id = it[SHOPPING_LIST.SHOP_ID],
+                    user_id = it[SHOPPING_LIST.USER_ID],
+                    name = it[SHOPPING_LIST.NAME]
+                )
+            }
+    }
+
+    fun getShoppingList(user_id: Long, shop_id: Long, create: DSLContext = dslContext): List<ProductInShoppingList> {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shop_id))
+        condition = condition.and(SHOPPING_LIST.USER_ID.eq(user_id))
+        condition = condition.and(PRODUCT_X_PANTRY.HAVE_QTY.lessThan(PRODUCT_X_PANTRY.WANT_QTY))
+
+        return create.select()
+            .from(SHOPPING_LIST)
+            .join(SHOPS).using(SHOPPING_LIST.SHOP_ID)
+            .join(SHOP_X_PRODUCT).using(SHOPPING_LIST.SHOP_ID)
+            .join(PRODUCTS).using(SHOP_X_PRODUCT.PRODUCT_ID)
+            .join(PANTRY_X_USER).using(SHOPPING_LIST.USER_ID)
+            .join(PRODUCT_X_PANTRY).using(PANTRY_X_USER.PANTRY_ID)
+            .where(condition)
+            .fetch().map {
+                ProductInShoppingList(
+                    product_id = it[PRODUCTS.PRODUCT_ID].toLong(),
+                    pantry_id = it[PANTRY_X_USER.PANTRY_ID],
+                    shop_id = it[SHOPS.SHOP_ID].toLong(),
+                    product_name = it[PRODUCTS.NAME],
+                    shop_name = it[SHOPS.NAME],
+                    barcode = it[PRODUCTS.BARCODE],
+                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER],
+                    reviewScore = it[PRODUCTS.REVIEW_SCORE],
+                    amountAvailable = it[PRODUCT_X_PANTRY.HAVE_QTY],
+                    amountNeeded = it[PRODUCT_X_PANTRY.WANT_QTY],
+                    price = it[SHOP_X_PRODUCT.PRICE]
+                )
+            }
+    }
 
 }

@@ -53,32 +53,32 @@ public class ShopsRecord extends UpdatableRecordImpl<ShopsRecord> implements Rec
     }
 
     /**
-     * Setter for <code>shops.location_x</code>.
+     * Setter for <code>shops.latitude</code>.
      */
-    public ShopsRecord setLocationX(Double value) {
+    public ShopsRecord setLatitude(Double value) {
         set(2, value);
         return this;
     }
 
     /**
-     * Getter for <code>shops.location_x</code>.
+     * Getter for <code>shops.latitude</code>.
      */
-    public Double getLocationX() {
+    public Double getLatitude() {
         return (Double) get(2);
     }
 
     /**
-     * Setter for <code>shops.location_y</code>.
+     * Setter for <code>shops.longitude</code>.
      */
-    public ShopsRecord setLocationY(Double value) {
+    public ShopsRecord setLongitude(Double value) {
         set(3, value);
         return this;
     }
 
     /**
-     * Getter for <code>shops.location_y</code>.
+     * Getter for <code>shops.longitude</code>.
      */
-    public Double getLocationY() {
+    public Double getLongitude() {
         return (Double) get(3);
     }
 
@@ -117,12 +117,12 @@ public class ShopsRecord extends UpdatableRecordImpl<ShopsRecord> implements Rec
 
     @Override
     public Field<Double> field3() {
-        return Shops.SHOPS.LOCATION_X;
+        return Shops.SHOPS.LATITUDE;
     }
 
     @Override
     public Field<Double> field4() {
-        return Shops.SHOPS.LOCATION_Y;
+        return Shops.SHOPS.LONGITUDE;
     }
 
     @Override
@@ -137,12 +137,12 @@ public class ShopsRecord extends UpdatableRecordImpl<ShopsRecord> implements Rec
 
     @Override
     public Double component3() {
-        return getLocationX();
+        return getLatitude();
     }
 
     @Override
     public Double component4() {
-        return getLocationY();
+        return getLongitude();
     }
 
     @Override
@@ -157,12 +157,12 @@ public class ShopsRecord extends UpdatableRecordImpl<ShopsRecord> implements Rec
 
     @Override
     public Double value3() {
-        return getLocationX();
+        return getLatitude();
     }
 
     @Override
     public Double value4() {
-        return getLocationY();
+        return getLongitude();
     }
 
     @Override
@@ -179,13 +179,13 @@ public class ShopsRecord extends UpdatableRecordImpl<ShopsRecord> implements Rec
 
     @Override
     public ShopsRecord value3(Double value) {
-        setLocationX(value);
+        setLatitude(value);
         return this;
     }
 
     @Override
     public ShopsRecord value4(Double value) {
-        setLocationY(value);
+        setLongitude(value);
         return this;
     }
 
@@ -212,12 +212,12 @@ public class ShopsRecord extends UpdatableRecordImpl<ShopsRecord> implements Rec
     /**
      * Create a detached, initialised ShopsRecord
      */
-    public ShopsRecord(ULong shopId, String name, Double locationX, Double locationY) {
+    public ShopsRecord(ULong shopId, String name, Double latitude, Double longitude) {
         super(Shops.SHOPS);
 
         setShopId(shopId);
         setName(name);
-        setLocationX(locationX);
-        setLocationY(locationY);
+        setLatitude(latitude);
+        setLongitude(longitude);
     }
 }

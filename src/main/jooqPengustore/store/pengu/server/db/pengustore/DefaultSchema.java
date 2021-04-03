@@ -17,6 +17,7 @@ import store.pengu.server.db.pengustore.tables.ProductXImage;
 import store.pengu.server.db.pengustore.tables.ProductXPantry;
 import store.pengu.server.db.pengustore.tables.Products;
 import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.Shops;
 import store.pengu.server.db.pengustore.tables.Users;
 
@@ -65,6 +66,11 @@ public class DefaultSchema extends SchemaImpl {
     public final ShopXProduct SHOP_X_PRODUCT = ShopXProduct.SHOP_X_PRODUCT;
 
     /**
+     * The table <code>shopping_list</code>.
+     */
+    public final ShoppingList SHOPPING_LIST = ShoppingList.SHOPPING_LIST;
+
+    /**
      * The table <code>shops</code>.
      */
     public final Shops SHOPS = Shops.SHOPS;
@@ -96,6 +102,7 @@ public class DefaultSchema extends SchemaImpl {
             ProductXPantry.PRODUCT_X_PANTRY,
             Products.PRODUCTS,
             ShopXProduct.SHOP_X_PRODUCT,
+            ShoppingList.SHOPPING_LIST,
             Shops.SHOPS,
             Users.USERS);
     }

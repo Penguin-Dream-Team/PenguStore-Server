@@ -19,26 +19,26 @@ public class Shops implements Serializable {
 
     private final ULong  shopId;
     private final String name;
-    private final Double locationX;
-    private final Double locationY;
+    private final Double latitude;
+    private final Double longitude;
 
     public Shops(Shops value) {
         this.shopId = value.shopId;
         this.name = value.name;
-        this.locationX = value.locationX;
-        this.locationY = value.locationY;
+        this.latitude = value.latitude;
+        this.longitude = value.longitude;
     }
 
     public Shops(
         ULong  shopId,
         String name,
-        Double locationX,
-        Double locationY
+        Double latitude,
+        Double longitude
     ) {
         this.shopId = shopId;
         this.name = name;
-        this.locationX = locationX;
-        this.locationY = locationY;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     /**
@@ -56,17 +56,17 @@ public class Shops implements Serializable {
     }
 
     /**
-     * Getter for <code>shops.location_x</code>.
+     * Getter for <code>shops.latitude</code>.
      */
-    public Double getLocationX() {
-        return this.locationX;
+    public Double getLatitude() {
+        return this.latitude;
     }
 
     /**
-     * Getter for <code>shops.location_y</code>.
+     * Getter for <code>shops.longitude</code>.
      */
-    public Double getLocationY() {
-        return this.locationY;
+    public Double getLongitude() {
+        return this.longitude;
     }
 
     @Override
@@ -75,8 +75,8 @@ public class Shops implements Serializable {
 
         sb.append(shopId);
         sb.append(", ").append(name);
-        sb.append(", ").append(locationX);
-        sb.append(", ").append(locationY);
+        sb.append(", ").append(latitude);
+        sb.append(", ").append(longitude);
 
         sb.append(")");
         return sb.toString();

@@ -15,6 +15,7 @@ import store.pengu.server.db.pengustore.tables.ProductXImage;
 import store.pengu.server.db.pengustore.tables.ProductXPantry;
 import store.pengu.server.db.pengustore.tables.Products;
 import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.Shops;
 import store.pengu.server.db.pengustore.tables.Users;
 import store.pengu.server.db.pengustore.tables.records.PantriesRecord;
@@ -23,6 +24,7 @@ import store.pengu.server.db.pengustore.tables.records.ProductXImageRecord;
 import store.pengu.server.db.pengustore.tables.records.ProductXPantryRecord;
 import store.pengu.server.db.pengustore.tables.records.ProductsRecord;
 import store.pengu.server.db.pengustore.tables.records.ShopXProductRecord;
+import store.pengu.server.db.pengustore.tables.records.ShoppingListRecord;
 import store.pengu.server.db.pengustore.tables.records.ShopsRecord;
 import store.pengu.server.db.pengustore.tables.records.UsersRecord;
 
@@ -45,6 +47,7 @@ public class Keys {
     public static final UniqueKey<ProductXPantryRecord> KEY_PRODUCT_X_PANTRY_PRIMARY = Internal.createUniqueKey(ProductXPantry.PRODUCT_X_PANTRY, DSL.name("KEY_product_x_pantry_PRIMARY"), new TableField[] { ProductXPantry.PRODUCT_X_PANTRY.PANTRY_ID, ProductXPantry.PRODUCT_X_PANTRY.PRODUCT_ID }, true);
     public static final UniqueKey<ProductsRecord> KEY_PRODUCTS_PRIMARY = Internal.createUniqueKey(Products.PRODUCTS, DSL.name("KEY_products_PRIMARY"), new TableField[] { Products.PRODUCTS.PRODUCT_ID }, true);
     public static final UniqueKey<ShopXProductRecord> KEY_SHOP_X_PRODUCT_PRIMARY = Internal.createUniqueKey(ShopXProduct.SHOP_X_PRODUCT, DSL.name("KEY_shop_x_product_PRIMARY"), new TableField[] { ShopXProduct.SHOP_X_PRODUCT.SHOP_ID, ShopXProduct.SHOP_X_PRODUCT.PRODUCT_ID }, true);
+    public static final UniqueKey<ShoppingListRecord> KEY_SHOPPING_LIST_PRIMARY = Internal.createUniqueKey(ShoppingList.SHOPPING_LIST, DSL.name("KEY_shopping_list_PRIMARY"), new TableField[] { ShoppingList.SHOPPING_LIST.SHOP_ID, ShoppingList.SHOPPING_LIST.USER_ID }, true);
     public static final UniqueKey<ShopsRecord> KEY_SHOPS_PRIMARY = Internal.createUniqueKey(Shops.SHOPS, DSL.name("KEY_shops_PRIMARY"), new TableField[] { Shops.SHOPS.SHOP_ID }, true);
     public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.USER_ID }, true);
 }

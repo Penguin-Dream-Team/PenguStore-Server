@@ -35,6 +35,21 @@ data class UserGetPantries(val id: Long)
 @Location("/users/{id}/shoppingList")
 data class UserGenerateShoppingList(val id: Long)
 
+@Location("/users/addShoppingList")
+object UserPostShoppingList
+
+@Location("/users/updateShoppingList")
+object UserPutShoppingList
+
+@Location("/users/deleteShoppingList")
+object UserDeleteShoppingList
+
+@Location("/users/{id}/ShoppingLists")
+data class UserGetShoppingLists(val id: Long)
+
+@Location("/users/{user_id}/ShoppingList/{shop_id}")
+data class UserGetShoppingList(val user_id: Long, val shop_id: Long)
+
 
 
 @Location("/pantries")

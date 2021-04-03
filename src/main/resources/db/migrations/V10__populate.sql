@@ -8,13 +8,13 @@ VALUES
        ("Pinguim5", "Pinguim5@pengu.com", "pengu");
 
 -- Pantries
-INSERT INTO PANTRIES (code, name)
+INSERT INTO PANTRIES (code, name, latitude, longitude)
 VALUES
-       ("OGPANTRY", "OGPantry"),
-       ("TuxPantry", "TuxPantry"),
-       ("PenguPANTRY", "PenguPantry"),
-       ("Pantry4", "Pantry4"),
-       ("Pantry5", "Pantry5");
+       ("OGPANTRY", "OGPantry", 125.12, 321.32),
+       ("TuxPantry", "TuxPantry", 456.45, 654.65),
+       ("PenguPANTRY", "PenguPantry", 789.98, 987.87),
+       ("Pantry4", "Pantry4", 159.95, 951.15),
+       ("Pantry5", "Pantry5", 753.35, 357.75);
 
 -- Products
 INSERT INTO PRODUCTS (barcode, review_score, review_number, name)
@@ -26,7 +26,7 @@ VALUES
        ("awds23156", 0.2, 14, "Crab");
 
 -- Shops
-INSERT INTO SHOPS (name, location_x, location_y)
+INSERT INTO SHOPS (name, latitude, longitude)
 VALUES
        ("OGShop", 420.69, 420.69),
        ("PenguSuper", 12.45, 27.56),
@@ -63,6 +63,15 @@ VALUES
        (3 , 3, 6.99),
        (4 , 4, 8.89),
        (5 , 5, 10.56);
+
+INSERT INTO SHOPPING_LIST (shop_id, user_id, name)
+VALUES
+       (1, 1, "OG Shopping List"),
+       (2, 1, "PenguSuper Shopping List"),
+       (3, 1, "TuxMarket Shopping List"),
+       (1, 2, "OG Shopping List"),
+       (1, 3, "OG Shopping List");
+
 
 -- Product_x_Image
 -- TODO

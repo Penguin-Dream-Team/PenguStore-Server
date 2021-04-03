@@ -22,7 +22,9 @@ class PantryDao(
                 Pantry(
                     id = it[PANTRIES.PANTRY_ID].toLong(),
                     code = it[PANTRIES.CODE],
-                    name = it[PANTRIES.NAME]
+                    name = it[PANTRIES.NAME],
+                    latitude = it[PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[PANTRIES.LONGITUDE].toFloat()
                 )
             }
 
@@ -36,15 +38,17 @@ class PantryDao(
                 Pantry(
                     id = it[PANTRIES.PANTRY_ID].toLong(),
                     code = it[PANTRIES.CODE],
-                    name = it[PANTRIES.NAME]
+                    name = it[PANTRIES.NAME],
+                    latitude = it[PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[PANTRIES.LONGITUDE].toFloat()
                 )
             }
     }
 
     fun addPantry(pantry: Pantry, create: DSLContext = dslContext): Boolean {
         return create.insertInto(PANTRIES,
-                PANTRIES.CODE, PANTRIES.NAME)
-            .values(pantry.code, pantry.name)
+                PANTRIES.CODE, PANTRIES.NAME, PANTRIES.LATITUDE, PANTRIES.LONGITUDE)
+            .values(pantry.code, pantry.name, pantry.latitude.toDouble(), pantry.longitude.toDouble())
             .execute() == 1
     }
 
@@ -52,6 +56,8 @@ class PantryDao(
         return create.update(PANTRIES)
             .set(PANTRIES.CODE, pantry.code)
             .set(PANTRIES.NAME, pantry.name)
+            .set(PANTRIES.LATITUDE, pantry.latitude.toDouble())
+            .set(PANTRIES.LONGITUDE, pantry.longitude.toDouble())
             .where(PANTRIES.PANTRY_ID.eq(ULong.valueOf(pantry.id)))
             .execute() == 1
     }

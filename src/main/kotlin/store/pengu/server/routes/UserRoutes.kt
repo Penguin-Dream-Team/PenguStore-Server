@@ -11,6 +11,7 @@ import store.pengu.server.*
 import store.pengu.server.daos.UserDao
 import store.pengu.server.data.Pantry_x_User
 import store.pengu.server.data.Pantry_x_User_Request
+import store.pengu.server.data.Shopping_list
 import store.pengu.server.data.User
 
 fun Route.userRoutes(
@@ -111,6 +112,61 @@ fun Route.userRoutes(
     get<UserGenerateShoppingList>{ param ->
         val entries = withContext(Dispatchers.IO) {
             userDao.generateShoppingList(param.id)
+        }
+
+        call.respond(mapOf("data" to entries))
+    }
+
+    post<UserPostShoppingList>{
+        val shopping_list = call.receive<Shopping_list>()
+        val response = withContext(Dispatchers.IO) {
+            try {
+                userDao.addShoppingList(shopping_list)
+            }
+            catch (e: Exception) {
+                throw BadRequestException(e.localizedMessage)
+            }
+        }
+        call.respond("data" to response)
+    }
+
+    put<UserPutShoppingList>{
+        val shopping_list = call.receive<Shopping_list>()
+        val response = withContext(Dispatchers.IO) {
+            try {
+                userDao.updateShopppingList(shopping_list)
+            }
+            catch (e: Exception) {
+                throw BadRequestException(e.localizedMessage)
+            }
+        }
+        call.respond("data" to response)
+    }
+
+
+    delete<UserDeleteShoppingList>{
+        val shopping_list = call.receive<Shopping_list>()
+        val response = withContext(Dispatchers.IO) {
+            try {
+                userDao.deleteShoppingList(shopping_list)
+            }
+            catch (e: Exception) {
+                throw BadRequestException(e.localizedMessage)
+            }
+        }
+        call.respond("data" to response)
+    }
+
+    get<UserGetShoppingLists>{ param ->
+        val entries = withContext(Dispatchers.IO) {
+            userDao.getShoppingLists(param.id)
+        }
+
+        call.respond(mapOf("data" to entries))
+    }
+    get<UserGetShoppingList>{ param ->
+        val entries = withContext(Dispatchers.IO) {
+            userDao.getShoppingList(param.user_id, param.shop_id)
         }
 
         call.respond(mapOf("data" to entries))

@@ -6,6 +6,7 @@ import org.jooq.types.ULong
 import store.pengu.server.data.ProductInShop
 import store.pengu.server.data.Shop
 import store.pengu.server.data.Shop_x_Product
+import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
 import store.pengu.server.db.pengustore.tables.Shops.SHOPS
@@ -22,8 +23,8 @@ class ShopDao(
                 Shop(
                     id = it[SHOPS.SHOP_ID].toLong(),
                     name = it[SHOPS.NAME],
-                    locationX = it[SHOPS.LOCATION_X].toFloat(),
-                    locationY = it[SHOPS.LOCATION_Y].toFloat()
+                    latitude = it[Pantries.PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[Pantries.PANTRIES.LONGITUDE].toFloat()
                 )
             }
 
@@ -37,24 +38,24 @@ class ShopDao(
                 Shop(
                     id = it[SHOPS.SHOP_ID].toLong(),
                     name = it[SHOPS.NAME],
-                    locationX = it[SHOPS.LOCATION_X].toFloat(),
-                    locationY = it[SHOPS.LOCATION_Y].toFloat()
+                    latitude = it[Pantries.PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[Pantries.PANTRIES.LONGITUDE].toFloat()
                 )
             }
     }
 
     fun addShop(shop: Shop, create: DSLContext = dslContext): Boolean {
         return create.insertInto(SHOPS,
-            SHOPS.NAME, SHOPS.LOCATION_X, SHOPS.LOCATION_Y)
-            .values(shop.name, shop.locationX.toDouble(), shop.locationY.toDouble())
+            SHOPS.NAME, SHOPS.LATITUDE, SHOPS.LONGITUDE)
+            .values(shop.name, shop.latitude.toDouble(), shop.longitude.toDouble())
             .execute() == 1
     }
 
     fun updateShop(shop: Shop, create: DSLContext = dslContext): Boolean {
         return create.update(SHOPS)
             .set(SHOPS.NAME, shop.name)
-            .set(SHOPS.LOCATION_X, shop.locationX.toDouble())
-            .set(SHOPS.LOCATION_Y, shop.locationY.toDouble())
+            .set(SHOPS.LATITUDE, shop.latitude.toDouble())
+            .set(SHOPS.LONGITUDE, shop.longitude.toDouble())
             .where(SHOPS.SHOP_ID.eq(ULong.valueOf(shop.id)))
             .execute() == 1
     }

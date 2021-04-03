@@ -10,6 +10,7 @@ import store.pengu.server.db.pengustore.tables.ProductXImage;
 import store.pengu.server.db.pengustore.tables.ProductXPantry;
 import store.pengu.server.db.pengustore.tables.Products;
 import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.Shops;
 import store.pengu.server.db.pengustore.tables.Users;
 
@@ -49,6 +50,11 @@ public class Tables {
      * The table <code>shop_x_product</code>.
      */
     public static final ShopXProduct SHOP_X_PRODUCT = ShopXProduct.SHOP_X_PRODUCT;
+
+    /**
+     * The table <code>shopping_list</code>.
+     */
+    public static final ShoppingList SHOPPING_LIST = ShoppingList.SHOPPING_LIST;
 
     /**
      * The table <code>shops</code>.

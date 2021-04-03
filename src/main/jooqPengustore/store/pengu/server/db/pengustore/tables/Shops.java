@@ -60,14 +60,14 @@ public class Shops extends TableImpl<ShopsRecord> {
     public final TableField<ShopsRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>shops.location_x</code>.
+     * The column <code>shops.latitude</code>.
      */
-    public final TableField<ShopsRecord, Double> LOCATION_X = createField(DSL.name("location_x"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<ShopsRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
 
     /**
-     * The column <code>shops.location_y</code>.
+     * The column <code>shops.longitude</code>.
      */
-    public final TableField<ShopsRecord, Double> LOCATION_Y = createField(DSL.name("location_y"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<ShopsRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
 
     private Shops(Name alias, Table<ShopsRecord> aliased) {
         this(alias, aliased, null);
