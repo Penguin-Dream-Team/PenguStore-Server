@@ -10,10 +10,8 @@ import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantryXUser.PANTRY_X_USER
 import store.pengu.server.db.pengustore.tables.ProductXPantry.PRODUCT_X_PANTRY
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.ShopXProduct
 import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
-import store.pengu.server.db.pengustore.tables.Shops
 import store.pengu.server.db.pengustore.tables.Shops.SHOPS
 import store.pengu.server.db.pengustore.tables.Users.USERS
 
@@ -102,15 +100,15 @@ class UserDao(
 
     fun addPantryToUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
         return  create.insertInto(PANTRY_X_USER,
-            PANTRY_X_USER.PANTRY_ID, PANTRY_X_USER.USER_ID)
-            .values(pantry_x_user.pantry_id, pantry_x_user.user_id)
+            PANTRY_X_USER.USER_ID, PANTRY_X_USER.PANTRY_ID)
+            .values(pantry_x_user.userId, pantry_x_user.pantryId)
             .execute() == 1
     }
 
     fun deletePantryUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(PANTRY_X_USER.PANTRY_ID.eq(pantry_x_user.pantry_id))
-        condition = condition.and(PANTRY_X_USER.USER_ID.eq(pantry_x_user.user_id))
+        condition = condition.and(PANTRY_X_USER.PANTRY_ID.eq(pantry_x_user.pantryId))
+        condition = condition.and(PANTRY_X_USER.USER_ID.eq(pantry_x_user.userId))
 
         return create.delete(PANTRY_X_USER)
             .where(condition)
@@ -165,18 +163,18 @@ class UserDao(
     fun addShoppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
         return create.insertInto(SHOPPING_LIST,
             SHOPPING_LIST.SHOP_ID, SHOPPING_LIST.USER_ID, SHOPPING_LIST.NAME)
-            .values(shopping_list.shop_id, shopping_list.user_id, shopping_list.name)
+            .values(shopping_list.shopId, shopping_list.userId, shopping_list.name)
             .execute() == 1
     }
 
     fun updateShopppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shop_id))
-        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.user_id))
+        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shopId))
+        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.userId))
 
         return create.update(SHOPPING_LIST)
-            .set(SHOPPING_LIST.SHOP_ID, shopping_list.shop_id)
-            .set(SHOPPING_LIST.USER_ID, shopping_list.user_id)
+            .set(SHOPPING_LIST.SHOP_ID, shopping_list.shopId)
+            .set(SHOPPING_LIST.USER_ID, shopping_list.userId)
             .set(SHOPPING_LIST.NAME, shopping_list.name)
             .where(condition)
             .execute() == 1
@@ -184,8 +182,8 @@ class UserDao(
 
     fun deleteShoppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shop_id))
-        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.user_id))
+        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shopId))
+        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.userId))
 
         return create.delete(SHOPPING_LIST)
             .where(condition)
@@ -198,8 +196,8 @@ class UserDao(
             .where(SHOPPING_LIST.USER_ID.eq(user_id))
             .fetch().map {
                 Shopping_list(
-                    shop_id = it[SHOPPING_LIST.SHOP_ID],
-                    user_id = it[SHOPPING_LIST.USER_ID],
+                    shopId = it[SHOPPING_LIST.SHOP_ID],
+                    userId = it[SHOPPING_LIST.USER_ID],
                     name = it[SHOPPING_LIST.NAME]
                 )
             }

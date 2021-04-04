@@ -23,6 +23,9 @@ object UserPut
 @Location("/users/login")
 object UserLogin
 
+@Location("/users/guestLogin")
+object UserGuestLogin
+
 @Location("/users/addPantry")
 object UserPostPantry
 

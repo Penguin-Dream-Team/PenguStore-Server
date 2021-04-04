@@ -72,20 +72,23 @@ fun Route.userRoutes(
         call.respond("data" to response)
     }
 
+    post<UserGuestLogin>{
+
+    }
+
     post<UserPostPantry> {
         val request = call.receive<Pantry_x_User_Request>()
-        val pantry = userDao.getPantryByCode(request.code) ?: throw NotFoundException("Pantry with specified code not found")
-        val pantry_x_user = Pantry_x_User(request.user_id, pantry.id)
+        val pantry = userDao.getPantryByCode(request.pantryCode) ?: throw NotFoundException("Pantry with specified code not found")
+        val pantry_x_user = Pantry_x_User(request.userId, pantry.id)
         val response = withContext(Dispatchers.IO) {
             try {
-
                 userDao.addPantryToUser(pantry_x_user)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond("data" to response)
+        call.respond(mapOf("data" to response))
     }
 
     delete<UserDeletePantry>{

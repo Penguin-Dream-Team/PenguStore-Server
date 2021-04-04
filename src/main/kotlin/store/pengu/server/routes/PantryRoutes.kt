@@ -41,7 +41,7 @@ fun Route.pantryRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond("data" to response)
+        call.respond(mapOf("data" to response))
     }
 
     put<PantryPut> {
