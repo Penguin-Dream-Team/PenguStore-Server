@@ -4,9 +4,12 @@ import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.data.Pantry
+import store.pengu.server.data.Pantry_x_User
 import store.pengu.server.data.ProductInPantry
 import store.pengu.server.data.Product_x_Pantry
+import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
+import store.pengu.server.db.pengustore.tables.PantryXUser
 import store.pengu.server.db.pengustore.tables.ProductXPantry.PRODUCT_X_PANTRY
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 
@@ -111,4 +114,26 @@ class PantryDao(
             }
     }
 
+    fun addPantryToUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
+        return  create.insertInto(
+            PantryXUser.PANTRY_X_USER,
+            PantryXUser.PANTRY_X_USER.PANTRY_ID, PantryXUser.PANTRY_X_USER.USER_ID)
+            .values(pantry_x_user.pantryId, pantry_x_user.userId)
+            .execute() == 1
+    }
+
+    fun getPantryByCode(code: String, create: DSLContext = dslContext): Pantry? {
+        return create.select()
+            .from(Pantries.PANTRIES)
+            .where(Pantries.PANTRIES.CODE.eq(code))
+            .fetchOne()?.map {
+                Pantry(
+                    id = it[Pantries.PANTRIES.PANTRY_ID].toLong(),
+                    code = it[Pantries.PANTRIES.CODE],
+                    name = it[Pantries.PANTRIES.NAME],
+                    latitude = it[PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[PANTRIES.LONGITUDE].toFloat()
+                )
+            }
+    }
 }

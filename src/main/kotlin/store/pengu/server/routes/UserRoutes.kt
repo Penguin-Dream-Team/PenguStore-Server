@@ -79,7 +79,7 @@ fun Route.userRoutes(
     post<UserPostPantry> {
         val request = call.receive<Pantry_x_User_Request>()
         val pantry = userDao.getPantryByCode(request.pantryCode) ?: throw NotFoundException("Pantry with specified code not found")
-        val pantry_x_user = Pantry_x_User(request.userId, pantry.id)
+        val pantry_x_user = Pantry_x_User(pantry.id, request.userId)
         val response = withContext(Dispatchers.IO) {
             try {
                 userDao.addPantryToUser(pantry_x_user)

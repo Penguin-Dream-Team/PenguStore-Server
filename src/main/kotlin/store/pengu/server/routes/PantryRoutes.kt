@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import store.pengu.server.*
 import store.pengu.server.daos.PantryDao
 import store.pengu.server.data.Pantry
+import store.pengu.server.data.Pantry_plus_user
+import store.pengu.server.data.Pantry_x_User
 import store.pengu.server.data.Product_x_Pantry
 
 fun Route.pantryRoutes(
@@ -32,10 +34,14 @@ fun Route.pantryRoutes(
     }
 
     post<PantryPost> {
-        val pantry = call.receive<Pantry>()
+        val pantry_plus_user = call.receive<Pantry_plus_user>()
+        val pantry = Pantry(pantry_plus_user.id, pantry_plus_user.code, pantry_plus_user.name, pantry_plus_user.latitude, pantry_plus_user.longitude)
         val response = withContext(Dispatchers.IO) {
             try {
                 pantryDao.addPantry(pantry)
+                val pantry2 = pantryDao.getPantryByCode(pantry_plus_user.code) ?: throw NotFoundException("Pantry with specified code not found")
+                val pantry_x_user = Pantry_x_User(pantry2.id, pantry_plus_user.user_id)
+                pantryDao.addPantryToUser(pantry_x_user)
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
