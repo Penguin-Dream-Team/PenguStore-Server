@@ -69,7 +69,7 @@ fun Route.userRoutes(
                 throw BadRequestException(e.localizedMessage)
             }
         }
-        call.respond("data" to response)
+        call.respond(response)
     }
 
     post<UserGuestLogin>{

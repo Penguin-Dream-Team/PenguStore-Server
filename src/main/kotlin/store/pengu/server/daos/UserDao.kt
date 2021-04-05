@@ -64,7 +64,7 @@ class UserDao(
             .execute() == 1
     }
 
-    fun loginUser(user: User, create: DSLContext = dslContext): Boolean {
+    fun loginUser(user: User, create: DSLContext = dslContext): Long {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(USERS.USERNAME.eq(user.username))
         condition = condition.and(USERS.PASSWORD.eq(user.password))
@@ -80,7 +80,7 @@ class UserDao(
                     password = it[USERS.PASSWORD]
                 )
             }
-        return db != null
+        return db?.id ?: 0
     }
 
     fun getPantryByCode(code: String, create: DSLContext = dslContext): Pantry? {
