@@ -100,7 +100,7 @@ class UserDao(
 
     fun addPantryToUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
         return  create.insertInto(PANTRY_X_USER,
-            PANTRY_X_USER.USER_ID, PANTRY_X_USER.PANTRY_ID)
+            PANTRY_X_USER.PANTRY_ID, PANTRY_X_USER.USER_ID)
             .values(pantry_x_user.userId, pantry_x_user.pantryId)
             .execute() == 1
     }
