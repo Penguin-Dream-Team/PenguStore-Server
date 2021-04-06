@@ -1,11 +1,12 @@
 -- Users
-INSERT INTO USERS (username, email, password)
+INSERT INTO USERS (username, email, password, guest)
 VALUES
-       ("Tux", "Tux@pengu.com", "tux"),
-       ("Pengu", "Pengu@pengu.com", "pengu"),
-       ("Pinguim3", "Pinguim3@pengu.com", "pengu"),
-       ("Pinguim4", "Pinguim4@pengu.com", "pengu"),
-       ("Pinguim5", "Pinguim5@pengu.com", "pengu");
+       ("Tux", "Tux@pengu.com", "tux", false),
+       ("Pengu", "Pengu@pengu.com", "pengu", false),
+       ("Pinguim3", "Pinguim3@pengu.com", "pengu", false),
+       ("Pinguim4", "Pinguim4@pengu.com", "pengu", false),
+       ("Pinguim5", "Pinguim5@pengu.com", "pengu", false),
+       ("", "", "", true);
 
 -- Pantries
 INSERT INTO PANTRIES (code, name, latitude, longitude)

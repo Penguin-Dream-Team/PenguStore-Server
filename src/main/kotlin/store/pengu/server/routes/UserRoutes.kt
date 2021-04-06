@@ -73,7 +73,16 @@ fun Route.userRoutes(
     }
 
     post<UserGuestLogin>{
-
+        val user = call.receive<User>()
+        val response = withContext(Dispatchers.IO) {
+            try {
+                userDao.loginGuest(user)
+            }
+            catch (e: Exception) {
+                throw BadRequestException(e.localizedMessage)
+            }
+        }
+        call.respond(response)
     }
 
     post<UserPostPantry> {

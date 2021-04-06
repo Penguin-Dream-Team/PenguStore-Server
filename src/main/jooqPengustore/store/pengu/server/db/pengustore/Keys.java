@@ -50,4 +50,5 @@ public class Keys {
     public static final UniqueKey<ShoppingListRecord> KEY_SHOPPING_LIST_PRIMARY = Internal.createUniqueKey(ShoppingList.SHOPPING_LIST, DSL.name("KEY_shopping_list_PRIMARY"), new TableField[] { ShoppingList.SHOPPING_LIST.SHOP_ID, ShoppingList.SHOPPING_LIST.USER_ID }, true);
     public static final UniqueKey<ShopsRecord> KEY_SHOPS_PRIMARY = Internal.createUniqueKey(Shops.SHOPS, DSL.name("KEY_shops_PRIMARY"), new TableField[] { Shops.SHOPS.SHOP_ID }, true);
     public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.USER_ID }, true);
+    public static final UniqueKey<UsersRecord> KEY_USERS_USERNAME = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_username"), new TableField[] { Users.USERS.USERNAME }, true);
 }

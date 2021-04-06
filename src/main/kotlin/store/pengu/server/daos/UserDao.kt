@@ -1,7 +1,5 @@
 package store.pengu.server.daos
 
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
@@ -16,7 +14,6 @@ import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
 import store.pengu.server.db.pengustore.tables.Shops.SHOPS
 import store.pengu.server.db.pengustore.tables.Users.USERS
-import store.pengu.server.db.pengustore.tables.records.UsersRecord
 
 class UserDao(
     conf: Configuration
@@ -31,7 +28,8 @@ class UserDao(
                     id = it[USERS.USER_ID].toLong(),
                     username = it[USERS.USERNAME],
                     email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD]
+                    password = it[USERS.PASSWORD],
+                    guest = it[USERS.GUEST]
                 )
             }
 
@@ -46,22 +44,24 @@ class UserDao(
                     id = it[USERS.USER_ID].toLong(),
                     username = it[USERS.USERNAME],
                     email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD]
+                    password = it[USERS.PASSWORD],
+                    guest = it[USERS.GUEST]
                 )
             }
     }
 
     fun addUser(user: User, create: DSLContext = dslContext):User? {
         return create.insertInto(USERS,
-                USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD)
-            .values(user.username, user.email, user.password)
-            .returningResult(USERS.USER_ID, USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD)
+                USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST)
+            .values(user.username, user.email, user.password, user.guest)
+            .returningResult(USERS.USER_ID, USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST)
             .fetchOne()?.map {
                 User(
                     id = it[USERS.USER_ID].toLong(),
                     username = it[USERS.USERNAME],
                     email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD]
+                    password = it[USERS.PASSWORD],
+                    guest = it[USERS.GUEST]
                 )
             }
     }
@@ -71,6 +71,7 @@ class UserDao(
             .set(USERS.USERNAME, user.username)
             .set(USERS.EMAIL, user.email)
             .set(USERS.PASSWORD, user.password)
+            .set(USERS.GUEST, user.guest)
             .where(USERS.USER_ID.eq(ULong.valueOf(user.id)))
             .execute() == 1
     }
@@ -79,6 +80,7 @@ class UserDao(
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(USERS.USERNAME.eq(user.username))
         condition = condition.and(USERS.PASSWORD.eq(user.password))
+        condition = condition.and(USERS.GUEST.eq(0))
 
         val db = create.select()
             .from(USERS)
@@ -88,9 +90,32 @@ class UserDao(
                     id = it[USERS.USER_ID].toLong(),
                     username = it[USERS.USERNAME],
                     email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD]
+                    password = it[USERS.PASSWORD],
+                    guest = it[USERS.GUEST]
                 )
             }
+        // Zero means failed
+        return db?.id ?: 0
+    }
+
+    fun loginGuest(user: User, create: DSLContext = dslContext): Long {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(USERS.USER_ID.eq(ULong.valueOf(user.id)))
+        condition = condition.and(USERS.GUEST.eq(1))
+
+        val db = create.select()
+            .from(USERS)
+            .where(condition)
+            .fetchOne()?.map {
+                User(
+                    id = it[USERS.USER_ID].toLong(),
+                    username = it[USERS.USERNAME],
+                    email = it[USERS.EMAIL],
+                    password = it[USERS.PASSWORD],
+                    guest = it[USERS.GUEST]
+                )
+            }
+        // Zero means failed
         return db?.id ?: 0
     }
 
