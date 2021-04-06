@@ -41,9 +41,9 @@ fun Route.userRoutes(
             }
             catch (e: Exception) {
                 throw BadRequestException(e.localizedMessage)
-            }
+            } ?: throw NotFoundException("User with specified id not found")
         }
-        call.respond("data" to response)
+        call.respond(response)
     }
 
     put<UserPut> {

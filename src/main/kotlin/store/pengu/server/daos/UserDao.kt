@@ -1,5 +1,7 @@
 package store.pengu.server.daos
 
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
@@ -14,6 +16,7 @@ import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
 import store.pengu.server.db.pengustore.tables.Shops.SHOPS
 import store.pengu.server.db.pengustore.tables.Users.USERS
+import store.pengu.server.db.pengustore.tables.records.UsersRecord
 
 class UserDao(
     conf: Configuration
@@ -48,11 +51,19 @@ class UserDao(
             }
     }
 
-    fun addUser(user: User, create: DSLContext = dslContext): Boolean {
+    fun addUser(user: User, create: DSLContext = dslContext):User? {
         return create.insertInto(USERS,
                 USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD)
             .values(user.username, user.email, user.password)
-            .execute() == 1
+            .returningResult(USERS.USER_ID, USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD)
+            .fetchOne()?.map {
+                User(
+                    id = it[USERS.USER_ID].toLong(),
+                    username = it[USERS.USERNAME],
+                    email = it[USERS.EMAIL],
+                    password = it[USERS.PASSWORD]
+                )
+            }
     }
 
     fun updateUser(user: User, create: DSLContext = dslContext): Boolean {
