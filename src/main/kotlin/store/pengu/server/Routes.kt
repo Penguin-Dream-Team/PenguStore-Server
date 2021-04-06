@@ -20,11 +20,11 @@ object UserPost
 @Location("/users/update")
 object UserPut
 
-@Location("/users/login")
+@Location("/login")
 object UserLogin
 
-@Location("/users/guestLogin")
-object UserGuestLogin
+@Location("/register/guest")
+object UserGuestRegister
 
 @Location("/users/addPantry")
 object UserPostPantry
@@ -53,6 +53,8 @@ data class UserGetShoppingLists(val id: Long)
 @Location("/users/{user_id}/ShoppingList/{shop_id}")
 data class UserGetShoppingList(val user_id: Long, val shop_id: Long)
 
+@Location("/login/refresh")
+object UserLoginRefresh
 
 
 @Location("/pantries")

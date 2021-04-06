@@ -3,6 +3,9 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.ForbiddenException
+import store.pengu.server.application.LoggedUser
+import store.pengu.server.application.RefreshToken
 import store.pengu.server.data.*
 import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.tables.Pantries
@@ -14,6 +17,10 @@ import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
 import store.pengu.server.db.pengustore.tables.Shops.SHOPS
 import store.pengu.server.db.pengustore.tables.Users.USERS
+import store.pengu.server.routes.requests.LoginRequest
+import store.pengu.server.routes.responses.GuestLoginResponse
+import store.pengu.server.utils.PasswordUtils
+import java.security.SecureRandom
 
 class UserDao(
     conf: Configuration
@@ -50,9 +57,11 @@ class UserDao(
             }
     }
 
-    fun addUser(user: User, create: DSLContext = dslContext):User? {
-        return create.insertInto(USERS,
-                USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST)
+    fun addUser(user: User, create: DSLContext = dslContext): User? {
+        return create.insertInto(
+            USERS,
+            USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST
+        )
             .values(user.username, user.email, user.password, user.guest)
             .returningResult(USERS.USER_ID, USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST)
             .fetchOne()?.map {
@@ -76,47 +85,24 @@ class UserDao(
             .execute() == 1
     }
 
-    fun loginUser(user: User, create: DSLContext = dslContext): Long {
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(USERS.USERNAME.eq(user.username))
-        condition = condition.and(USERS.PASSWORD.eq(user.password))
-        condition = condition.and(USERS.GUEST.eq(0))
-
-        val db = create.select()
+    fun loginUser(username: String, password: String, create: DSLContext = dslContext): RefreshToken {
+        return create.select(USERS.USER_ID)
             .from(USERS)
-            .where(condition)
+            .where(USERS.USERNAME.eq(username))
+            .and(USERS.PASSWORD.eq(password))
             .fetchOne()?.map {
-                User(
-                    id = it[USERS.USER_ID].toLong(),
-                    username = it[USERS.USERNAME],
-                    email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD],
-                    guest = it[USERS.GUEST]
-                )
-            }
-        // Zero means failed
-        return db?.id ?: 0
+                RefreshToken(it[USERS.USER_ID].toInt())
+            } ?: throw ForbiddenException("Account credentials are not correct")
     }
 
-    fun loginGuest(user: User, create: DSLContext = dslContext): Long {
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(USERS.USER_ID.eq(ULong.valueOf(user.id)))
-        condition = condition.and(USERS.GUEST.eq(1))
-
-        val db = create.select()
-            .from(USERS)
-            .where(condition)
+    fun registerGuestUser(username: String, create: DSLContext = dslContext): GuestLoginResponse {
+        return create.insertInto(USERS, USERS.USERNAME, USERS.PASSWORD, USERS.GUEST)
+            .values(username, PasswordUtils.generatePassword(), 1)
+            .returningResult(USERS.USER_ID, USERS.PASSWORD)
             .fetchOne()?.map {
-                User(
-                    id = it[USERS.USER_ID].toLong(),
-                    username = it[USERS.USERNAME],
-                    email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD],
-                    guest = it[USERS.GUEST]
-                )
-            }
-        // Zero means failed
-        return db?.id ?: 0
+                val token = RefreshToken(it[USERS.USER_ID].toInt())
+                GuestLoginResponse(password = it[USERS.PASSWORD], token.token, token.refreshToken)
+            } ?: throw ForbiddenException("Error registering new account")
     }
 
     fun getPantryByCode(code: String, create: DSLContext = dslContext): Pantry? {
@@ -135,8 +121,10 @@ class UserDao(
     }
 
     fun addPantryToUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
-        return  create.insertInto(PANTRY_X_USER,
-            PANTRY_X_USER.PANTRY_ID, PANTRY_X_USER.USER_ID)
+        return create.insertInto(
+            PANTRY_X_USER,
+            PANTRY_X_USER.PANTRY_ID, PANTRY_X_USER.USER_ID
+        )
             .values(pantry_x_user.pantryId, pantry_x_user.userId)
             .execute() == 1
     }
@@ -151,7 +139,7 @@ class UserDao(
             .execute() == 1
     }
 
-    fun getUserPantries (user_id: Long, create: DSLContext = dslContext): List<Pantry> {
+    fun getUserPantries(user_id: Long, create: DSLContext = dslContext): List<Pantry> {
         return create.select()
             .from(USERS)
             .join(PANTRY_X_USER).using(USERS.USER_ID)
@@ -169,7 +157,7 @@ class UserDao(
     }
 
 
-    fun generateShoppingList (user_id: Long, create: DSLContext = dslContext): List<ProductInPantry> {
+    fun generateShoppingList(user_id: Long, create: DSLContext = dslContext): List<ProductInPantry> {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(USERS.USER_ID.eq(ULong.valueOf(user_id)))
         condition = condition.and(PRODUCT_X_PANTRY.HAVE_QTY.lessThan(PRODUCT_X_PANTRY.WANT_QTY))
@@ -196,14 +184,16 @@ class UserDao(
 
     }
 
-    fun addShoppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(SHOPPING_LIST,
-            SHOPPING_LIST.SHOP_ID, SHOPPING_LIST.USER_ID, SHOPPING_LIST.NAME)
+    fun addShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+        return create.insertInto(
+            SHOPPING_LIST,
+            SHOPPING_LIST.SHOP_ID, SHOPPING_LIST.USER_ID, SHOPPING_LIST.NAME
+        )
             .values(shopping_list.shopId, shopping_list.userId, shopping_list.name)
             .execute() == 1
     }
 
-    fun updateShopppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+    fun updateShopppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shopId))
         condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.userId))
@@ -216,7 +206,7 @@ class UserDao(
             .execute() == 1
     }
 
-    fun deleteShoppingList (shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+    fun deleteShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shopId))
         condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.userId))
@@ -226,7 +216,7 @@ class UserDao(
             .execute() == 1
     }
 
-    fun getShoppingLists (user_id: Long, create: DSLContext = dslContext): List<Shopping_list> {
+    fun getShoppingLists(user_id: Long, create: DSLContext = dslContext): List<Shopping_list> {
         return create.select()
             .from(SHOPPING_LIST)
             .where(SHOPPING_LIST.USER_ID.eq(user_id))

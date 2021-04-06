@@ -1,0 +1,1 @@
+ALTER TABLE users CHANGE COLUMN email email VARCHAR(255) NULL;

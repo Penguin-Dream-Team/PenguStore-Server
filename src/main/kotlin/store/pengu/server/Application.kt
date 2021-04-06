@@ -137,6 +137,13 @@ fun Application.module(testing: Boolean = false) {
             )
         }
 
+        status(HttpStatusCode.Unauthorized) { status ->
+            call.respond(
+                message = "You cannot access the requested resource",
+                status = status
+            )
+        }
+
         status(HttpStatusCode.NotFound) { status ->
             call.respond(
                 message = "The requested resource cannot be found",
@@ -153,6 +160,12 @@ fun Application.module(testing: Boolean = false) {
             realm = JWTAuthenticationConfig.issuer
             validate { JWTAuthenticationConfig.validate(it) }
             challenge { _, _ -> throw UnauthorizedException("You need to be logged in to access this resource") }
+        }
+        jwt("refresh") {
+            verifier(JWTAuthenticationConfig.verifier)
+            realm = JWTAuthenticationConfig.issuer
+            validate { JWTAuthenticationConfig.validateRefreshToken(it) }
+            challenge { _, _ -> throw UnauthorizedException("Invalid refresh token. Please login again") }
         }
     }
 
@@ -174,7 +187,14 @@ fun Application.module(testing: Boolean = false) {
         /* LANDING PAGE */
         authenticate {
             get<Home> {
-                call.respondText("Welcome to the PenguStore API!!")
+                call.respond(call.user)
+                //call.respondText("Welcome to the PenguStore API!!")
+            }
+        }
+
+        authenticate("refresh") {
+            post<UserLoginRefresh> {
+                call.respond(call.refresh)
             }
         }
 
