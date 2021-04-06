@@ -38,8 +38,7 @@ fun Route.pantryRoutes(
         val pantry = Pantry(pantry_plus_user.id, pantry_plus_user.code, pantry_plus_user.name, pantry_plus_user.latitude, pantry_plus_user.longitude)
         val response = withContext(Dispatchers.IO) {
             try {
-                pantryDao.addPantry(pantry)
-                val pantry2 = pantryDao.getPantryByCode(pantry_plus_user.code) ?: throw NotFoundException("Pantry with specified code not found")
+                val pantry2 = pantryDao.addPantry(pantry) ?: throw NotFoundException("Pantry with specified id not found")
                 val pantry_x_user = Pantry_x_User(pantry2.id, pantry_plus_user.user_id)
                 pantryDao.addPantryToUser(pantry_x_user)
             }

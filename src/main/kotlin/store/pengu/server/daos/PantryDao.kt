@@ -51,13 +51,29 @@ class PantryDao(
             }
     }
 
-    fun addPantry(pantry: Pantry, create: DSLContext = dslContext): Boolean {
+    fun addPantry(pantry: Pantry, create: DSLContext = dslContext): Pantry? {
+        val charPool = (('A'..'Z') + ('0'..'9')).toMutableList()
+
+        val randomString = (1..8)
+            .map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("");
+
         return create.insertInto(
             PANTRIES,
             PANTRIES.CODE, PANTRIES.NAME, PANTRIES.LATITUDE, PANTRIES.LONGITUDE
         )
-            .values(pantry.code, pantry.name, pantry.latitude.toDouble(), pantry.longitude.toDouble())
-            .execute() == 1
+            .values(randomString, pantry.name, pantry.latitude.toDouble(), pantry.longitude.toDouble())
+            .returningResult(PANTRIES.PANTRY_ID, PANTRIES.CODE, PANTRIES.NAME, PANTRIES.LATITUDE, PANTRIES.LONGITUDE)
+            .fetchOne()?.map {
+                Pantry(
+                    id = it[PANTRIES.PANTRY_ID].toLong(),
+                    code = it[PANTRIES.CODE],
+                    name = it[PANTRIES.NAME],
+                    latitude = it[PANTRIES.LATITUDE].toFloat(),
+                    longitude = it[PANTRIES.LONGITUDE].toFloat()
+                )
+            }
     }
 
     fun updatePantry(pantry: Pantry, create: DSLContext = dslContext): Boolean {
