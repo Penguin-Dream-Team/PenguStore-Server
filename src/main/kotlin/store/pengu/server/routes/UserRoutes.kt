@@ -24,35 +24,16 @@ import store.pengu.server.routes.responses.Response
 fun Route.userRoutes(
     userDao: UserDao,
 ) {
-    get<UsersList> {
-        val entries = withContext(Dispatchers.IO) {
-            userDao.getUsers()
-        }
-
-        call.respond(mapOf("data" to entries))
-    }
-
-    get<UserGet> { param ->
-        val user = withContext(Dispatchers.IO) {
-            userDao.getUser(param.id)
-        } ?: throw NotFoundException("User with specified id not found")
-
-        call.respond(mapOf("data" to user))
-    }
-
-    post<UserPost> {
-        val user = call.receive<User>()
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.addUser(user)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
-            } ?: throw NotFoundException("User with specified id not found")
-        }
-        call.respond(response)
-    }
 
     authenticate {
+
+        get<Dashboard> {
+            val profile = withContext(Dispatchers.IO) {
+                userDao.getProfile(call.user.id)
+            }
+            call.respond(Response(profile))
+        }
+
         put<UserUpdate> {
             val userId = call.user.id
             val success = withContext(Dispatchers.IO) {

@@ -205,10 +205,6 @@ fun Application.module(testing: Boolean = false) {
             }
         }
 
-        get<Dashboard> {
-            call.respond(mapOf("data" to "Welcome to the dashboard"))
-        }
-
         /* STATIC FILES */
         static("/static") {
             resources("static")

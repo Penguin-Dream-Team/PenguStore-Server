@@ -8,15 +8,6 @@ object Home
 @Location("/dashboard")
 object Dashboard
 
-@Location("/users")
-object UsersList
-
-@Location("/users/{id}")
-data class UserGet(val id: Long)
-
-@Location("/users/add")
-object UserPost
-
 @Location("/users/update")
 object UserUpdate
 

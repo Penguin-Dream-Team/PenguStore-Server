@@ -4,6 +4,7 @@ import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.ForbiddenException
+import store.pengu.server.NotFoundException
 import store.pengu.server.application.LoggedUser
 import store.pengu.server.application.RefreshToken
 import store.pengu.server.data.*
@@ -27,52 +28,17 @@ class UserDao(
 ) {
     private val dslContext = DSL.using(conf)
 
-    fun getUsers(create: DSLContext = dslContext): List<User> {
+    fun getProfile(id: Int, create: DSLContext = dslContext): User {
         return create.select()
             .from(USERS)
-            .fetch().map {
-                User(
-                    id = it[USERS.USER_ID].toLong(),
-                    username = it[USERS.USERNAME],
-                    email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD],
-                    guest = it[USERS.GUEST]
-                )
-            }
-
-    }
-
-    fun getUser(id: Long, create: DSLContext = dslContext): User? {
-        return create.select()
-            .from(USERS)
-            .where(USERS.USER_ID.eq(ULong.valueOf(id)))
+            .where(USERS.USER_ID.eq(ULong.valueOf(id.toLong())))
             .fetchOne()?.map {
                 User(
-                    id = it[USERS.USER_ID].toLong(),
                     username = it[USERS.USERNAME],
                     email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD],
-                    guest = it[USERS.GUEST]
+                    guest = it[USERS.GUEST].toInt() == 1
                 )
-            }
-    }
-
-    fun addUser(user: User, create: DSLContext = dslContext): User? {
-        return create.insertInto(
-            USERS,
-            USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST
-        )
-            .values(user.username, user.email, user.password, user.guest)
-            .returningResult(USERS.USER_ID, USERS.USERNAME, USERS.EMAIL, USERS.PASSWORD, USERS.GUEST)
-            .fetchOne()?.map {
-                User(
-                    id = it[USERS.USER_ID].toLong(),
-                    username = it[USERS.USERNAME],
-                    email = it[USERS.EMAIL],
-                    password = it[USERS.PASSWORD],
-                    guest = it[USERS.GUEST]
-                )
-            }
+            } ?: throw NotFoundException("Profile not found")
     }
 
     fun updateUser(
