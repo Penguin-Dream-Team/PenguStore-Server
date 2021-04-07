@@ -75,13 +75,27 @@ class UserDao(
             }
     }
 
-    fun updateUser(user: User, create: DSLContext = dslContext): Boolean {
-        return create.update(USERS)
-            .set(USERS.USERNAME, user.username)
-            .set(USERS.EMAIL, user.email)
-            .set(USERS.PASSWORD, user.password)
-            .set(USERS.GUEST, user.guest)
-            .where(USERS.USER_ID.eq(ULong.valueOf(user.id)))
+    fun updateUser(
+        userId: Int,
+        username: String?,
+        email: String?,
+        password: String?,
+        create: DSLContext = dslContext
+    ): Boolean {
+        val id = ULong.valueOf(userId.toLong())
+        return create.update(USERS).set(USERS.USER_ID, id).apply {
+            if (!username.isNullOrBlank()) {
+                set(USERS.USERNAME, username)
+            }
+            if (!email.isNullOrBlank()) {
+                set(USERS.EMAIL, email)
+                    .set(USERS.GUEST, 0)
+            }
+            if (!password.isNullOrBlank()) {
+                set(USERS.PASSWORD, password)
+            }
+        }
+            .where(USERS.USER_ID.eq(id))
             .execute() == 1
     }
 

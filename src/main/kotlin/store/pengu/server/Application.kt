@@ -17,6 +17,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.*
 import io.ktor.websocket.*
+import org.jooq.exception.DataAccessException
 import org.koin.core.context.startKoin
 import org.slf4j.event.Level
 import store.pengu.server.application.*
@@ -128,6 +129,12 @@ fun Application.module(testing: Boolean = false) {
         }
         exception<PenguStoreException> { cause ->
             call.respond(message = cause.content, status = cause.statusCode)
+        }
+        exception<DataAccessException> { cause ->
+            val sqlMsg = cause.message?.split(";")?.run {
+                subList(1, size)
+            }?.joinToString(";") { it.trim() } ?: "An internal server error occurred."
+            call.respond(message = sqlMsg, status = HttpStatusCode.BadRequest)
         }
         exception<Exception> { cause ->
             cause.printStackTrace()

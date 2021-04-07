@@ -18,7 +18,7 @@ data class UserGet(val id: Long)
 object UserPost
 
 @Location("/users/update")
-object UserPut
+object UserUpdate
 
 @Location("/login")
 object UserLogin

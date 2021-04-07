@@ -1,6 +1,7 @@
 package store.pengu.server.routes
 
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.locations.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -8,6 +9,8 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import store.pengu.server.*
+import store.pengu.server.application.features.guestOnly
+import store.pengu.server.application.user
 import store.pengu.server.daos.UserDao
 import store.pengu.server.data.Pantry_x_User
 import store.pengu.server.data.Pantry_x_User_Request
@@ -15,6 +18,8 @@ import store.pengu.server.data.Shopping_list
 import store.pengu.server.data.User
 import store.pengu.server.routes.requests.LoginRequest
 import store.pengu.server.routes.requests.RegisterRequest
+import store.pengu.server.routes.requests.UserUpdateRequest
+import store.pengu.server.routes.responses.Response
 
 fun Route.userRoutes(
     userDao: UserDao,
@@ -32,7 +37,7 @@ fun Route.userRoutes(
             userDao.getUser(param.id)
         } ?: throw NotFoundException("User with specified id not found")
 
-        call.respond("data" to user)
+        call.respond(mapOf("data" to user))
     }
 
     post<UserPost> {
@@ -47,32 +52,45 @@ fun Route.userRoutes(
         call.respond(response)
     }
 
-    put<UserPut> {
-        val user = call.receive<User>()
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.updateUser(user)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
+    authenticate {
+        put<UserUpdate> {
+            val userId = call.user.id
+            val success = withContext(Dispatchers.IO) {
+                val updateRequest =
+                    call.receiveOrNull<UserUpdateRequest>() ?: throw BadRequestException("Invalid update request")
+                userDao.updateUser(
+                    userId,
+                    email = updateRequest.email,
+                    username = updateRequest.username,
+                    password = updateRequest.password
+                )
+            }
+            if (success) {
+                call.respond(Response("Successfully updated user"))
+            } else {
+                call.respond(Response("Failed to update user"))
             }
         }
-        call.respond("data" to response)
     }
 
-    post<UserLogin> {
-        val response = withContext(Dispatchers.IO) {
-            val loginRequest = call.receiveOrNull<LoginRequest>() ?: throw BadRequestException("Invalid login request")
-            userDao.loginUser(loginRequest.username, loginRequest.password)
+    guestOnly {
+        post<UserLogin> {
+            val response = withContext(Dispatchers.IO) {
+                val loginRequest = call.receiveOrNull<LoginRequest>() ?: throw BadRequestException("Invalid login request")
+                userDao.loginUser(loginRequest.username, loginRequest.password)
+            }
+            call.respond(response)
         }
-        call.respond(response)
-    }
 
-    post<UserGuestRegister> {
-        val response = withContext(Dispatchers.IO) {
-            val registerRequest = call.receiveOrNull<RegisterRequest>() ?: throw BadRequestException("Invalid register request")
-            userDao.registerGuestUser(registerRequest.username)
+        post<UserGuestRegister> {
+            val response = withContext(Dispatchers.IO) {
+                val registerRequest =
+                    call.receiveOrNull<RegisterRequest>() ?: throw BadRequestException("Invalid register request")
+                userDao.registerGuestUser(registerRequest.username)
+            }
+            call.respond(response)
         }
-        call.respond(response)
+
     }
 
     post<UserPostPantry> {
