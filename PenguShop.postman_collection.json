@@ -35,12 +35,25 @@
 		},
 		{
 			"name": "User Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var token = pm.response.json().token;\r",
+							"var res = \"token=\" + token;\r",
+							"pm.collectionVariables.set(\"token\", token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"\",\r\n    \"username\": \"tux\",\r\n    \"password\": \"tux\",\r\n    \"email\": \"\"\r\n}",
+					"raw": "{\r\n    \"username\": \"Tux\",\r\n    \"password\": \"tux\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -48,13 +61,12 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/users/login",
+					"raw": "localhost:8080/login",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"users",
 						"login"
 					]
 				}
@@ -62,13 +74,13 @@
 			"response": []
 		},
 		{
-			"name": "Update User",
+			"name": "User Guest Login",
 			"request": {
-				"method": "PUT",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"username\": \"tux\",\r\n    \"email\": \"tux@pengu.com\",\r\n    \"password\": \"tux\"\r\n}",
+					"raw": "{\r\n    \"id\": 6,\r\n    \"username\": \"\",\r\n    \"password\": \"\",\r\n    \"email\": \"\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -76,106 +88,156 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/users/update",
+					"raw": "localhost:8080/users/guestLogin",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"users",
-						"update"
+						"guestLogin"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get Users",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tux\",\r\n    \"email\": \"tux@pengu.com\",\r\n    \"password\": \"tux\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "User Connect Pantry",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
 				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
-					"raw": "localhost:8080/users",
+					"raw": "localhost:8080/user/connectPantry/Pantry5",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"users"
+						"user",
+						"connectPantry",
+						"Pantry5"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get User",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tux\",\r\n    \"email\": \"tux@pengu.com\",\r\n    \"password\": \"tux\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "User Disconnect Pantry Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
 				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
-					"raw": "localhost:8080/users/1",
+					"raw": "localhost:8080/user/disconnectPantry/5",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"users",
-						"1"
+						"user",
+						"disconnectPantry",
+						"5"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get User Pantry",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tux\",\r\n    \"email\": \"tux@pengu.com\",\r\n    \"password\": \"tux\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "User Get Pantries",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
 				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
-					"raw": "localhost:8080/users/1/pantries",
+					"raw": "localhost:8080/user/pantries",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"users",
-						"1",
+						"user",
 						"pantries"
 					]
 				}
@@ -183,88 +245,286 @@
 			"response": []
 		},
 		{
-			"name": "Generate User Shopping List",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tux\",\r\n    \"email\": \"tux@pengu.com\",\r\n    \"password\": \"tux\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "User Connect Shopping List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
-				},
-				"url": {
-					"raw": "localhost:8080/users/1/shoppingList",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"users",
-						"1",
-						"shoppingList"
-					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Post Users Pantry",
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"user_id\": 1,\r\n    \"code\": \"tuxspantry1\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
 					}
-				},
+				],
 				"url": {
-					"raw": "localhost:8080/users/addPantry",
+					"raw": "localhost:8080/user/connectShoppingList/1",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"users",
-						"addPantry"
+						"user",
+						"connectShoppingList",
+						"1"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete Users Pantry",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"user_id\": 1,\r\n    \"pantry_id\": 1\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "User Disconnect Shopping List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
 				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
-					"raw": "localhost:8080/users/deletePantry",
+					"raw": "localhost:8080/user/disconnectShoppingList/1",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"users",
-						"deletePantry"
+						"user",
+						"disconnectShoppingList",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Get Shopping Lists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/user/ShoppingLists",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"ShoppingLists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Connect Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/user/connectProduct/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"connectProduct",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Disconnect Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/user/disconnectProduct/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"disconnectProduct",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Get Products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "localhost:8080/user/products",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"products"
 					]
 				}
 			},
@@ -272,12 +532,40 @@
 		},
 		{
 			"name": "Post Pantry",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"code\": \"tuxspantry1\",\r\n    \"name\": \"tuxspantry1\"\r\n}",
+					"raw": "{\r\n    \"id\": \"\",\r\n    \"code\": \"\",\r\n    \"name\": \"Test Pantry\",\r\n    \"latitude\": 159.37,\r\n    \"longitude\": 159.37\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -300,12 +588,40 @@
 		},
 		{
 			"name": "Put Pantry",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"1\",\r\n    \"code\": \"tuxspantry1\",\r\n    \"name\": \"tuxspantry1\"\r\n}",
+					"raw": "{\r\n    \"id\": 6,\r\n    \"code\": \"cawd\",\r\n    \"name\": \"Test Pantry\",\r\n    \"latitude\": 159.37,\r\n    \"longitude\": 159.37\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -327,46 +643,44 @@
 			"response": []
 		},
 		{
-			"name": "Get Pantries",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"1\",\r\n    \"code\": \"tuxspantry1\",\r\n    \"name\": \"tuxspantry1\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:8080/pantries",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"pantries"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get Pantry",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"1\",\r\n    \"code\": \"tuxspantry1\",\r\n    \"name\": \"tuxspantry1\"\r\n}",
+					"raw": "{\r\n    \"id\": \"\",\r\n    \"code\": \"\",\r\n    \"name\": \"Test Pantry\",\r\n    \"latitude\": 159.37,\r\n    \"longitude\": 159.37\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -374,143 +688,55 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/pantries/1",
+					"raw": "localhost:8080/pantry/6",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"pantries",
-						"1"
+						"pantry",
+						"6"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get Pantry Products",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"1\",\r\n    \"code\": \"tuxspantry1\",\r\n    \"name\": \"tuxspantry1\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "Pantry Post Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
-				},
-				"url": {
-					"raw": "localhost:8080/pantries/1/products",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"pantries",
-						"1",
-						"products"
-					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Post Pantry Product",
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"pantry_id\": 1,\r\n    \"product_id\": 1,\r\n    \"have_qty\": 2,\r\n    \"want_qty\": 3\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
 					}
-				},
-				"url": {
-					"raw": "localhost:8080/pantries/addProduct",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"pantries",
-						"addProduct"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Put  Pantry Product",
-			"request": {
-				"method": "PUT",
-				"header": [],
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"pantry_id\": 1,\r\n    \"product_id\": 1,\r\n    \"have_qty\": 2,\r\n    \"want_qty\": 3\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:8080/pantries/updateProduct",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"pantries",
-						"updateProduct"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete Pantry Product",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"pantry_id\": 1,\r\n    \"product_id\": 1,\r\n    \"have_qty\": 2,\r\n    \"want_qty\": 3\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:8080/pantries/deleteProduct",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"pantries",
-						"deleteProduct"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Post Product",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"PengProductOG\",\r\n    \"barcode\": \"asd51a5da\",\r\n    \"review_score\": 4.5,\r\n    \"review_number\": 20\r\n}",
+					"raw": "{\r\n    \"id\": \"\",\r\n    \"name\": \"Test Pantry\",\r\n    \"barcode\": \"teste123456\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -532,13 +758,41 @@
 			"response": []
 		},
 		{
-			"name": "Put Product",
+			"name": "Pantry Put Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"PengProductOG\",\r\n    \"barcode\": \"asd51a5da\",\r\n    \"review_score\": 4.6,\r\n    \"review_number\": 20\r\n}",
+					"raw": "{\r\n    \"id\": \"6\",\r\n    \"name\": \"Updated Test Pantry\",\r\n    \"barcode\": \"teste123456\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -560,16 +814,44 @@
 			"response": []
 		},
 		{
-			"name": "Get Products",
+			"name": "Pantry Get Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"PenguShopOG\",\r\n    \"barcode\": \"asd51a5da\",\r\n    \"review_score\": 4.5,\r\n    \"review_number\": 20\r\n}",
+					"raw": "{\r\n    \"id\": \"\",\r\n    \"name\": \"Test Pantry\",\r\n    \"barcode\": \"teste123456\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -577,57 +859,55 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/products",
+					"raw": "localhost:8080/product/6",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"products"
+						"product",
+						"6"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get Product",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"PenguShopOG\",\r\n    \"barcode\": \"asd51a5da\",\r\n    \"review_score\": 4.5,\r\n    \"review_number\": 20\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "Post Shopping List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
-				},
-				"url": {
-					"raw": "localhost:8080/products/1",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"products",
-						"1"
-					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Post Shop",
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"PenguShopOG\",\r\n    \"location_x\": 420.69,\r\n    \"location_y\": 420.69\r\n}",
+					"raw": "{\r\n    \"id\": \"\",\r\n    \"name\": \"Test Pantry\",\r\n    \"latitude\": 159.79,\r\n    \"longitude\": 159.79\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -635,13 +915,13 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/add",
+					"raw": "localhost:8080/shoppingLists/add",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
+						"shoppingLists",
 						"add"
 					]
 				}
@@ -649,13 +929,41 @@
 			"response": []
 		},
 		{
-			"name": "Put Shop",
+			"name": "Put Shopping List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"PenguShopOG\",\r\n    \"location_x\": 420.69,\r\n    \"location_y\": 420.69\r\n}",
+					"raw": "{\r\n    \"id\": 4,\r\n    \"name\": \"Updated Test Pantry\",\r\n    \"latitude\": 159.79,\r\n    \"longitude\": 159.79\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -663,13 +971,13 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/update",
+					"raw": "localhost:8080/shoppingLists/update",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
+						"shoppingLists",
 						"update"
 					]
 				}
@@ -677,46 +985,44 @@
 			"response": []
 		},
 		{
-			"name": "Get Shops",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"PenguShopOG\",\r\n    \"location_x\": 420.69,\r\n    \"location_y\": 420.69\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
+			"name": "Gen Shopping List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
 					}
-				},
-				"url": {
-					"raw": "localhost:8080/shops",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"shops"
-					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Shop",
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"PenguShopOG\",\r\n    \"location_x\": 420.69,\r\n    \"location_y\": 420.69\r\n}",
+					"raw": "{\r\n    \"id\": \"\",\r\n    \"name\": \"Test Pantry\",\r\n    \"latitude\": 159.79,\r\n    \"longitude\": 159.79\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -724,13 +1030,13 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/1",
+					"raw": "localhost:8080/shoppingList/1",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
+						"shoppingList",
 						"1"
 					]
 				}
@@ -738,13 +1044,41 @@
 			"response": []
 		},
 		{
-			"name": "Post Shop Product",
+			"name": "Post Price",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"shop_id\": 1,\r\n    \"product_id\": 1,\r\n    \"price\": 15.23\r\n}",
+					"raw": "{\r\n    \"barcode\": \"fish15468\",\r\n    \"price\": 420.69,\r\n    \"latitude\": 350.15,\r\n    \"longitude\": 350.15\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -752,27 +1086,55 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/addProduct",
+					"raw": "localhost:8080/prices/addPrice",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
-						"addProduct"
+						"prices",
+						"addPrice"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Put Shop Product",
+			"name": "Put Price",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"shop_id\": 1,\r\n    \"product_id\": 1,\r\n    \"price\": 15.26\r\n}",
+					"raw": "{\r\n    \"barcode\": \"fish15468\",\r\n    \"price\": 69.420,\r\n    \"latitude\": 350.15,\r\n    \"longitude\": 350.15\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -780,27 +1142,55 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/updateProduct",
+					"raw": "localhost:8080/prices/updatePrice",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
-						"updateProduct"
+						"prices",
+						"updatePrice"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete Shop Product",
+			"name": "Delete Price",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "DELETE",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"shop_id\": 1,\r\n    \"product_id\": 1,\r\n    \"price\": 15.23\r\n}",
+					"raw": "{\r\n    \"barcode\": \"fish15468\",\r\n    \"price\": 420.69,\r\n    \"latitude\": 350.15,\r\n    \"longitude\": 350.15\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -808,30 +1198,58 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/deleteProduct",
+					"raw": "localhost:8080/prices/deletePrice",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
-						"deleteProduct"
+						"prices",
+						"deletePrice"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get Shop Products",
+			"name": "Gen Shopping List Copy 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6InBlbmd1LnN0b3JlIiwicmVmcmVzaCI6ZmFsc2UsImlkIjoxLCJleHAiOjE2MTgwNTYxODZ9.bU8iVx-6QJiggC80wuniYnkw7poWS3bXo3KRN9twoZkeMdvTwvQm4_u1XxsWuqtP45oJeoLiiJVH1J0gdpPPyw",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"PenguShopOG\",\r\n    \"location_x\": 420.69,\r\n    \"location_y\": 420.69\r\n}",
+					"raw": "{\r\n    \"barcode\": \"fish15468\",\r\n    \"price\": 420.69,\r\n    \"latitude\": 350.25,\r\n    \"longitude\": 350.25\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -839,19 +1257,25 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:8080/shops/1/products",
+					"raw": "localhost:8080/prices/350.25/350.25",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"shops",
-						"1",
-						"products"
+						"prices",
+						"350.25",
+						"350.25"
 					]
 				}
 			},
 			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
 		}
 	]
 }

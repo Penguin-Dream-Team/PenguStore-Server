@@ -1,7 +1,8 @@
 package store.pengu.server.data
 
 data class Shopping_list(
-    val shopId: Long,
-    val userId: Long,
-    val name: String
+    val id: Long,
+    val name: String,
+    val latitude: Float,
+    val longitude: Float
 )

@@ -12,7 +12,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row5;
+import org.jooq.Row4;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -50,9 +50,9 @@ public class Users extends TableImpl<UsersRecord> {
     }
 
     /**
-     * The column <code>users.user_id</code>.
+     * The column <code>users.id</code>.
      */
-    public final TableField<UsersRecord, ULong> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
+    public final TableField<UsersRecord, ULong> ID = createField(DSL.name("id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>users.username</code>.
@@ -68,11 +68,6 @@ public class Users extends TableImpl<UsersRecord> {
      * The column <code>users.password</code>.
      */
     public final TableField<UsersRecord, String> PASSWORD = createField(DSL.name("password"), SQLDataType.VARCHAR(255).nullable(false), this, "");
-
-    /**
-     * The column <code>users.guest</code>.
-     */
-    public final TableField<UsersRecord, Byte> GUEST = createField(DSL.name("guest"), SQLDataType.TINYINT.nullable(false), this, "");
 
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, null);
@@ -154,11 +149,11 @@ public class Users extends TableImpl<UsersRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row5 type methods
+    // Row4 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<ULong, String, String, String, Byte> fieldsRow() {
-        return (Row5) super.fieldsRow();
+    public Row4<ULong, String, String, String> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 }

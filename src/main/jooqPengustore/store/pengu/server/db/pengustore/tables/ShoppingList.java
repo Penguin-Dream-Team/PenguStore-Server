@@ -9,9 +9,10 @@ import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row3;
+import org.jooq.Row4;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -20,6 +21,7 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.types.ULong;
 
 import store.pengu.server.db.pengustore.DefaultSchema;
 import store.pengu.server.db.pengustore.Keys;
@@ -48,19 +50,24 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
     }
 
     /**
-     * The column <code>shopping_list.shop_id</code>.
+     * The column <code>shopping_list.id</code>.
      */
-    public final TableField<ShoppingListRecord, Long> SHOP_ID = createField(DSL.name("shop_id"), SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>shopping_list.user_id</code>.
-     */
-    public final TableField<ShoppingListRecord, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<ShoppingListRecord, ULong> ID = createField(DSL.name("id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>shopping_list.name</code>.
      */
     public final TableField<ShoppingListRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>shopping_list.latitude</code>.
+     */
+    public final TableField<ShoppingListRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+
+    /**
+     * The column <code>shopping_list.longitude</code>.
+     */
+    public final TableField<ShoppingListRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
 
     private ShoppingList(Name alias, Table<ShoppingListRecord> aliased) {
         this(alias, aliased, null);
@@ -101,6 +108,11 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
     }
 
     @Override
+    public Identity<ShoppingListRecord, ULong> getIdentity() {
+        return (Identity<ShoppingListRecord, ULong>) super.getIdentity();
+    }
+
+    @Override
     public UniqueKey<ShoppingListRecord> getPrimaryKey() {
         return Keys.KEY_SHOPPING_LIST_PRIMARY;
     }
@@ -137,11 +149,11 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row3 type methods
+    // Row4 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<Long, Long, String> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<ULong, String, Double, Double> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 }

@@ -4,14 +4,15 @@
 package store.pengu.server.db.pengustore;
 
 
+import store.pengu.server.db.pengustore.tables.CrowdProductImages;
+import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
 import store.pengu.server.db.pengustore.tables.Pantries;
-import store.pengu.server.db.pengustore.tables.PantryXUser;
-import store.pengu.server.db.pengustore.tables.ProductXImage;
-import store.pengu.server.db.pengustore.tables.ProductXPantry;
+import store.pengu.server.db.pengustore.tables.PantriesUsers;
+import store.pengu.server.db.pengustore.tables.PantryProducts;
 import store.pengu.server.db.pengustore.tables.Products;
-import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
-import store.pengu.server.db.pengustore.tables.Shops;
+import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Users;
 
 
@@ -22,24 +23,29 @@ import store.pengu.server.db.pengustore.tables.Users;
 public class Tables {
 
     /**
+     * The table <code>crowd_product_images</code>.
+     */
+    public static final CrowdProductImages CROWD_PRODUCT_IMAGES = CrowdProductImages.CROWD_PRODUCT_IMAGES;
+
+    /**
+     * The table <code>crowd_product_prices</code>.
+     */
+    public static final CrowdProductPrices CROWD_PRODUCT_PRICES = CrowdProductPrices.CROWD_PRODUCT_PRICES;
+
+    /**
      * The table <code>pantries</code>.
      */
     public static final Pantries PANTRIES = Pantries.PANTRIES;
 
     /**
-     * The table <code>pantry_x_user</code>.
+     * The table <code>pantries_users</code>.
      */
-    public static final PantryXUser PANTRY_X_USER = PantryXUser.PANTRY_X_USER;
+    public static final PantriesUsers PANTRIES_USERS = PantriesUsers.PANTRIES_USERS;
 
     /**
-     * The table <code>product_x_image</code>.
+     * The table <code>pantry_products</code>.
      */
-    public static final ProductXImage PRODUCT_X_IMAGE = ProductXImage.PRODUCT_X_IMAGE;
-
-    /**
-     * The table <code>product_x_pantry</code>.
-     */
-    public static final ProductXPantry PRODUCT_X_PANTRY = ProductXPantry.PRODUCT_X_PANTRY;
+    public static final PantryProducts PANTRY_PRODUCTS = PantryProducts.PANTRY_PRODUCTS;
 
     /**
      * The table <code>products</code>.
@@ -47,9 +53,9 @@ public class Tables {
     public static final Products PRODUCTS = Products.PRODUCTS;
 
     /**
-     * The table <code>shop_x_product</code>.
+     * The table <code>products_users</code>.
      */
-    public static final ShopXProduct SHOP_X_PRODUCT = ShopXProduct.SHOP_X_PRODUCT;
+    public static final ProductsUsers PRODUCTS_USERS = ProductsUsers.PRODUCTS_USERS;
 
     /**
      * The table <code>shopping_list</code>.
@@ -57,9 +63,9 @@ public class Tables {
     public static final ShoppingList SHOPPING_LIST = ShoppingList.SHOPPING_LIST;
 
     /**
-     * The table <code>shops</code>.
+     * The table <code>shopping_list_users</code>.
      */
-    public static final Shops SHOPS = Shops.SHOPS;
+    public static final ShoppingListUsers SHOPPING_LIST_USERS = ShoppingListUsers.SHOPPING_LIST_USERS;
 
     /**
      * The table <code>users</code>.

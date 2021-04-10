@@ -4,28 +4,31 @@
 package store.pengu.server.db.pengustore;
 
 
+import org.jooq.ForeignKey;
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
+import store.pengu.server.db.pengustore.tables.CrowdProductImages;
+import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
 import store.pengu.server.db.pengustore.tables.Pantries;
-import store.pengu.server.db.pengustore.tables.PantryXUser;
-import store.pengu.server.db.pengustore.tables.ProductXImage;
-import store.pengu.server.db.pengustore.tables.ProductXPantry;
+import store.pengu.server.db.pengustore.tables.PantriesUsers;
+import store.pengu.server.db.pengustore.tables.PantryProducts;
 import store.pengu.server.db.pengustore.tables.Products;
-import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
-import store.pengu.server.db.pengustore.tables.Shops;
+import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Users;
+import store.pengu.server.db.pengustore.tables.records.CrowdProductImagesRecord;
+import store.pengu.server.db.pengustore.tables.records.CrowdProductPricesRecord;
 import store.pengu.server.db.pengustore.tables.records.PantriesRecord;
-import store.pengu.server.db.pengustore.tables.records.PantryXUserRecord;
-import store.pengu.server.db.pengustore.tables.records.ProductXImageRecord;
-import store.pengu.server.db.pengustore.tables.records.ProductXPantryRecord;
+import store.pengu.server.db.pengustore.tables.records.PantriesUsersRecord;
+import store.pengu.server.db.pengustore.tables.records.PantryProductsRecord;
 import store.pengu.server.db.pengustore.tables.records.ProductsRecord;
-import store.pengu.server.db.pengustore.tables.records.ShopXProductRecord;
+import store.pengu.server.db.pengustore.tables.records.ProductsUsersRecord;
 import store.pengu.server.db.pengustore.tables.records.ShoppingListRecord;
-import store.pengu.server.db.pengustore.tables.records.ShopsRecord;
+import store.pengu.server.db.pengustore.tables.records.ShoppingListUsersRecord;
 import store.pengu.server.db.pengustore.tables.records.UsersRecord;
 
 
@@ -40,15 +43,30 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<CrowdProductImagesRecord> KEY_CROWD_PRODUCT_IMAGES_PRIMARY = Internal.createUniqueKey(CrowdProductImages.CROWD_PRODUCT_IMAGES, DSL.name("KEY_crowd_product_images_PRIMARY"), new TableField[] { CrowdProductImages.CROWD_PRODUCT_IMAGES.ID }, true);
+    public static final UniqueKey<CrowdProductPricesRecord> KEY_CROWD_PRODUCT_PRICES_PRIMARY = Internal.createUniqueKey(CrowdProductPrices.CROWD_PRODUCT_PRICES, DSL.name("KEY_crowd_product_prices_PRIMARY"), new TableField[] { CrowdProductPrices.CROWD_PRODUCT_PRICES.BARCODE, CrowdProductPrices.CROWD_PRODUCT_PRICES.LATITUDE, CrowdProductPrices.CROWD_PRODUCT_PRICES.LONGITUDE }, true);
     public static final UniqueKey<PantriesRecord> KEY_PANTRIES_CODE = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_code"), new TableField[] { Pantries.PANTRIES.CODE }, true);
-    public static final UniqueKey<PantriesRecord> KEY_PANTRIES_PRIMARY = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_PRIMARY"), new TableField[] { Pantries.PANTRIES.PANTRY_ID }, true);
-    public static final UniqueKey<PantryXUserRecord> KEY_PANTRY_X_USER_PRIMARY = Internal.createUniqueKey(PantryXUser.PANTRY_X_USER, DSL.name("KEY_pantry_x_user_PRIMARY"), new TableField[] { PantryXUser.PANTRY_X_USER.PANTRY_ID, PantryXUser.PANTRY_X_USER.USER_ID }, true);
-    public static final UniqueKey<ProductXImageRecord> KEY_PRODUCT_X_IMAGE_PRIMARY = Internal.createUniqueKey(ProductXImage.PRODUCT_X_IMAGE, DSL.name("KEY_product_x_image_PRIMARY"), new TableField[] { ProductXImage.PRODUCT_X_IMAGE.PRODUCT_ID }, true);
-    public static final UniqueKey<ProductXPantryRecord> KEY_PRODUCT_X_PANTRY_PRIMARY = Internal.createUniqueKey(ProductXPantry.PRODUCT_X_PANTRY, DSL.name("KEY_product_x_pantry_PRIMARY"), new TableField[] { ProductXPantry.PRODUCT_X_PANTRY.PANTRY_ID, ProductXPantry.PRODUCT_X_PANTRY.PRODUCT_ID }, true);
-    public static final UniqueKey<ProductsRecord> KEY_PRODUCTS_PRIMARY = Internal.createUniqueKey(Products.PRODUCTS, DSL.name("KEY_products_PRIMARY"), new TableField[] { Products.PRODUCTS.PRODUCT_ID }, true);
-    public static final UniqueKey<ShopXProductRecord> KEY_SHOP_X_PRODUCT_PRIMARY = Internal.createUniqueKey(ShopXProduct.SHOP_X_PRODUCT, DSL.name("KEY_shop_x_product_PRIMARY"), new TableField[] { ShopXProduct.SHOP_X_PRODUCT.SHOP_ID, ShopXProduct.SHOP_X_PRODUCT.PRODUCT_ID }, true);
-    public static final UniqueKey<ShoppingListRecord> KEY_SHOPPING_LIST_PRIMARY = Internal.createUniqueKey(ShoppingList.SHOPPING_LIST, DSL.name("KEY_shopping_list_PRIMARY"), new TableField[] { ShoppingList.SHOPPING_LIST.SHOP_ID, ShoppingList.SHOPPING_LIST.USER_ID }, true);
-    public static final UniqueKey<ShopsRecord> KEY_SHOPS_PRIMARY = Internal.createUniqueKey(Shops.SHOPS, DSL.name("KEY_shops_PRIMARY"), new TableField[] { Shops.SHOPS.SHOP_ID }, true);
-    public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.USER_ID }, true);
+    public static final UniqueKey<PantriesRecord> KEY_PANTRIES_PRIMARY = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_PRIMARY"), new TableField[] { Pantries.PANTRIES.ID }, true);
+    public static final UniqueKey<PantriesUsersRecord> KEY_PANTRIES_USERS_PRIMARY = Internal.createUniqueKey(PantriesUsers.PANTRIES_USERS, DSL.name("KEY_pantries_users_PRIMARY"), new TableField[] { PantriesUsers.PANTRIES_USERS.PANTRY_ID, PantriesUsers.PANTRIES_USERS.USER_ID }, true);
+    public static final UniqueKey<PantryProductsRecord> KEY_PANTRY_PRODUCTS_PRIMARY = Internal.createUniqueKey(PantryProducts.PANTRY_PRODUCTS, DSL.name("KEY_pantry_products_PRIMARY"), new TableField[] { PantryProducts.PANTRY_PRODUCTS.PANTRY_ID, PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID }, true);
+    public static final UniqueKey<ProductsRecord> KEY_PRODUCTS_BARCODE = Internal.createUniqueKey(Products.PRODUCTS, DSL.name("KEY_products_barcode"), new TableField[] { Products.PRODUCTS.BARCODE }, true);
+    public static final UniqueKey<ProductsRecord> KEY_PRODUCTS_PRIMARY = Internal.createUniqueKey(Products.PRODUCTS, DSL.name("KEY_products_PRIMARY"), new TableField[] { Products.PRODUCTS.ID }, true);
+    public static final UniqueKey<ProductsUsersRecord> KEY_PRODUCTS_USERS_PRIMARY = Internal.createUniqueKey(ProductsUsers.PRODUCTS_USERS, DSL.name("KEY_products_users_PRIMARY"), new TableField[] { ProductsUsers.PRODUCTS_USERS.PRODUCT_ID, ProductsUsers.PRODUCTS_USERS.USER_ID }, true);
+    public static final UniqueKey<ShoppingListRecord> KEY_SHOPPING_LIST_PRIMARY = Internal.createUniqueKey(ShoppingList.SHOPPING_LIST, DSL.name("KEY_shopping_list_PRIMARY"), new TableField[] { ShoppingList.SHOPPING_LIST.ID }, true);
+    public static final UniqueKey<ShoppingListUsersRecord> KEY_SHOPPING_LIST_USERS_PRIMARY = Internal.createUniqueKey(ShoppingListUsers.SHOPPING_LIST_USERS, DSL.name("KEY_shopping_list_users_PRIMARY"), new TableField[] { ShoppingListUsers.SHOPPING_LIST_USERS.SHOPPING_LIST_ID, ShoppingListUsers.SHOPPING_LIST_USERS.USER_ID }, true);
+    public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.ID }, true);
     public static final UniqueKey<UsersRecord> KEY_USERS_USERNAME = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_username"), new TableField[] { Users.USERS.USERNAME }, true);
+
+    // -------------------------------------------------------------------------
+    // FOREIGN KEY definitions
+    // -------------------------------------------------------------------------
+
+    public static final ForeignKey<PantriesUsersRecord, PantriesRecord> PANTRIES_USERS_IBFK_1 = Internal.createForeignKey(PantriesUsers.PANTRIES_USERS, DSL.name("pantries_users_ibfk_1"), new TableField[] { PantriesUsers.PANTRIES_USERS.PANTRY_ID }, Keys.KEY_PANTRIES_PRIMARY, new TableField[] { Pantries.PANTRIES.ID }, true);
+    public static final ForeignKey<PantriesUsersRecord, UsersRecord> PANTRIES_USERS_IBFK_2 = Internal.createForeignKey(PantriesUsers.PANTRIES_USERS, DSL.name("pantries_users_ibfk_2"), new TableField[] { PantriesUsers.PANTRIES_USERS.USER_ID }, Keys.KEY_USERS_PRIMARY, new TableField[] { Users.USERS.ID }, true);
+    public static final ForeignKey<PantryProductsRecord, PantriesRecord> PANTRY_PRODUCTS_IBFK_1 = Internal.createForeignKey(PantryProducts.PANTRY_PRODUCTS, DSL.name("pantry_products_ibfk_1"), new TableField[] { PantryProducts.PANTRY_PRODUCTS.PANTRY_ID }, Keys.KEY_PANTRIES_PRIMARY, new TableField[] { Pantries.PANTRIES.ID }, true);
+    public static final ForeignKey<PantryProductsRecord, ProductsRecord> PANTRY_PRODUCTS_IBFK_2 = Internal.createForeignKey(PantryProducts.PANTRY_PRODUCTS, DSL.name("pantry_products_ibfk_2"), new TableField[] { PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
+    public static final ForeignKey<ProductsUsersRecord, ProductsRecord> PRODUCTS_USERS_IBFK_1 = Internal.createForeignKey(ProductsUsers.PRODUCTS_USERS, DSL.name("products_users_ibfk_1"), new TableField[] { ProductsUsers.PRODUCTS_USERS.PRODUCT_ID }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
+    public static final ForeignKey<ProductsUsersRecord, UsersRecord> PRODUCTS_USERS_IBFK_2 = Internal.createForeignKey(ProductsUsers.PRODUCTS_USERS, DSL.name("products_users_ibfk_2"), new TableField[] { ProductsUsers.PRODUCTS_USERS.USER_ID }, Keys.KEY_USERS_PRIMARY, new TableField[] { Users.USERS.ID }, true);
+    public static final ForeignKey<ShoppingListUsersRecord, ShoppingListRecord> SHOPPING_LIST_USERS_IBFK_1 = Internal.createForeignKey(ShoppingListUsers.SHOPPING_LIST_USERS, DSL.name("shopping_list_users_ibfk_1"), new TableField[] { ShoppingListUsers.SHOPPING_LIST_USERS.SHOPPING_LIST_ID }, Keys.KEY_SHOPPING_LIST_PRIMARY, new TableField[] { ShoppingList.SHOPPING_LIST.ID }, true);
+    public static final ForeignKey<ShoppingListUsersRecord, UsersRecord> SHOPPING_LIST_USERS_IBFK_2 = Internal.createForeignKey(ShoppingListUsers.SHOPPING_LIST_USERS, DSL.name("shopping_list_users_ibfk_2"), new TableField[] { ShoppingListUsers.SHOPPING_LIST_USERS.USER_ID }, Keys.KEY_USERS_PRIMARY, new TableField[] { Users.USERS.ID }, true);
 }

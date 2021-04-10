@@ -3,58 +3,63 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.data.Pantry
 import store.pengu.server.data.Product
+import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.db.pengustore.tables.ProductsUsers
 
 class ProductDao(
     conf: Configuration
 ) {
     private val dslContext = DSL.using(conf)
 
-    fun getProducts(create: DSLContext = dslContext): List<Product> {
-        return create.select()
-            .from(PRODUCTS)
-            .fetch().map {
-                Product(
-                    id = it[PRODUCTS.PRODUCT_ID].toLong(),
-                    name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE],
-                    reviewScore = it[PRODUCTS.REVIEW_SCORE]?.toDouble(),
-                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER]
-                )
-            }
+    // Products
 
-    }
-
-    fun getProduct(id: Long, create: DSLContext = dslContext): Product? {
-        return create.select()
-            .from(PRODUCTS)
-            .where(PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(id)))
-            .fetchOne()?.map {
-                Product(
-                    id = it[PRODUCTS.PRODUCT_ID].toLong(),
-                    name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE],
-                    reviewScore = it[PRODUCTS.REVIEW_SCORE].toDouble(),
-                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER]
-                )
-            }
-    }
-
-    fun addProduct(product: Product, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(PRODUCTS,
-                PRODUCTS.NAME, PRODUCTS.BARCODE, PRODUCTS.REVIEW_SCORE, PRODUCTS.REVIEW_NUMBER)
-            .values(product.name, product.barcode, product.reviewScore, product.reviewNumber)
-            .execute() == 1
+    fun addProduct(product: Product, create: DSLContext = dslContext): Product? {
+        return  create.insertInto(PRODUCTS,
+                PRODUCTS.NAME, PRODUCTS.BARCODE)
+                .values(product.name, product.barcode)
+                .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
+                .fetchOne()?.map {
+                    Product(
+                        id = it[PRODUCTS.ID].toLong(),
+                        name = it[PRODUCTS.NAME],
+                        barcode = it[PRODUCTS.BARCODE]
+                    )
+                }
     }
 
     fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
         return create.update(PRODUCTS)
-            .set(PRODUCTS.NAME, product.name)
-            .set(PRODUCTS.BARCODE, product.barcode)
-            .set(PRODUCTS.REVIEW_SCORE, product.reviewScore)
-            .set(PRODUCTS.REVIEW_NUMBER, product.reviewNumber)
-            .where(PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(product.id)))
+                .set(PRODUCTS.NAME, product.name)
+                .set(PRODUCTS.BARCODE, product.barcode)
+                .where(PRODUCTS.ID.eq(ULong.valueOf(product.id)))
+                .execute() == 1
+        }
+
+    fun getProduct(id: Long, create: DSLContext = dslContext): Product? {
+        return create.select()
+            .from(PRODUCTS)
+            .where(PRODUCTS.ID.eq(ULong.valueOf(id)))
+            .fetchOne()?.map {
+                Product(
+                    id = it[PRODUCTS.ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE]
+                )
+            }
+    }
+
+
+    // Aux
+
+    fun connectProduct(product_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
+        return create.insertInto(
+            ProductsUsers.PRODUCTS_USERS,
+            ProductsUsers.PRODUCTS_USERS.PRODUCT_ID, ProductsUsers.PRODUCTS_USERS.USER_ID
+        )
+            .values(ULong.valueOf(product_id), ULong.valueOf(user_id))
             .execute() == 1
     }
 

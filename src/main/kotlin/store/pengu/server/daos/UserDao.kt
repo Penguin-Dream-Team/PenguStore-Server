@@ -5,18 +5,16 @@ import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.ForbiddenException
 import store.pengu.server.NotFoundException
-import store.pengu.server.application.LoggedUser
 import store.pengu.server.application.RefreshToken
 import store.pengu.server.data.*
 import store.pengu.server.data.User
+import store.pengu.server.db.pengustore.Tables
+import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
-import store.pengu.server.db.pengustore.tables.PantryXUser.PANTRY_X_USER
-import store.pengu.server.db.pengustore.tables.ProductXPantry.PRODUCT_X_PANTRY
-import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
+import store.pengu.server.db.pengustore.tables.PantriesUsers.PANTRIES_USERS
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
-import store.pengu.server.db.pengustore.tables.Shops.SHOPS
+import store.pengu.server.db.pengustore.tables.ShoppingListUsers.SHOPPING_LIST_USERS
 import store.pengu.server.db.pengustore.tables.Users.USERS
 import store.pengu.server.routes.requests.LoginRequest
 import store.pengu.server.routes.responses.GuestLoginResponse
@@ -28,15 +26,15 @@ class UserDao(
 ) {
     private val dslContext = DSL.using(conf)
 
+    // User Login
     fun getProfile(id: Int, create: DSLContext = dslContext): User {
         return create.select()
             .from(USERS)
-            .where(USERS.USER_ID.eq(ULong.valueOf(id.toLong())))
+            .where(USERS.ID.eq(ULong.valueOf(id.toLong())))
             .fetchOne()?.map {
                 User(
                     username = it[USERS.USERNAME],
-                    email = it[USERS.EMAIL],
-                    guest = it[USERS.GUEST].toInt() == 1
+                    email = it[USERS.EMAIL]
                 )
             } ?: throw NotFoundException("Profile not found")
     }
@@ -49,72 +47,72 @@ class UserDao(
         create: DSLContext = dslContext
     ): Boolean {
         val id = ULong.valueOf(userId.toLong())
-        return create.update(USERS).set(USERS.USER_ID, id).apply {
+        return create.update(USERS).set(USERS.ID, id).apply {
             if (!username.isNullOrBlank()) {
                 set(USERS.USERNAME, username)
-            }
-            if (!email.isNullOrBlank()) {
-                set(USERS.EMAIL, email)
-                    .set(USERS.GUEST, 0)
             }
             if (!password.isNullOrBlank()) {
                 set(USERS.PASSWORD, password)
             }
         }
-            .where(USERS.USER_ID.eq(id))
+            .where(USERS.ID.eq(id))
             .execute() == 1
     }
 
     fun loginUser(username: String, password: String, create: DSLContext = dslContext): RefreshToken {
-        return create.select(USERS.USER_ID)
+        return create.select(USERS.ID)
             .from(USERS)
             .where(USERS.USERNAME.eq(username))
             .and(USERS.PASSWORD.eq(password))
             .fetchOne()?.map {
-                RefreshToken(it[USERS.USER_ID].toInt())
+                RefreshToken(it[USERS.ID].toInt())
             } ?: throw ForbiddenException("Account credentials are not correct")
     }
 
     fun registerGuestUser(username: String, create: DSLContext = dslContext): GuestLoginResponse {
-        return create.insertInto(USERS, USERS.USERNAME, USERS.PASSWORD, USERS.GUEST)
-            .values(username, PasswordUtils.generatePassword(), 1)
-            .returningResult(USERS.USER_ID, USERS.PASSWORD)
+        return create.insertInto(USERS, USERS.USERNAME, USERS.PASSWORD)
+            .values(username, PasswordUtils.generatePassword())
+            .returningResult(USERS.ID, USERS.PASSWORD)
             .fetchOne()?.map {
-                val token = RefreshToken(it[USERS.USER_ID].toInt())
+                val token = RefreshToken(it[USERS.ID].toInt())
                 GuestLoginResponse(password = it[USERS.PASSWORD], token.token, token.refreshToken)
             } ?: throw ForbiddenException("Error registering new account")
     }
 
+
+    // User Pantry
+
     fun getPantryByCode(code: String, create: DSLContext = dslContext): Pantry? {
         return create.select()
-            .from(Pantries.PANTRIES)
-            .where(Pantries.PANTRIES.CODE.eq(code))
+            .from(PANTRIES)
+            .where(PANTRIES.CODE.eq(code))
             .fetchOne()?.map {
                 Pantry(
-                    id = it[Pantries.PANTRIES.PANTRY_ID].toLong(),
-                    code = it[Pantries.PANTRIES.CODE],
-                    name = it[Pantries.PANTRIES.NAME],
+                    id = it[PANTRIES.ID].toLong(),
+                    code = it[PANTRIES.CODE],
+                    name = it[PANTRIES.NAME],
                     latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat()
+                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
+                    product_num = 0
                 )
             }
     }
 
-    fun addPantryToUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
+    fun connectPantryToUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         return create.insertInto(
-            PANTRY_X_USER,
-            PANTRY_X_USER.PANTRY_ID, PANTRY_X_USER.USER_ID
+            PANTRIES_USERS,
+            PANTRIES_USERS.PANTRY_ID, PANTRIES_USERS.USER_ID
         )
-            .values(pantry_x_user.pantryId, pantry_x_user.userId)
+            .values(ULong.valueOf(pantry_id), ULong.valueOf(user_id))
             .execute() == 1
     }
 
-    fun deletePantryUser(pantry_x_user: Pantry_x_User, create: DSLContext = dslContext): Boolean {
+    fun disconnectPantryUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(PANTRY_X_USER.PANTRY_ID.eq(pantry_x_user.pantryId))
-        condition = condition.and(PANTRY_X_USER.USER_ID.eq(pantry_x_user.userId))
+        condition = condition.and(PANTRIES_USERS.PANTRY_ID.eq(ULong.valueOf(pantry_id)))
+        condition = condition.and(PANTRIES_USERS.USER_ID.eq(ULong.valueOf(user_id)))
 
-        return create.delete(PANTRY_X_USER)
+        return create.delete(PANTRIES_USERS)
             .where(condition)
             .execute() == 1
     }
@@ -122,122 +120,96 @@ class UserDao(
     fun getUserPantries(user_id: Long, create: DSLContext = dslContext): List<Pantry> {
         return create.select()
             .from(USERS)
-            .join(PANTRY_X_USER).using(USERS.USER_ID)
-            .join(PANTRIES).using(PANTRY_X_USER.PANTRY_ID)
-            .where(USERS.USER_ID.eq(ULong.valueOf(user_id)))
+            .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
+            .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
+            .where(USERS.ID.eq(ULong.valueOf(user_id)))
             .fetch().map {
                 Pantry(
-                    id = it[PANTRIES.PANTRY_ID].toLong(),
+                    id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
                     latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat()
+                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
+                    product_num = create.fetchCount(
+                        DSL.select()
+                            .from(PANTRIES)
+                            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+                            .where(PANTRIES.ID.eq(it[PANTRIES.ID]))
+                    )
                 )
             }
     }
 
 
-    fun generateShoppingList(user_id: Long, create: DSLContext = dslContext): List<ProductInPantry> {
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(USERS.USER_ID.eq(ULong.valueOf(user_id)))
-        condition = condition.and(PRODUCT_X_PANTRY.HAVE_QTY.lessThan(PRODUCT_X_PANTRY.WANT_QTY))
+    // User Shopping List
 
-        return create.select()
-            .from(USERS)
-            .join(PANTRY_X_USER).using(USERS.USER_ID)
-            .join(PANTRIES).using(PANTRY_X_USER.PANTRY_ID)
-            .join(PRODUCT_X_PANTRY).using(PANTRIES.PANTRY_ID)
-            .join(PRODUCTS).using(PRODUCT_X_PANTRY.PRODUCT_ID)
-            .where(condition)
-            .fetch().map {
-                ProductInPantry(
-                    productId = it[PRODUCTS.PRODUCT_ID].toLong(),
-                    pantryId = it[PANTRIES.PANTRY_ID].toLong(),
-                    barcode = it[PRODUCTS.BARCODE],
-                    name = it[PRODUCTS.NAME],
-                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER],
-                    reviewScore = it[PRODUCTS.REVIEW_SCORE],
-                    amountAvailable = it[PRODUCT_X_PANTRY.HAVE_QTY],
-                    amountNeeded = it[PRODUCT_X_PANTRY.WANT_QTY]
-                )
-            }
-
-    }
-
-    fun addShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+    fun connectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         return create.insertInto(
-            SHOPPING_LIST,
-            SHOPPING_LIST.SHOP_ID, SHOPPING_LIST.USER_ID, SHOPPING_LIST.NAME
+            SHOPPING_LIST_USERS,
+            SHOPPING_LIST_USERS.SHOPPING_LIST_ID, SHOPPING_LIST_USERS.USER_ID
         )
-            .values(shopping_list.shopId, shopping_list.userId, shopping_list.name)
+            .values(ULong.valueOf(shopping_list_id), ULong.valueOf(user_id))
             .execute() == 1
     }
 
-    fun updateShopppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+    fun disconnectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shopId))
-        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.userId))
+        condition = condition.and(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(ULong.valueOf(shopping_list_id)))
+        condition = condition.and(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(user_id)))
 
-        return create.update(SHOPPING_LIST)
-            .set(SHOPPING_LIST.SHOP_ID, shopping_list.shopId)
-            .set(SHOPPING_LIST.USER_ID, shopping_list.userId)
-            .set(SHOPPING_LIST.NAME, shopping_list.name)
-            .where(condition)
-            .execute() == 1
-    }
-
-    fun deleteShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shopping_list.shopId))
-        condition = condition.and(SHOPPING_LIST.USER_ID.eq(shopping_list.userId))
-
-        return create.delete(SHOPPING_LIST)
+        return create.delete(SHOPPING_LIST_USERS)
             .where(condition)
             .execute() == 1
     }
 
     fun getShoppingLists(user_id: Long, create: DSLContext = dslContext): List<Shopping_list> {
         return create.select()
-            .from(SHOPPING_LIST)
-            .where(SHOPPING_LIST.USER_ID.eq(user_id))
+            .from(SHOPPING_LIST_USERS)
+            .join(SHOPPING_LIST).on(SHOPPING_LIST.ID.eq(SHOPPING_LIST_USERS.SHOPPING_LIST_ID))
+            .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(user_id)))
             .fetch().map {
                 Shopping_list(
-                    shopId = it[SHOPPING_LIST.SHOP_ID],
-                    userId = it[SHOPPING_LIST.USER_ID],
-                    name = it[SHOPPING_LIST.NAME]
+                    id = it[SHOPPING_LIST.ID].toLong(),
+                    name = it[SHOPPING_LIST.NAME],
+                    latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),
+                    longitude = it[SHOPPING_LIST.LONGITUDE].toFloat()
                 )
             }
     }
 
-    fun getShoppingList(user_id: Long, shop_id: Long, create: DSLContext = dslContext): List<ProductInShoppingList> {
+
+    // User Products
+
+    fun connectProduct(product_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
+        return create.insertInto(
+            PRODUCTS_USERS,
+            PRODUCTS_USERS.PRODUCT_ID, PRODUCTS_USERS.USER_ID
+        )
+            .values(ULong.valueOf(product_id), ULong.valueOf(user_id))
+            .execute() == 1
+    }
+
+    fun disconnectProduct(product_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOPPING_LIST.SHOP_ID.eq(shop_id))
-        condition = condition.and(SHOPPING_LIST.USER_ID.eq(user_id))
-        condition = condition.and(PRODUCT_X_PANTRY.HAVE_QTY.lessThan(PRODUCT_X_PANTRY.WANT_QTY))
+        condition = condition.and(PRODUCTS_USERS.PRODUCT_ID.eq(ULong.valueOf(product_id)))
+        condition = condition.and(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(user_id)))
 
-        return create.select()
-            .from(SHOPPING_LIST)
-            .join(SHOPS).using(SHOPPING_LIST.SHOP_ID)
-            .join(SHOP_X_PRODUCT).using(SHOPPING_LIST.SHOP_ID)
-            .join(PRODUCTS).using(SHOP_X_PRODUCT.PRODUCT_ID)
-            .join(PANTRY_X_USER).using(SHOPPING_LIST.USER_ID)
-            .join(PRODUCT_X_PANTRY).using(PANTRY_X_USER.PANTRY_ID)
+        return create.delete(PRODUCTS_USERS)
             .where(condition)
+            .execute() == 1
+    }
+
+    fun getProducts(user_id: Long, create: DSLContext = dslContext): List<Product> {
+        return create.select()
+            .from(PRODUCTS_USERS)
+            .join(PRODUCTS).on(PRODUCTS.ID.eq(PRODUCTS_USERS.PRODUCT_ID))
+            .where(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(user_id)))
             .fetch().map {
-                ProductInShoppingList(
-                    product_id = it[PRODUCTS.PRODUCT_ID].toLong(),
-                    pantry_id = it[PANTRY_X_USER.PANTRY_ID],
-                    shop_id = it[SHOPS.SHOP_ID].toLong(),
-                    product_name = it[PRODUCTS.NAME],
-                    shop_name = it[SHOPS.NAME],
-                    barcode = it[PRODUCTS.BARCODE],
-                    reviewNumber = it[PRODUCTS.REVIEW_NUMBER],
-                    reviewScore = it[PRODUCTS.REVIEW_SCORE],
-                    amountAvailable = it[PRODUCT_X_PANTRY.HAVE_QTY],
-                    amountNeeded = it[PRODUCT_X_PANTRY.WANT_QTY],
-                    price = it[SHOP_X_PRODUCT.PRICE]
+                Product(
+                    id = it[PRODUCTS.ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE]
                 )
             }
     }
-
 }

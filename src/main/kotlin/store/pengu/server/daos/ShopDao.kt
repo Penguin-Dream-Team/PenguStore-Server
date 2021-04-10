@@ -3,108 +3,155 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
-import store.pengu.server.data.ProductInShop
-import store.pengu.server.data.Shop
-import store.pengu.server.data.Shop_x_Product
+import store.pengu.server.data.*
+import store.pengu.server.db.pengustore.Tables
+import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries
+import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.ShopXProduct.SHOP_X_PRODUCT
-import store.pengu.server.db.pengustore.tables.Shops.SHOPS
+import store.pengu.server.db.pengustore.tables.ShoppingList
 
 class ShopDao(
     conf: Configuration
 ) {
     private val dslContext = DSL.using(conf)
 
-    fun getShops(create: DSLContext = dslContext): List<Shop> {
-        return create.select()
-            .from(SHOPS)
-            .fetch().map {
-                Shop(
-                    id = it[SHOPS.SHOP_ID].toLong(),
-                    name = it[SHOPS.NAME],
-                    latitude = it[Pantries.PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[Pantries.PANTRIES.LONGITUDE].toFloat()
-                )
-            }
+    // Shopping Lists
 
-    }
-
-    fun getShop(id: Long, create: DSLContext = dslContext): Shop? {
-        return create.select()
-            .from(SHOPS)
-            .where(SHOPS.SHOP_ID.eq(ULong.valueOf(id)))
+    fun addShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Shopping_list? {
+        return create.insertInto(SHOPPING_LIST,
+            SHOPPING_LIST.NAME, SHOPPING_LIST.LATITUDE, SHOPPING_LIST.LONGITUDE)
+            .values(shopping_list.name, shopping_list.latitude.toDouble(), shopping_list.longitude.toDouble())
+            .returningResult(SHOPPING_LIST.ID, SHOPPING_LIST.NAME, SHOPPING_LIST.LATITUDE, SHOPPING_LIST.LONGITUDE)
             .fetchOne()?.map {
-                Shop(
-                    id = it[SHOPS.SHOP_ID].toLong(),
-                    name = it[SHOPS.NAME],
-                    latitude = it[Pantries.PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[Pantries.PANTRIES.LONGITUDE].toFloat()
+                Shopping_list(
+                    id = it[SHOPPING_LIST.ID].toLong(),
+                    name = it[SHOPPING_LIST.NAME],
+                    latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),
+                    longitude = it[SHOPPING_LIST.LONGITUDE].toFloat()
                 )
             }
     }
 
-    fun addShop(shop: Shop, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(SHOPS,
-            SHOPS.NAME, SHOPS.LATITUDE, SHOPS.LONGITUDE)
-            .values(shop.name, shop.latitude.toDouble(), shop.longitude.toDouble())
+    fun updateShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+        return create.update(SHOPPING_LIST)
+            .set(SHOPPING_LIST.NAME, shopping_list.name)
+            .set(SHOPPING_LIST.LATITUDE, shopping_list.latitude.toDouble())
+            .set(SHOPPING_LIST.LONGITUDE, shopping_list.longitude.toDouble())
+            .where(SHOPPING_LIST.ID.eq(ULong.valueOf(shopping_list.id)))
             .execute() == 1
     }
 
-    fun updateShop(shop: Shop, create: DSLContext = dslContext): Boolean {
-        return create.update(SHOPS)
-            .set(SHOPS.NAME, shop.name)
-            .set(SHOPS.LATITUDE, shop.latitude.toDouble())
-            .set(SHOPS.LONGITUDE, shop.longitude.toDouble())
-            .where(SHOPS.SHOP_ID.eq(ULong.valueOf(shop.id)))
-            .execute() == 1
-    }
 
-    fun addProductToShop(shop_x_product: Shop_x_Product, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(SHOP_X_PRODUCT,
-            SHOP_X_PRODUCT.SHOP_ID, SHOP_X_PRODUCT.PRODUCT_ID, SHOP_X_PRODUCT.PRICE)
-            .values(shop_x_product.shop_id, shop_x_product.product_id, shop_x_product.price)
-            .execute() == 1
-    }
-
-    fun updateProductShop(shop_x_product: Shop_x_Product, create: DSLContext = dslContext): Boolean {
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOP_X_PRODUCT.SHOP_ID.eq(shop_x_product.shop_id))
-        condition = condition.and(SHOP_X_PRODUCT.PRODUCT_ID.eq(shop_x_product.product_id))
-
-        return create.update(SHOP_X_PRODUCT)
-            .set(SHOP_X_PRODUCT.PRICE, shop_x_product.price)
-            .where(condition)
-            .execute() == 1
-    }
-
-    fun deleteProductShop(shop_x_product: Shop_x_Product, create: DSLContext = dslContext): Boolean {
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(SHOP_X_PRODUCT.SHOP_ID.eq(shop_x_product.shop_id))
-        condition = condition.and(SHOP_X_PRODUCT.PRODUCT_ID.eq(shop_x_product.product_id))
-
-        return create.delete(SHOP_X_PRODUCT)
-            .where(condition)
-            .execute() == 1
-    }
-
-    fun getShopProducts(shop_id: Long, create: DSLContext = dslContext): List<ProductInShop> {
+    fun getShoppingList(id: Long, create: DSLContext = dslContext): Shopping_list? {
         return create.select()
-            .from(SHOPS)
-            .join(SHOP_X_PRODUCT).using(SHOPS.SHOP_ID)
-            .join(PRODUCTS).using(SHOP_X_PRODUCT.PRODUCT_ID)
-            .where(SHOPS.SHOP_ID.eq(ULong.valueOf(shop_id)))
+            .from(SHOPPING_LIST)
+            .where(SHOPPING_LIST.ID.eq(ULong.valueOf(id)))
+            .fetchOne()?.map {
+                Shopping_list(
+                    id = it[SHOPPING_LIST.ID].toLong(),
+                    name = it[SHOPPING_LIST.NAME],
+                    latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),
+                    longitude = it[SHOPPING_LIST.LONGITUDE].toFloat()
+                )
+            }
+    }
+
+    fun genShoppingList(user_id: Long, latitude: Float, longitude: Float, create: DSLContext = dslContext): List<ProductInShoppingList> {
+        // TODO Trocar estes valores pa coisas q facam sentido
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(USERS.ID.eq(ULong.valueOf(user_id)))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude+0.5))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude-0.5))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude+0.5))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude-0.5))
+
+        return create.select()
+            .from(USERS)
+            .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
+            .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
+            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+            .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
+            .join(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
+            .where(condition)
+            .fetch().map {
+                ProductInShoppingList(
+                    product_id = it[PRODUCTS.ID].toLong(),
+                    pantry_id = it[PANTRIES.ID].toLong(),
+                    product_name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE],
+                    amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
+                    amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
+                    price = it[CROWD_PRODUCT_PRICES.PRICE]
+                )
+            }
+    }
+
+    // Prices
+
+    fun addPrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
+        return create.insertInto(CROWD_PRODUCT_PRICES,
+            CROWD_PRODUCT_PRICES.BARCODE, CROWD_PRODUCT_PRICES.PRICE, CROWD_PRODUCT_PRICES.LATITUDE, CROWD_PRODUCT_PRICES.LONGITUDE)
+            .values(crowd_Product_Price.barcode, crowd_Product_Price.price, crowd_Product_Price.latitude.toDouble(), crowd_Product_Price.longitude.toDouble())
+            .execute() == 1
+    }
+
+    fun updatePrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(crowd_Product_Price.barcode))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.eq(crowd_Product_Price.latitude.toDouble()))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.eq(crowd_Product_Price.longitude.toDouble()))
+
+        return create.update(CROWD_PRODUCT_PRICES)
+            .set(CROWD_PRODUCT_PRICES.PRICE, crowd_Product_Price.price)
+            .where(condition)
+            .execute() == 1
+    }
+
+    fun deletePrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(crowd_Product_Price.barcode))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.eq(crowd_Product_Price.latitude.toDouble()))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.eq(crowd_Product_Price.longitude.toDouble()))
+
+        return create.delete(CROWD_PRODUCT_PRICES)
+            .where(condition)
+            .execute() == 1
+    }
+
+    fun getShopPrices(latitude: Float, longitude: Float, create: DSLContext = dslContext): List<ProductInShop> {
+        // TODO Trocar estes valores pa coisas q facam sentido
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude+0.5))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude-0.5))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude+0.5))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude-0.5))
+
+        return create.select()
+            .from(CROWD_PRODUCT_PRICES)
+            .join(PRODUCTS).on(PRODUCTS.BARCODE.eq(CROWD_PRODUCT_PRICES.BARCODE))
+            .where(condition)
             .fetch().map {
                 ProductInShop(
-                    product_id = it[PRODUCTS.PRODUCT_ID].toLong(),
+                    product_id = it[PRODUCTS.ID].toLong(),
                     name = it[PRODUCTS.NAME],
                     barcode = it[PRODUCTS.BARCODE],
-                    review_score = it[PRODUCTS.REVIEW_SCORE],
-                    review_number = it[PRODUCTS.REVIEW_NUMBER],
-                    price = it[SHOP_X_PRODUCT.PRICE]
+                    price = it[CROWD_PRODUCT_PRICES.PRICE]
 
                 )
             }
+    }
+
+
+    // Aux
+
+    fun connectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
+        return create.insertInto(
+            Tables.SHOPPING_LIST_USERS,
+            Tables.SHOPPING_LIST_USERS.SHOPPING_LIST_ID, Tables.SHOPPING_LIST_USERS.USER_ID
+        )
+            .values(ULong.valueOf(shopping_list_id), ULong.valueOf(user_id))
+            .execute() == 1
     }
 
 }

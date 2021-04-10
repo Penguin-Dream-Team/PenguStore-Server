@@ -12,10 +12,7 @@ import store.pengu.server.*
 import store.pengu.server.application.features.guestOnly
 import store.pengu.server.application.user
 import store.pengu.server.daos.UserDao
-import store.pengu.server.data.Pantry_x_User
-import store.pengu.server.data.Pantry_x_User_Request
 import store.pengu.server.data.Shopping_list
-import store.pengu.server.data.User
 import store.pengu.server.routes.requests.LoginRequest
 import store.pengu.server.routes.requests.RegisterRequest
 import store.pengu.server.routes.requests.UserUpdateRequest
@@ -24,6 +21,7 @@ import store.pengu.server.routes.responses.Response
 fun Route.userRoutes(
     userDao: UserDao,
 ) {
+
 
     authenticate {
 
@@ -74,98 +72,115 @@ fun Route.userRoutes(
 
     }
 
-    post<UserPostPantry> {
-        val request = call.receive<Pantry_x_User_Request>()
-        val pantry = userDao.getPantryByCode(request.pantryCode)
-            ?: throw NotFoundException("Pantry with specified code not found")
-        val pantry_x_user = Pantry_x_User(pantry.id, request.userId)
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.addPantryToUser(pantry_x_user)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
+    authenticate {
+        // User Pantry
+
+        post<UserConnectPantry> { param ->
+            val userId = call.user.id.toLong()
+            val pantry = userDao.getPantryByCode(param.code)
+                ?: throw NotFoundException("Pantry with specified code not found")
+
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    userDao.connectPantryToUser(pantry.id, userId)
+                } catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
             }
+            call.respond(mapOf("data" to response))
         }
-        call.respond(mapOf("data" to response))
-    }
 
-    delete<UserDeletePantry> {
-        val pantry_x_user = call.receive<Pantry_x_User>()
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.deletePantryUser(pantry_x_user)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
+        delete<UserDisconnectPantry> { param ->
+            val userId = call.user.id.toLong()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    userDao.disconnectPantryUser(param.pantry_id, userId)
+                } catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
             }
-        }
-        call.respond("data" to response)
-    }
-
-    get<UserGetPantries> { param ->
-        val entries = withContext(Dispatchers.IO) {
-            userDao.getUserPantries(param.id)
+            call.respond(mapOf("data" to response))
         }
 
-        call.respond(mapOf("data" to entries))
-    }
-
-    get<UserGenerateShoppingList> { param ->
-        val entries = withContext(Dispatchers.IO) {
-            userDao.generateShoppingList(param.id)
-        }
-
-        call.respond(mapOf("data" to entries))
-    }
-
-    post<UserPostShoppingList> {
-        val shopping_list = call.receive<Shopping_list>()
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.addShoppingList(shopping_list)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
+        get<UserGetPantries> {
+            val userId = call.user.id.toLong()
+            val entries = withContext(Dispatchers.IO) {
+                userDao.getUserPantries(userId)
             }
+            call.respond(mapOf("data" to entries))
         }
-        call.respond("data" to response)
-    }
 
-    put<UserPutShoppingList> {
-        val shopping_list = call.receive<Shopping_list>()
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.updateShopppingList(shopping_list)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
+
+        // User Shopping List
+
+        post<UserConnectShoppingList> { param ->
+            val userId = call.user.id.toLong()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    userDao.connectShoppingList(param.shopping_list_id, userId)
+                } catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
             }
+            call.respond(mapOf("data" to response))
         }
-        call.respond("data" to response)
-    }
 
-
-    delete<UserDeleteShoppingList> {
-        val shopping_list = call.receive<Shopping_list>()
-        val response = withContext(Dispatchers.IO) {
-            try {
-                userDao.deleteShoppingList(shopping_list)
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
+        delete<UserDisconnectShoppingList> { param->
+            val userId = call.user.id.toLong()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    userDao.disconnectShoppingList(param.shopping_list_id, userId)
+                } catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
             }
-        }
-        call.respond("data" to response)
-    }
-
-    get<UserGetShoppingLists> { param ->
-        val entries = withContext(Dispatchers.IO) {
-            userDao.getShoppingLists(param.id)
+            call.respond(mapOf("data" to response))
         }
 
-        call.respond(mapOf("data" to entries))
-    }
-    get<UserGetShoppingList> { param ->
-        val entries = withContext(Dispatchers.IO) {
-            userDao.getShoppingList(param.user_id, param.shop_id)
+        get<UserGetShoppingLists> {
+            val userId = call.user.id.toLong()
+            val entries = withContext(Dispatchers.IO) {
+                userDao.getShoppingLists(userId)
+            }
+
+            call.respond(mapOf("data" to entries))
         }
 
-        call.respond(mapOf("data" to entries))
+
+        // User Products
+
+        post<UserConnectProduct> { param ->
+            val userId = call.user.id.toLong()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    userDao.connectProduct(param.product_id, userId)
+                } catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
+            }
+            call.respond(mapOf("data" to response))
+        }
+
+        delete<UserDisconnectProduct> { param->
+            val userId = call.user.id.toLong()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    userDao.disconnectProduct(param.product_id, userId)
+                } catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
+            }
+            call.respond(mapOf("data" to response))
+        }
+
+        get<UserGetProducts> {
+            val userId = call.user.id.toLong()
+            val entries = withContext(Dispatchers.IO) {
+                userDao.getProducts(userId)
+            }
+
+            call.respond(mapOf("data" to entries))
+        }
     }
+
 }

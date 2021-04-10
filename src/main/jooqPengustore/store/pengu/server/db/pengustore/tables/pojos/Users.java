@@ -17,39 +17,35 @@ public class Users implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final ULong  userId;
+    private final ULong  id;
     private final String username;
     private final String email;
     private final String password;
-    private final Byte   guest;
 
     public Users(Users value) {
-        this.userId = value.userId;
+        this.id = value.id;
         this.username = value.username;
         this.email = value.email;
         this.password = value.password;
-        this.guest = value.guest;
     }
 
     public Users(
-        ULong  userId,
+        ULong  id,
         String username,
         String email,
-        String password,
-        Byte   guest
+        String password
     ) {
-        this.userId = userId;
+        this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.guest = guest;
     }
 
     /**
-     * Getter for <code>users.user_id</code>.
+     * Getter for <code>users.id</code>.
      */
-    public ULong getUserId() {
-        return this.userId;
+    public ULong getId() {
+        return this.id;
     }
 
     /**
@@ -73,22 +69,14 @@ public class Users implements Serializable {
         return this.password;
     }
 
-    /**
-     * Getter for <code>users.guest</code>.
-     */
-    public Byte getGuest() {
-        return this.guest;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Users (");
 
-        sb.append(userId);
+        sb.append(id);
         sb.append(", ").append(username);
         sb.append(", ").append(email);
         sb.append(", ").append(password);
-        sb.append(", ").append(guest);
 
         sb.append(")");
         return sb.toString();

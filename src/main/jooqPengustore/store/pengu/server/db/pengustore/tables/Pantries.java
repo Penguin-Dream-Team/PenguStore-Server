@@ -50,9 +50,9 @@ public class Pantries extends TableImpl<PantriesRecord> {
     }
 
     /**
-     * The column <code>pantries.pantry_id</code>.
+     * The column <code>pantries.id</code>.
      */
-    public final TableField<PantriesRecord, ULong> PANTRY_ID = createField(DSL.name("pantry_id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
+    public final TableField<PantriesRecord, ULong> ID = createField(DSL.name("id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>pantries.code</code>.

@@ -11,14 +11,15 @@ import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
+import store.pengu.server.db.pengustore.tables.CrowdProductImages;
+import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
 import store.pengu.server.db.pengustore.tables.Pantries;
-import store.pengu.server.db.pengustore.tables.PantryXUser;
-import store.pengu.server.db.pengustore.tables.ProductXImage;
-import store.pengu.server.db.pengustore.tables.ProductXPantry;
+import store.pengu.server.db.pengustore.tables.PantriesUsers;
+import store.pengu.server.db.pengustore.tables.PantryProducts;
 import store.pengu.server.db.pengustore.tables.Products;
-import store.pengu.server.db.pengustore.tables.ShopXProduct;
+import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
-import store.pengu.server.db.pengustore.tables.Shops;
+import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Users;
 
 
@@ -36,24 +37,29 @@ public class DefaultSchema extends SchemaImpl {
     public static final DefaultSchema DEFAULT_SCHEMA = new DefaultSchema();
 
     /**
+     * The table <code>crowd_product_images</code>.
+     */
+    public final CrowdProductImages CROWD_PRODUCT_IMAGES = CrowdProductImages.CROWD_PRODUCT_IMAGES;
+
+    /**
+     * The table <code>crowd_product_prices</code>.
+     */
+    public final CrowdProductPrices CROWD_PRODUCT_PRICES = CrowdProductPrices.CROWD_PRODUCT_PRICES;
+
+    /**
      * The table <code>pantries</code>.
      */
     public final Pantries PANTRIES = Pantries.PANTRIES;
 
     /**
-     * The table <code>pantry_x_user</code>.
+     * The table <code>pantries_users</code>.
      */
-    public final PantryXUser PANTRY_X_USER = PantryXUser.PANTRY_X_USER;
+    public final PantriesUsers PANTRIES_USERS = PantriesUsers.PANTRIES_USERS;
 
     /**
-     * The table <code>product_x_image</code>.
+     * The table <code>pantry_products</code>.
      */
-    public final ProductXImage PRODUCT_X_IMAGE = ProductXImage.PRODUCT_X_IMAGE;
-
-    /**
-     * The table <code>product_x_pantry</code>.
-     */
-    public final ProductXPantry PRODUCT_X_PANTRY = ProductXPantry.PRODUCT_X_PANTRY;
+    public final PantryProducts PANTRY_PRODUCTS = PantryProducts.PANTRY_PRODUCTS;
 
     /**
      * The table <code>products</code>.
@@ -61,9 +67,9 @@ public class DefaultSchema extends SchemaImpl {
     public final Products PRODUCTS = Products.PRODUCTS;
 
     /**
-     * The table <code>shop_x_product</code>.
+     * The table <code>products_users</code>.
      */
-    public final ShopXProduct SHOP_X_PRODUCT = ShopXProduct.SHOP_X_PRODUCT;
+    public final ProductsUsers PRODUCTS_USERS = ProductsUsers.PRODUCTS_USERS;
 
     /**
      * The table <code>shopping_list</code>.
@@ -71,9 +77,9 @@ public class DefaultSchema extends SchemaImpl {
     public final ShoppingList SHOPPING_LIST = ShoppingList.SHOPPING_LIST;
 
     /**
-     * The table <code>shops</code>.
+     * The table <code>shopping_list_users</code>.
      */
-    public final Shops SHOPS = Shops.SHOPS;
+    public final ShoppingListUsers SHOPPING_LIST_USERS = ShoppingListUsers.SHOPPING_LIST_USERS;
 
     /**
      * The table <code>users</code>.
@@ -96,14 +102,15 @@ public class DefaultSchema extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
+            CrowdProductImages.CROWD_PRODUCT_IMAGES,
+            CrowdProductPrices.CROWD_PRODUCT_PRICES,
             Pantries.PANTRIES,
-            PantryXUser.PANTRY_X_USER,
-            ProductXImage.PRODUCT_X_IMAGE,
-            ProductXPantry.PRODUCT_X_PANTRY,
+            PantriesUsers.PANTRIES_USERS,
+            PantryProducts.PANTRY_PRODUCTS,
             Products.PRODUCTS,
-            ShopXProduct.SHOP_X_PRODUCT,
+            ProductsUsers.PRODUCTS_USERS,
             ShoppingList.SHOPPING_LIST,
-            Shops.SHOPS,
+            ShoppingListUsers.SHOPPING_LIST_USERS,
             Users.USERS);
     }
 }

@@ -12,7 +12,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row5;
+import org.jooq.Row3;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -50,29 +50,19 @@ public class Products extends TableImpl<ProductsRecord> {
     }
 
     /**
-     * The column <code>products.product_id</code>.
+     * The column <code>products.id</code>.
      */
-    public final TableField<ProductsRecord, ULong> PRODUCT_ID = createField(DSL.name("product_id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
+    public final TableField<ProductsRecord, ULong> ID = createField(DSL.name("id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>products.barcode</code>.
      */
-    public final TableField<ProductsRecord, String> BARCODE = createField(DSL.name("barcode"), SQLDataType.VARCHAR(255).nullable(false), this, "");
-
-    /**
-     * The column <code>products.review_score</code>.
-     */
-    public final TableField<ProductsRecord, Double> REVIEW_SCORE = createField(DSL.name("review_score"), SQLDataType.DOUBLE.defaultValue(DSL.inline("NULL", SQLDataType.DOUBLE)), this, "");
-
-    /**
-     * The column <code>products.review_number</code>.
-     */
-    public final TableField<ProductsRecord, Integer> REVIEW_NUMBER = createField(DSL.name("review_number"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<ProductsRecord, String> BARCODE = createField(DSL.name("barcode"), SQLDataType.VARCHAR(255).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>products.name</code>.
      */
-    public final TableField<ProductsRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+    public final TableField<ProductsRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(255).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
 
     private Products(Name alias, Table<ProductsRecord> aliased) {
         this(alias, aliased, null);
@@ -124,7 +114,7 @@ public class Products extends TableImpl<ProductsRecord> {
 
     @Override
     public List<UniqueKey<ProductsRecord>> getKeys() {
-        return Arrays.<UniqueKey<ProductsRecord>>asList(Keys.KEY_PRODUCTS_PRIMARY);
+        return Arrays.<UniqueKey<ProductsRecord>>asList(Keys.KEY_PRODUCTS_PRIMARY, Keys.KEY_PRODUCTS_BARCODE);
     }
 
     @Override
@@ -154,11 +144,11 @@ public class Products extends TableImpl<ProductsRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row5 type methods
+    // Row3 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<ULong, String, Double, Integer, String> fieldsRow() {
-        return (Row5) super.fieldsRow();
+    public Row3<ULong, String, String> fieldsRow() {
+        return (Row3) super.fieldsRow();
     }
 }

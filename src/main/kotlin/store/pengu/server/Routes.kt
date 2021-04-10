@@ -11,104 +11,117 @@ object Dashboard
 @Location("/users/update")
 object UserUpdate
 
+
+// User Login
+
 @Location("/login")
 object UserLogin
 
 @Location("/register/guest")
 object UserGuestRegister
 
-@Location("/users/addPantry")
-object UserPostPantry
-
-@Location("/users/deletePantry")
-object UserDeletePantry
-
-@Location("/users/{id}/pantries")
-data class UserGetPantries(val id: Long)
-
-@Location("/users/{id}/shoppingList")
-data class UserGenerateShoppingList(val id: Long)
-
-@Location("/users/addShoppingList")
-object UserPostShoppingList
-
-@Location("/users/updateShoppingList")
-object UserPutShoppingList
-
-@Location("/users/deleteShoppingList")
-object UserDeleteShoppingList
-
-@Location("/users/{id}/ShoppingLists")
-data class UserGetShoppingLists(val id: Long)
-
-@Location("/users/{user_id}/ShoppingList/{shop_id}")
-data class UserGetShoppingList(val user_id: Long, val shop_id: Long)
-
 @Location("/login/refresh")
 object UserLoginRefresh
 
 
-@Location("/pantries")
-object PantriesList
+// User Pantry
 
-@Location("/pantries/{id}")
-data class PantryGet(val id: Long)
+@Location("/user/connectPantry/{code}")
+data class UserConnectPantry(val code: String)
+
+@Location("/user/disconnectPantry/{pantry_id}")
+data class UserDisconnectPantry(val pantry_id: Long)
+
+@Location("/user/pantries")
+object UserGetPantries
+
+
+// User Shopping List
+
+@Location("/user/connectShoppingList/{shopping_list_id}")
+data class UserConnectShoppingList(val shopping_list_id: Long)
+
+@Location("/user/disconnectShoppingList/{shopping_list_id}")
+data class UserDisconnectShoppingList(val shopping_list_id: Long)
+
+@Location("/user/ShoppingLists")
+object UserGetShoppingLists
+
+
+// User Products
+
+@Location("/user/connectProduct/{product_id}")
+data class UserConnectProduct(val product_id: Long)
+
+@Location("/user/disconnectProduct/{product_id}")
+data class UserDisconnectProduct(val product_id: Long)
+
+@Location("user/products")
+object UserGetProducts
+
+
+// Pantries
 
 @Location("/pantries/add")
-object PantryPost
+object AddPantry
 
 @Location("/pantries/update")
-object PantryPut
+object UpdatePantry
+
+@Location("/pantry/{id}")
+data class GetPantry(val id: Long)
+
+
+// Pantry Products
 
 @Location("/pantries/addProduct")
-object PantryPostProduct
+object  PantryAddProduct
 
 @Location("/pantries/updateProduct")
-object PantryPutProduct
+object PantryUpdateProduct
 
-@Location("/pantries/deleteProduct")
-object PantryDeleteProduct
+@Location("/pantry/{pantry_id}/deleteProduct/{product_id}")
+data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
 
 @Location("/pantries/{id}/products")
-data class  PantryGetProducts(val id: Long)
+data class PantryGetProducts(val id: Long)
 
 
-
-@Location("/products")
-object ProductsList
-
-@Location("/products/{id}")
-data class ProductGet(val id: Long)
+// Products
 
 @Location("/products/add")
-object ProductPost
+object AddProduct
 
 @Location("/products/update")
-object ProductPut
+object UpdateProduct
+
+@Location("product/{id}")
+data class GetProduct(val id: Long)
 
 
+// Shopping Lists
+
+@Location("/shoppingLists/add")
+object  AddShoppingList
+
+@Location("/shoppingLists/update")
+object  UpdateShoppingList
+
+@Location("/shoppingList/{shopping_list_id}")
+data class GenShoppingList(val shopping_list_id: Long)
 
 
-@Location("/shops")
-object ShopsList
+// Prices
 
-@Location("/shops/{id}")
-data class ShopGet(val id: Long)
+@Location("/prices/addPrice")
+object AddPrice
 
-@Location("/shops/add")
-object ShopPost
+@Location("/prices/updatePrice")
+object UpdatePrice
 
-@Location("/shops/update")
-object ShopPut
+@Location("/prices/deletePrice")
+object DeletePrice
 
-@Location("/shops/addProduct")
-object  ShopPostProduct
+@Location("/prices/{latitude}/{longitude}")
+data class GetShopPrices(val latitude: Float, val longitude: Float)
 
-@Location("/shops/updateProduct")
-object  ShopPutProduct
-
-@Location("/shops/deleteProduct")
-object  ShopDeleteProduct
-
-@Location("/shops/{id}/products")
-data class  ShopGetProducts(val id: Long)

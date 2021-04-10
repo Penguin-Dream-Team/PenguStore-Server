@@ -23,17 +23,17 @@ public class PantriesRecord extends UpdatableRecordImpl<PantriesRecord> implemen
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>pantries.pantry_id</code>.
+     * Setter for <code>pantries.id</code>.
      */
-    public PantriesRecord setPantryId(ULong value) {
+    public PantriesRecord setId(ULong value) {
         set(0, value);
         return this;
     }
 
     /**
-     * Getter for <code>pantries.pantry_id</code>.
+     * Getter for <code>pantries.id</code>.
      */
-    public ULong getPantryId() {
+    public ULong getId() {
         return (ULong) get(0);
     }
 
@@ -122,7 +122,7 @@ public class PantriesRecord extends UpdatableRecordImpl<PantriesRecord> implemen
 
     @Override
     public Field<ULong> field1() {
-        return Pantries.PANTRIES.PANTRY_ID;
+        return Pantries.PANTRIES.ID;
     }
 
     @Override
@@ -147,7 +147,7 @@ public class PantriesRecord extends UpdatableRecordImpl<PantriesRecord> implemen
 
     @Override
     public ULong component1() {
-        return getPantryId();
+        return getId();
     }
 
     @Override
@@ -172,7 +172,7 @@ public class PantriesRecord extends UpdatableRecordImpl<PantriesRecord> implemen
 
     @Override
     public ULong value1() {
-        return getPantryId();
+        return getId();
     }
 
     @Override
@@ -197,7 +197,7 @@ public class PantriesRecord extends UpdatableRecordImpl<PantriesRecord> implemen
 
     @Override
     public PantriesRecord value1(ULong value) {
-        setPantryId(value);
+        setId(value);
         return this;
     }
 
@@ -249,10 +249,10 @@ public class PantriesRecord extends UpdatableRecordImpl<PantriesRecord> implemen
     /**
      * Create a detached, initialised PantriesRecord
      */
-    public PantriesRecord(ULong pantryId, String code, String name, Double latitude, Double longitude) {
+    public PantriesRecord(ULong id, String code, String name, Double latitude, Double longitude) {
         super(Pantries.PANTRIES);
 
-        setPantryId(pantryId);
+        setId(id);
         setCode(code);
         setName(name);
         setLatitude(latitude);

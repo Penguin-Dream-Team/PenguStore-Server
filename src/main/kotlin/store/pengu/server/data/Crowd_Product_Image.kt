@@ -1,8 +1,7 @@
 package store.pengu.server.data
 
-
-data class Product(
+data class Crowd_Product_Image(
     val id: Long,
-    val name: String,
     val barcode: String?,
+    val image_url: String,
 )

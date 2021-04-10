@@ -17,14 +17,14 @@ public class Pantries implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final ULong  pantryId;
+    private final ULong  id;
     private final String code;
     private final String name;
     private final Double latitude;
     private final Double longitude;
 
     public Pantries(Pantries value) {
-        this.pantryId = value.pantryId;
+        this.id = value.id;
         this.code = value.code;
         this.name = value.name;
         this.latitude = value.latitude;
@@ -32,13 +32,13 @@ public class Pantries implements Serializable {
     }
 
     public Pantries(
-        ULong  pantryId,
+        ULong  id,
         String code,
         String name,
         Double latitude,
         Double longitude
     ) {
-        this.pantryId = pantryId;
+        this.id = id;
         this.code = code;
         this.name = name;
         this.latitude = latitude;
@@ -46,10 +46,10 @@ public class Pantries implements Serializable {
     }
 
     /**
-     * Getter for <code>pantries.pantry_id</code>.
+     * Getter for <code>pantries.id</code>.
      */
-    public ULong getPantryId() {
-        return this.pantryId;
+    public ULong getId() {
+        return this.id;
     }
 
     /**
@@ -84,7 +84,7 @@ public class Pantries implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder("Pantries (");
 
-        sb.append(pantryId);
+        sb.append(id);
         sb.append(", ").append(code);
         sb.append(", ").append(name);
         sb.append(", ").append(latitude);

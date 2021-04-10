@@ -5,5 +5,6 @@ data class Pantry(
     val code: String,
     val name: String,
     val latitude: Float,
-    val longitude: Float
+    val longitude: Float,
+    val product_num: Int
 )
