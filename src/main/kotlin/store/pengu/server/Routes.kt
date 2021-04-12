@@ -95,6 +95,9 @@ object AddProduct
 @Location("/products/update")
 object UpdateProduct
 
+@Location("/product/addBarcode")
+object AddBarcode
+
 @Location("product/{id}")
 data class GetProduct(val id: Long)
 
@@ -115,9 +118,6 @@ data class GenShoppingList(val shopping_list_id: Long)
 
 @Location("/prices/addPrice")
 object AddPrice
-
-@Location("/prices/updatePrice")
-object UpdatePrice
 
 @Location("/prices/deletePrice")
 object DeletePrice

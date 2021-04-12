@@ -5,7 +5,7 @@ data class ProductInShoppingList(
     val product_id: Long,
     val pantry_id: Long,
     val product_name: String,
-    val barcode: String,
+    val barcode: String?,
     val amountAvailable: Int,
     val amountNeeded: Int,
     val price: Double

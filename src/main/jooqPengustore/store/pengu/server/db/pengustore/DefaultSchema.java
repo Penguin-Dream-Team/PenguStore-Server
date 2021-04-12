@@ -13,6 +13,8 @@ import org.jooq.impl.SchemaImpl;
 
 import store.pengu.server.db.pengustore.tables.CrowdProductImages;
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
+import store.pengu.server.db.pengustore.tables.LocalProductImages;
+import store.pengu.server.db.pengustore.tables.LocalProductPrices;
 import store.pengu.server.db.pengustore.tables.Pantries;
 import store.pengu.server.db.pengustore.tables.PantriesUsers;
 import store.pengu.server.db.pengustore.tables.PantryProducts;
@@ -45,6 +47,16 @@ public class DefaultSchema extends SchemaImpl {
      * The table <code>crowd_product_prices</code>.
      */
     public final CrowdProductPrices CROWD_PRODUCT_PRICES = CrowdProductPrices.CROWD_PRODUCT_PRICES;
+
+    /**
+     * The table <code>local_product_images</code>.
+     */
+    public final LocalProductImages LOCAL_PRODUCT_IMAGES = LocalProductImages.LOCAL_PRODUCT_IMAGES;
+
+    /**
+     * The table <code>local_product_prices</code>.
+     */
+    public final LocalProductPrices LOCAL_PRODUCT_PRICES = LocalProductPrices.LOCAL_PRODUCT_PRICES;
 
     /**
      * The table <code>pantries</code>.
@@ -104,6 +116,8 @@ public class DefaultSchema extends SchemaImpl {
         return Arrays.<Table<?>>asList(
             CrowdProductImages.CROWD_PRODUCT_IMAGES,
             CrowdProductPrices.CROWD_PRODUCT_PRICES,
+            LocalProductImages.LOCAL_PRODUCT_IMAGES,
+            LocalProductPrices.LOCAL_PRODUCT_PRICES,
             Pantries.PANTRIES,
             PantriesUsers.PANTRIES_USERS,
             PantryProducts.PANTRY_PRODUCTS,

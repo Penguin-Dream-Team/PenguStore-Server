@@ -6,6 +6,8 @@ package store.pengu.server.db.pengustore;
 
 import store.pengu.server.db.pengustore.tables.CrowdProductImages;
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
+import store.pengu.server.db.pengustore.tables.LocalProductImages;
+import store.pengu.server.db.pengustore.tables.LocalProductPrices;
 import store.pengu.server.db.pengustore.tables.Pantries;
 import store.pengu.server.db.pengustore.tables.PantriesUsers;
 import store.pengu.server.db.pengustore.tables.PantryProducts;
@@ -31,6 +33,16 @@ public class Tables {
      * The table <code>crowd_product_prices</code>.
      */
     public static final CrowdProductPrices CROWD_PRODUCT_PRICES = CrowdProductPrices.CROWD_PRODUCT_PRICES;
+
+    /**
+     * The table <code>local_product_images</code>.
+     */
+    public static final LocalProductImages LOCAL_PRODUCT_IMAGES = LocalProductImages.LOCAL_PRODUCT_IMAGES;
+
+    /**
+     * The table <code>local_product_prices</code>.
+     */
+    public static final LocalProductPrices LOCAL_PRODUCT_PRICES = LocalProductPrices.LOCAL_PRODUCT_PRICES;
 
     /**
      * The table <code>pantries</code>.

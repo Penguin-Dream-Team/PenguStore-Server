@@ -12,6 +12,8 @@ import org.jooq.impl.Internal;
 
 import store.pengu.server.db.pengustore.tables.CrowdProductImages;
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
+import store.pengu.server.db.pengustore.tables.LocalProductImages;
+import store.pengu.server.db.pengustore.tables.LocalProductPrices;
 import store.pengu.server.db.pengustore.tables.Pantries;
 import store.pengu.server.db.pengustore.tables.PantriesUsers;
 import store.pengu.server.db.pengustore.tables.PantryProducts;
@@ -22,6 +24,8 @@ import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Users;
 import store.pengu.server.db.pengustore.tables.records.CrowdProductImagesRecord;
 import store.pengu.server.db.pengustore.tables.records.CrowdProductPricesRecord;
+import store.pengu.server.db.pengustore.tables.records.LocalProductImagesRecord;
+import store.pengu.server.db.pengustore.tables.records.LocalProductPricesRecord;
 import store.pengu.server.db.pengustore.tables.records.PantriesRecord;
 import store.pengu.server.db.pengustore.tables.records.PantriesUsersRecord;
 import store.pengu.server.db.pengustore.tables.records.PantryProductsRecord;
@@ -45,6 +49,8 @@ public class Keys {
 
     public static final UniqueKey<CrowdProductImagesRecord> KEY_CROWD_PRODUCT_IMAGES_PRIMARY = Internal.createUniqueKey(CrowdProductImages.CROWD_PRODUCT_IMAGES, DSL.name("KEY_crowd_product_images_PRIMARY"), new TableField[] { CrowdProductImages.CROWD_PRODUCT_IMAGES.ID }, true);
     public static final UniqueKey<CrowdProductPricesRecord> KEY_CROWD_PRODUCT_PRICES_PRIMARY = Internal.createUniqueKey(CrowdProductPrices.CROWD_PRODUCT_PRICES, DSL.name("KEY_crowd_product_prices_PRIMARY"), new TableField[] { CrowdProductPrices.CROWD_PRODUCT_PRICES.BARCODE, CrowdProductPrices.CROWD_PRODUCT_PRICES.LATITUDE, CrowdProductPrices.CROWD_PRODUCT_PRICES.LONGITUDE }, true);
+    public static final UniqueKey<LocalProductImagesRecord> KEY_LOCAL_PRODUCT_IMAGES_PRIMARY = Internal.createUniqueKey(LocalProductImages.LOCAL_PRODUCT_IMAGES, DSL.name("KEY_local_product_images_PRIMARY"), new TableField[] { LocalProductImages.LOCAL_PRODUCT_IMAGES.ID }, true);
+    public static final UniqueKey<LocalProductPricesRecord> KEY_LOCAL_PRODUCT_PRICES_PRIMARY = Internal.createUniqueKey(LocalProductPrices.LOCAL_PRODUCT_PRICES, DSL.name("KEY_local_product_prices_PRIMARY"), new TableField[] { LocalProductPrices.LOCAL_PRODUCT_PRICES.PRODUCT_ID, LocalProductPrices.LOCAL_PRODUCT_PRICES.LATITUDE, LocalProductPrices.LOCAL_PRODUCT_PRICES.LONGITUDE }, true);
     public static final UniqueKey<PantriesRecord> KEY_PANTRIES_CODE = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_code"), new TableField[] { Pantries.PANTRIES.CODE }, true);
     public static final UniqueKey<PantriesRecord> KEY_PANTRIES_PRIMARY = Internal.createUniqueKey(Pantries.PANTRIES, DSL.name("KEY_pantries_PRIMARY"), new TableField[] { Pantries.PANTRIES.ID }, true);
     public static final UniqueKey<PantriesUsersRecord> KEY_PANTRIES_USERS_PRIMARY = Internal.createUniqueKey(PantriesUsers.PANTRIES_USERS, DSL.name("KEY_pantries_users_PRIMARY"), new TableField[] { PantriesUsers.PANTRIES_USERS.PANTRY_ID, PantriesUsers.PANTRIES_USERS.USER_ID }, true);
@@ -61,6 +67,8 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<LocalProductImagesRecord, ProductsRecord> LOCAL_PRODUCT_IMAGES_IBFK_1 = Internal.createForeignKey(LocalProductImages.LOCAL_PRODUCT_IMAGES, DSL.name("local_product_images_ibfk_1"), new TableField[] { LocalProductImages.LOCAL_PRODUCT_IMAGES.PRODUCT_ID }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
+    public static final ForeignKey<LocalProductPricesRecord, ProductsRecord> LOCAL_PRODUCT_PRICES_IBFK_1 = Internal.createForeignKey(LocalProductPrices.LOCAL_PRODUCT_PRICES, DSL.name("local_product_prices_ibfk_1"), new TableField[] { LocalProductPrices.LOCAL_PRODUCT_PRICES.PRODUCT_ID }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
     public static final ForeignKey<PantriesUsersRecord, PantriesRecord> PANTRIES_USERS_IBFK_1 = Internal.createForeignKey(PantriesUsers.PANTRIES_USERS, DSL.name("pantries_users_ibfk_1"), new TableField[] { PantriesUsers.PANTRIES_USERS.PANTRY_ID }, Keys.KEY_PANTRIES_PRIMARY, new TableField[] { Pantries.PANTRIES.ID }, true);
     public static final ForeignKey<PantriesUsersRecord, UsersRecord> PANTRIES_USERS_IBFK_2 = Internal.createForeignKey(PantriesUsers.PANTRIES_USERS, DSL.name("pantries_users_ibfk_2"), new TableField[] { PantriesUsers.PANTRIES_USERS.USER_ID }, Keys.KEY_USERS_PRIMARY, new TableField[] { Users.USERS.ID }, true);
     public static final ForeignKey<PantryProductsRecord, PantriesRecord> PANTRY_PRODUCTS_IBFK_1 = Internal.createForeignKey(PantryProducts.PANTRY_PRODUCTS, DSL.name("pantry_products_ibfk_1"), new TableField[] { PantryProducts.PANTRY_PRODUCTS.PANTRY_ID }, Keys.KEY_PANTRIES_PRIMARY, new TableField[] { Pantries.PANTRIES.ID }, true);

@@ -33,10 +33,9 @@ class ProductDao(
     fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
         return create.update(PRODUCTS)
                 .set(PRODUCTS.NAME, product.name)
-                .set(PRODUCTS.BARCODE, product.barcode)
                 .where(PRODUCTS.ID.eq(ULong.valueOf(product.id)))
                 .execute() == 1
-        }
+    }
 
     fun getProduct(id: Long, create: DSLContext = dslContext): Product? {
         return create.select()
