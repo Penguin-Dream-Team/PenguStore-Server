@@ -3,13 +3,11 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
-import store.pengu.server.db.pengustore.tables.Pantries
-import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.ShoppingList
 
 class ShopDao(
     conf: Configuration
@@ -61,10 +59,24 @@ class ShopDao(
         // TODO Trocar estes valores pa coisas q facam sentido
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(USERS.ID.eq(ULong.valueOf(user_id)))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude+0.5))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude-0.5))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude+0.5))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude-0.5))
+
+        var condition2 = DSL.noCondition() // Alternatively, use trueCondition()
+
+        var condition3 = DSL.noCondition() // Alternatively, use trueCondition()
+        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude + 0.5))
+        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude - 0.5))
+        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.5))
+        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.5))
+
+        var condition4 = DSL.noCondition() // Alternatively, use trueCondition()
+        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(latitude + 0.5))
+        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(latitude - 0.5))
+        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.5))
+        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.5))
+
+        condition2 = condition3.or(condition4)
+
+        condition = condition.and(condition2)
 
         return create.select()
             .from(USERS)
@@ -72,7 +84,8 @@ class ShopDao(
             .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
             .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
             .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
-            .join(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
+            .leftJoin(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
+            .leftJoin(LOCAL_PRODUCT_PRICES).on(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(PRODUCTS.ID))
             .where(condition)
             .fetch().map {
                 ProductInShoppingList(
@@ -82,7 +95,7 @@ class ShopDao(
                     barcode = it[PRODUCTS.BARCODE],
                     amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
                     amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
-                    price = it[CROWD_PRODUCT_PRICES.PRICE]
+                    price = price(it[PRODUCTS.BARCODE], it[CROWD_PRODUCT_PRICES.PRICE], it[LOCAL_PRODUCT_PRICES.PRICE])
                 )
             }
     }
@@ -154,4 +167,12 @@ class ShopDao(
             .execute() == 1
     }
 
+
+
+    fun price(barcode: String?, crowd_price: Double?, local_price:Double? ): Double {
+        return if (barcode != null)
+            crowd_price ?: throw NotFoundException("Crowd Price not found")
+        else
+            local_price ?: throw NotFoundException("Local Price not found")
+    }
 }

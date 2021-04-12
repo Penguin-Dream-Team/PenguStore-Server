@@ -9,6 +9,7 @@ import org.jooq.OrderField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
+import store.pengu.server.db.pengustore.tables.LocalProductImages;
 import store.pengu.server.db.pengustore.tables.PantriesUsers;
 import store.pengu.server.db.pengustore.tables.PantryProducts;
 import store.pengu.server.db.pengustore.tables.ProductsUsers;
@@ -25,6 +26,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index LOCAL_PRODUCT_IMAGES_PRODUCT_ID = Internal.createIndex(DSL.name("product_id"), LocalProductImages.LOCAL_PRODUCT_IMAGES, new OrderField[] { LocalProductImages.LOCAL_PRODUCT_IMAGES.PRODUCT_ID }, false);
     public static final Index PANTRY_PRODUCTS_PRODUCT_ID = Internal.createIndex(DSL.name("product_id"), PantryProducts.PANTRY_PRODUCTS, new OrderField[] { PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID }, false);
     public static final Index PANTRIES_USERS_USER_ID = Internal.createIndex(DSL.name("user_id"), PantriesUsers.PANTRIES_USERS, new OrderField[] { PantriesUsers.PANTRIES_USERS.USER_ID }, false);
     public static final Index PRODUCTS_USERS_USER_ID = Internal.createIndex(DSL.name("user_id"), ProductsUsers.PRODUCTS_USERS, new OrderField[] { ProductsUsers.PRODUCTS_USERS.USER_ID }, false);

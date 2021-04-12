@@ -55,6 +55,7 @@ fun Route.shopRoutes(
             val entries = withContext(Dispatchers.IO) {
                 val shoppingList = shopDao.getShoppingList(param.shopping_list_id) ?: throw NotFoundException("Shopping List with specified id not found")
                 shopDao.genShoppingList(userId, shoppingList.latitude, shoppingList.longitude)
+                //shopDao.price("ice4510", 1, shoppingList.latitude, shoppingList.longitude )
             }
 
             call.respond(mapOf("data" to entries))

@@ -17,7 +17,7 @@ VALUES
        ("Pantry4", "Pantry4", 159.95, 951.15),
        ("Pantry5", "Pantry5", 753.35, 357.75);
 
--- Products
+-- Products with barcode
 INSERT INTO PRODUCTS (barcode, name)
 VALUES
        ("ice4510", "Ice"),
@@ -26,12 +26,20 @@ VALUES
        ("seabird789987", "Seabird"),
        ("crab159357", "Crab");
 
+-- Products without barcode
+INSERT INTO PRODUCTS (name)
+VALUES
+       ("Batatas"),
+       ("Couves");
+
 -- Pantry_Products
 INSERT INTO PANTRY_PRODUCTS (pantry_id, product_id, have_qty, want_qty)
 VALUES
        (1, 1, 2, 3),
        (1, 2, 3, 3),
        (1, 3, 1, 5),
+       (1, 6, 1, 2),
+       (1, 7, 1, 3),
        (2, 1, 2, 6),
        (2, 2, 3, 5);
 
@@ -48,14 +56,19 @@ VALUES
 INSERT INTO CROWD_PRODUCT_PRICES (barcode, price, latitude, longitude)
 VALUES
        ("ice4510" , 1.69, 150.25, 150.25),
-       ("ice4510" , 5.26, 150.15, 150.15),
-       ("ice4510" , 6.79, 150.35, 150.35),
-       ("fish15468" , 1.13, 250.25, 250.25),
-       ("fish15468" , 4.27, 250.15, 250.35),
+       ("ice4510" , 5.26, 250.25, 250.25),
+       ("ice4510" , 6.79,  350.25, 350.25),
+       ("fish15468" , 1.13, 150.15, 150.15),
+       ("fish15468" , 4.27, 250.25, 250.35),
        ("shirmp456564" , 6.99, 350.25, 350.25),
        ("seabird789987" , 8.89, 450.25, 450.25),
        ("crab159357" , 10.56, 550.25, 550.25 );
 
+-- Local_Product_Prices
+INSERT INTO LOCAL_PRODUCT_PRICES (product_id, price, latitude, longitude)
+VALUES
+        (6, 15.23, 150.25, 150.25),
+        (7, 25.22, 250.25, 250.25);
 -- Shopping_List
 INSERT INTO SHOPPING_LIST (name, latitude, longitude)
 VALUES
@@ -90,4 +103,5 @@ VALUES
 
 
 -- Crowd_Product_Images
+-- Local_Product_Images
 -- TODO

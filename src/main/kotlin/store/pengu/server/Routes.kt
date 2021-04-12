@@ -95,6 +95,9 @@ object AddProduct
 @Location("/products/update")
 object UpdateProduct
 
+@Location("/product/addBarcode")
+object AddBarcode
+
 @Location("product/{id}")
 data class GetProduct(val id: Long)
 
