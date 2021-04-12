@@ -12,7 +12,6 @@ import store.pengu.server.*
 import store.pengu.server.application.features.guestOnly
 import store.pengu.server.application.user
 import store.pengu.server.daos.UserDao
-import store.pengu.server.data.Shopping_list
 import store.pengu.server.routes.requests.LoginRequest
 import store.pengu.server.routes.requests.RegisterRequest
 import store.pengu.server.routes.requests.UserUpdateRequest
@@ -55,7 +54,8 @@ fun Route.userRoutes(
     guestOnly {
         post<UserLogin> {
             val response = withContext(Dispatchers.IO) {
-                val loginRequest = call.receiveOrNull<LoginRequest>() ?: throw BadRequestException("Invalid login request")
+                val loginRequest =
+                    call.receiveOrNull<LoginRequest>() ?: throw BadRequestException("Invalid login request")
                 userDao.loginUser(loginRequest.username, loginRequest.password)
             }
             call.respond(response)
@@ -125,7 +125,7 @@ fun Route.userRoutes(
             call.respond(mapOf("data" to response))
         }
 
-        delete<UserDisconnectShoppingList> { param->
+        delete<UserDisconnectShoppingList> { param ->
             val userId = call.user.id.toLong()
             val response = withContext(Dispatchers.IO) {
                 try {
@@ -161,7 +161,7 @@ fun Route.userRoutes(
             call.respond(mapOf("data" to response))
         }
 
-        delete<UserDisconnectProduct> { param->
+        delete<UserDisconnectProduct> { param ->
             val userId = call.user.id.toLong()
             val response = withContext(Dispatchers.IO) {
                 try {
