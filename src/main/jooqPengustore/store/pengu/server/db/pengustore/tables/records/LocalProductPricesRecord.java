@@ -5,7 +5,7 @@ package store.pengu.server.db.pengustore.tables.records;
 
 
 import org.jooq.Field;
-import org.jooq.Record1;
+import org.jooq.Record3;
 import org.jooq.Record4;
 import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
@@ -87,8 +87,8 @@ public class LocalProductPricesRecord extends UpdatableRecordImpl<LocalProductPr
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<ULong> key() {
-        return (Record1) super.key();
+    public Record3<ULong, Double, Double> key() {
+        return (Record3) super.key();
     }
 
     // -------------------------------------------------------------------------

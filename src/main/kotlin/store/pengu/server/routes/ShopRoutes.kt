@@ -13,6 +13,7 @@ import store.pengu.server.application.user
 import store.pengu.server.daos.ShopDao
 import store.pengu.server.data.Crowd_Product_Price
 import store.pengu.server.data.Shopping_list
+import store.pengu.server.routes.requests.PriceRequest
 
 fun Route.shopRoutes(
     shopDao: ShopDao,
@@ -55,7 +56,6 @@ fun Route.shopRoutes(
             val entries = withContext(Dispatchers.IO) {
                 val shoppingList = shopDao.getShoppingList(param.shopping_list_id) ?: throw NotFoundException("Shopping List with specified id not found")
                 shopDao.genShoppingList(userId, shoppingList.latitude, shoppingList.longitude)
-                //shopDao.price("ice4510", 1, shoppingList.latitude, shoppingList.longitude )
             }
 
             call.respond(mapOf("data" to entries))
@@ -65,10 +65,10 @@ fun Route.shopRoutes(
         // Prices
 
         post<AddPrice> {
-            val crowd_Product_Price = call.receive<Crowd_Product_Price>()
+            val price_request = call.receive<PriceRequest>()
             val response = withContext(Dispatchers.IO) {
                 try {
-                    shopDao.addPrice(crowd_Product_Price)
+                    shopDao.addPrice(price_request)
                 }
                 catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
@@ -79,10 +79,10 @@ fun Route.shopRoutes(
 
 
         delete<DeletePrice> {
-            val crowd_Product_Price = call.receive<Crowd_Product_Price>()
+            val price_request = call.receive<PriceRequest>()
             val response = withContext(Dispatchers.IO) {
                 try {
-                    shopDao.deletePrice(crowd_Product_Price)
+                    shopDao.deletePrice(price_request)
                 }
                 catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)

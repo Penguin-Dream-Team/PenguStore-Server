@@ -8,6 +8,7 @@ import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.routes.requests.PriceRequest
 
 class ShopDao(
     conf: Configuration
@@ -102,38 +103,83 @@ class ShopDao(
 
     // Prices
 
-    fun addPrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
+    fun addPrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(crowd_Product_Price.barcode))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(crowd_Product_Price.latitude+1.0))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(crowd_Product_Price.latitude-1.0))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(crowd_Product_Price.longitude+1.0))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(crowd_Product_Price.longitude-1.0))
 
-        val sucess = create.update(CROWD_PRODUCT_PRICES)
-            .set(CROWD_PRODUCT_PRICES.PRICE, crowd_Product_Price.price)
-            .where(condition)
-            .execute() == 1
+        if (price_request.barcode != null) {
 
-        return if (sucess)
-            sucess
-        else
-            create.insertInto(CROWD_PRODUCT_PRICES,
-                CROWD_PRODUCT_PRICES.BARCODE, CROWD_PRODUCT_PRICES.PRICE, CROWD_PRODUCT_PRICES.LATITUDE, CROWD_PRODUCT_PRICES.LONGITUDE)
-                .values(crowd_Product_Price.barcode, crowd_Product_Price.price, crowd_Product_Price.latitude.toDouble(), crowd_Product_Price.longitude.toDouble())
+            condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+1.0))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-1.0))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+1.0))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-1.0))
+
+            val success = create.update(CROWD_PRODUCT_PRICES)
+                .set(CROWD_PRODUCT_PRICES.PRICE, price_request.price)
+                .where(condition)
                 .execute() == 1
+
+            return if (success)
+                success
+            else
+                create.insertInto(CROWD_PRODUCT_PRICES,
+                    CROWD_PRODUCT_PRICES.BARCODE, CROWD_PRODUCT_PRICES.PRICE, CROWD_PRODUCT_PRICES.LATITUDE, CROWD_PRODUCT_PRICES.LONGITUDE)
+                    .values(price_request.barcode, price_request.price, price_request.latitude.toDouble(), price_request.longitude.toDouble())
+                    .execute() == 1
+        }
+
+        else {
+            val productId = price_request.product_id ?: throw NotFoundException("Product Id not provided")
+            condition = condition.and(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+1.0))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-1.0))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+1.0))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-1.0))
+
+            val success = create.update(LOCAL_PRODUCT_PRICES)
+                .set(LOCAL_PRODUCT_PRICES.PRICE, price_request.price)
+                .where(condition)
+                .execute() == 1
+
+            return if (success)
+                success
+            else
+                create.insertInto(LOCAL_PRODUCT_PRICES,
+                    LOCAL_PRODUCT_PRICES.PRODUCT_ID, LOCAL_PRODUCT_PRICES.PRICE, LOCAL_PRODUCT_PRICES.LATITUDE, LOCAL_PRODUCT_PRICES.LONGITUDE)
+                    .values(ULong.valueOf(productId), price_request.price, price_request.latitude.toDouble(), price_request.longitude.toDouble())
+                    .execute() == 1
+        }
+
     }
 
 
-    fun deletePrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
+    fun deletePrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(crowd_Product_Price.barcode))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.eq(crowd_Product_Price.latitude.toDouble()))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.eq(crowd_Product_Price.longitude.toDouble()))
 
-        return create.delete(CROWD_PRODUCT_PRICES)
-            .where(condition)
-            .execute() == 1
+        if (price_request.barcode != null) {
+
+            condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+1.0))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-1.0))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+1.0))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-1.0))
+
+            return create.delete(CROWD_PRODUCT_PRICES)
+                .where(condition)
+                .execute() == 1
+        }
+        else {
+            val productId = price_request.product_id ?: throw NotFoundException("Product Id not provided")
+            condition = condition.and(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+1.0))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-1.0))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+1.0))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-1.0))
+
+            return create.delete(LOCAL_PRODUCT_PRICES)
+                .where(condition)
+                .execute() == 1
+        }
     }
 
     fun getShopPrices(latitude: Float, longitude: Float, create: DSLContext = dslContext): List<ProductInShop> {
@@ -164,8 +210,8 @@ class ShopDao(
 
     fun connectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         return create.insertInto(
-            Tables.SHOPPING_LIST_USERS,
-            Tables.SHOPPING_LIST_USERS.SHOPPING_LIST_ID, Tables.SHOPPING_LIST_USERS.USER_ID
+            SHOPPING_LIST_USERS,
+            SHOPPING_LIST_USERS.SHOPPING_LIST_ID, SHOPPING_LIST_USERS.USER_ID
         )
             .values(ULong.valueOf(shopping_list_id), ULong.valueOf(user_id))
             .execute() == 1
