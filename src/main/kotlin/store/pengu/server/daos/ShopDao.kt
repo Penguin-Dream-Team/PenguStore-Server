@@ -103,23 +103,27 @@ class ShopDao(
     // Prices
 
     fun addPrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(CROWD_PRODUCT_PRICES,
-            CROWD_PRODUCT_PRICES.BARCODE, CROWD_PRODUCT_PRICES.PRICE, CROWD_PRODUCT_PRICES.LATITUDE, CROWD_PRODUCT_PRICES.LONGITUDE)
-            .values(crowd_Product_Price.barcode, crowd_Product_Price.price, crowd_Product_Price.latitude.toDouble(), crowd_Product_Price.longitude.toDouble())
-            .execute() == 1
-    }
-
-    fun updatePrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(crowd_Product_Price.barcode))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.eq(crowd_Product_Price.latitude.toDouble()))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.eq(crowd_Product_Price.longitude.toDouble()))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(crowd_Product_Price.latitude+1.0))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(crowd_Product_Price.latitude-1.0))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(crowd_Product_Price.longitude+1.0))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(crowd_Product_Price.longitude-1.0))
 
-        return create.update(CROWD_PRODUCT_PRICES)
+        val sucess = create.update(CROWD_PRODUCT_PRICES)
             .set(CROWD_PRODUCT_PRICES.PRICE, crowd_Product_Price.price)
             .where(condition)
             .execute() == 1
+
+        return if (sucess)
+            sucess
+        else
+            create.insertInto(CROWD_PRODUCT_PRICES,
+                CROWD_PRODUCT_PRICES.BARCODE, CROWD_PRODUCT_PRICES.PRICE, CROWD_PRODUCT_PRICES.LATITUDE, CROWD_PRODUCT_PRICES.LONGITUDE)
+                .values(crowd_Product_Price.barcode, crowd_Product_Price.price, crowd_Product_Price.latitude.toDouble(), crowd_Product_Price.longitude.toDouble())
+                .execute() == 1
     }
+
 
     fun deletePrice(crowd_Product_Price: Crowd_Product_Price, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()

@@ -119,9 +119,6 @@ data class GenShoppingList(val shopping_list_id: Long)
 @Location("/prices/addPrice")
 object AddPrice
 
-@Location("/prices/updatePrice")
-object UpdatePrice
-
 @Location("/prices/deletePrice")
 object DeletePrice
 

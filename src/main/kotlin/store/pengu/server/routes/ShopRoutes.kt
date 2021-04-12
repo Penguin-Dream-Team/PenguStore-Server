@@ -77,18 +77,6 @@ fun Route.shopRoutes(
             call.respond(mapOf("data" to response))
         }
 
-        put<UpdatePrice> {
-            val crowd_Product_Price = call.receive<Crowd_Product_Price>()
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    shopDao.updatePrice(crowd_Product_Price)
-                }
-                catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
-            }
-            call.respond(mapOf("data" to response))
-        }
 
         delete<DeletePrice> {
             val crowd_Product_Price = call.receive<Crowd_Product_Price>()
