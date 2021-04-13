@@ -8,6 +8,7 @@ import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.routes.requests.CartRequest
 import store.pengu.server.routes.requests.PriceRequest
 
 class ShopDao(
@@ -60,8 +61,7 @@ class ShopDao(
         // TODO Trocar estes valores pa coisas q facam sentido
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(USERS.ID.eq(ULong.valueOf(user_id)))
-
-        var condition2 = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(PANTRY_PRODUCTS.WANT_QTY.ge(PANTRY_PRODUCTS.HAVE_QTY + 1))
 
         var condition3 = DSL.noCondition() // Alternatively, use trueCondition()
         condition3 = condition3.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude + 0.5))
@@ -75,7 +75,7 @@ class ShopDao(
         condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.5))
         condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.5))
 
-        condition2 = condition3.or(condition4)
+        var condition2 = condition3.or(condition4)
 
         condition = condition.and(condition2)
 
@@ -203,6 +203,27 @@ class ShopDao(
 
                 )
             }
+    }
+
+
+    // Carts
+
+    fun buyCart(cart: List<Cart>, create: DSLContext = dslContext): Boolean {
+        val itr = cart.iterator()
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        itr.forEach {
+            condition = DSL.noCondition()
+            condition = condition.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(it.product_id)))
+            condition = condition.and(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(it.pantry_id)))
+
+            create.update(PANTRY_PRODUCTS)
+                .set(PANTRY_PRODUCTS.HAVE_QTY, PANTRY_PRODUCTS.HAVE_QTY + it.amount)
+                .where(condition)
+                .execute()
+        }
+
+        return true
+
     }
 
 

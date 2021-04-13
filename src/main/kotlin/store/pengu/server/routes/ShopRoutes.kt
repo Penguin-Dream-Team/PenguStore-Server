@@ -13,6 +13,7 @@ import store.pengu.server.application.user
 import store.pengu.server.daos.ShopDao
 import store.pengu.server.data.Crowd_Product_Price
 import store.pengu.server.data.Shopping_list
+import store.pengu.server.routes.requests.CartRequest
 import store.pengu.server.routes.requests.PriceRequest
 
 fun Route.shopRoutes(
@@ -98,6 +99,19 @@ fun Route.shopRoutes(
 
             call.respond(mapOf("data" to entries))
         }
+
+
+        // Carts
+
+        post<BuyCart> {
+            val cart_request = call.receive<CartRequest>()
+            val entries = withContext(Dispatchers.IO) {
+                shopDao.buyCart(cart_request.requests)
+            }
+
+            call.respond(mapOf("data" to entries))
+        }
+
     }
 
 }
