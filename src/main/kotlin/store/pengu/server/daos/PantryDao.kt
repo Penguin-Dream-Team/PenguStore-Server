@@ -24,9 +24,9 @@ class PantryDao(
         val charPool = (('A'..'Z') + ('0'..'9')).toMutableList()
 
         val randomString = (1..8)
-            .map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
+            .map { kotlin.random.Random.nextInt(0, charPool.size) }
             .map(charPool::get)
-            .joinToString("");
+            .joinToString("")
 
         return create.insertInto(
             PANTRIES,

@@ -54,6 +54,9 @@ class UserDao(
             if (!password.isNullOrBlank()) {
                 set(USERS.PASSWORD, password)
             }
+            if (!email.isNullOrBlank()) {
+                set(USERS.EMAIL, email)
+            }
         }
             .where(USERS.ID.eq(id))
             .execute() == 1
