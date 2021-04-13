@@ -1,25 +1,25 @@
 package store.pengu.server.daos
 
-import org.jooq.*
+import org.jooq.Configuration
+import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.ForbiddenException
+import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.application.RefreshToken
-import store.pengu.server.data.*
+import store.pengu.server.data.Pantry
+import store.pengu.server.data.Product
+import store.pengu.server.data.Shopping_list
 import store.pengu.server.data.User
-import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
-import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantriesUsers.PANTRIES_USERS
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers.SHOPPING_LIST_USERS
 import store.pengu.server.db.pengustore.tables.Users.USERS
-import store.pengu.server.routes.requests.LoginRequest
 import store.pengu.server.routes.responses.GuestLoginResponse
 import store.pengu.server.utils.PasswordUtils
-import java.security.SecureRandom
 
 class UserDao(
     conf: Configuration
@@ -45,9 +45,9 @@ class UserDao(
         email: String?,
         password: String?,
         create: DSLContext = dslContext
-    ): Boolean {
+    ): User {
         val id = ULong.valueOf(userId.toLong())
-        return create.update(USERS).set(USERS.ID, id).apply {
+        val success = create.update(USERS).set(USERS.ID, id).apply {
             if (!username.isNullOrBlank()) {
                 set(USERS.USERNAME, username)
             }
@@ -60,6 +60,11 @@ class UserDao(
         }
             .where(USERS.ID.eq(id))
             .execute() == 1
+        if (success) {
+            return getProfile(userId)
+        } else {
+            throw InternalServerErrorException("Could not update user")
+        }
     }
 
     fun loginUser(username: String, password: String, create: DSLContext = dslContext): RefreshToken {

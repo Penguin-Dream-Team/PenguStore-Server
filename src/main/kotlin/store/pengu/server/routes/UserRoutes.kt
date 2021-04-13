@@ -33,7 +33,7 @@ fun Route.userRoutes(
 
         put<UserUpdate> {
             val userId = call.user.id
-            val success = withContext(Dispatchers.IO) {
+            val profile = withContext(Dispatchers.IO) {
                 val updateRequest =
                     call.receiveOrNull<UserUpdateRequest>() ?: throw BadRequestException("Invalid update request")
                 userDao.updateUser(
@@ -43,11 +43,15 @@ fun Route.userRoutes(
                     password = updateRequest.password
                 )
             }
-            if (success) {
-                call.respond(Response("Successfully updated user"))
-            } else {
-                call.respond(Response("Failed to update user"))
+            call.respond(profile)
+        }
+
+        get<UserProfile> {
+            val userId = call.user.id
+            val profile = withContext(Dispatchers.IO) {
+                userDao.getProfile(userId)
             }
+            call.respond(profile)
         }
     }
 

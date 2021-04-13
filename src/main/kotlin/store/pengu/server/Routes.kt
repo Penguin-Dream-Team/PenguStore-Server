@@ -11,6 +11,9 @@ object Dashboard
 @Location("/users/update")
 object UserUpdate
 
+@Location("/profile")
+object UserProfile
+
 
 // User Login
 
