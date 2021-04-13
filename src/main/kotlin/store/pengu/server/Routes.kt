@@ -125,3 +125,8 @@ object DeletePrice
 @Location("/prices/{latitude}/{longitude}")
 data class GetShopPrices(val latitude: Float, val longitude: Float)
 
+
+// Carts
+@Location("/cart")
+object BuyCart
+
