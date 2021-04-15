@@ -14,6 +14,10 @@ object UserUpdate
 @Location("/profile")
 object UserProfile
 
+@Location("/lists/find")
+data class LocationList(val latitude: Float, val longitude: Float)
+
+
 
 // User Login
 

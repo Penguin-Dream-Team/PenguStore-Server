@@ -3,13 +3,10 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
-import store.pengu.server.LeaveQueue
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
-import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.routes.requests.CartRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
 
@@ -20,13 +17,13 @@ class ShopDao(
 
     // Shopping Lists
 
-    fun addShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Shopping_list? {
+    fun addShoppingList(shopping_list: ShoppingList, create: DSLContext = dslContext): ShoppingList? {
         return create.insertInto(SHOPPING_LIST,
             SHOPPING_LIST.NAME, SHOPPING_LIST.LATITUDE, SHOPPING_LIST.LONGITUDE)
             .values(shopping_list.name, shopping_list.latitude.toDouble(), shopping_list.longitude.toDouble())
             .returningResult(SHOPPING_LIST.ID, SHOPPING_LIST.NAME, SHOPPING_LIST.LATITUDE, SHOPPING_LIST.LONGITUDE)
             .fetchOne()?.map {
-                Shopping_list(
+                ShoppingList(
                     id = it[SHOPPING_LIST.ID].toLong(),
                     name = it[SHOPPING_LIST.NAME],
                     latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),
@@ -35,7 +32,7 @@ class ShopDao(
             }
     }
 
-    fun updateShoppingList(shopping_list: Shopping_list, create: DSLContext = dslContext): Boolean {
+    fun updateShoppingList(shopping_list: ShoppingList, create: DSLContext = dslContext): Boolean {
         return create.update(SHOPPING_LIST)
             .set(SHOPPING_LIST.NAME, shopping_list.name)
             .set(SHOPPING_LIST.LATITUDE, shopping_list.latitude.toDouble())
@@ -45,12 +42,12 @@ class ShopDao(
     }
 
 
-    fun getShoppingList(id: Long, create: DSLContext = dslContext): Shopping_list? {
+    fun getShoppingList(id: Long, create: DSLContext = dslContext): ShoppingList? {
         return create.select()
             .from(SHOPPING_LIST)
             .where(SHOPPING_LIST.ID.eq(ULong.valueOf(id)))
             .fetchOne()?.map {
-                Shopping_list(
+                ShoppingList(
                     id = it[SHOPPING_LIST.ID].toLong(),
                     name = it[SHOPPING_LIST.NAME],
                     latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),

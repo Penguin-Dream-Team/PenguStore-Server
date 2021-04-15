@@ -10,10 +10,7 @@ import org.koin.core.qualifier.named
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import store.pengu.server.ApiModule.getDatabase
-import store.pengu.server.daos.PantryDao
-import store.pengu.server.daos.ProductDao
-import store.pengu.server.daos.ShopDao
-import store.pengu.server.daos.UserDao
+import store.pengu.server.daos.*
 
 object ApiModule {
 
@@ -41,6 +38,9 @@ object ApiModule {
         }
         single {
             ShopDao(getDatabase())
+        }
+        single {
+            ListDao(getDatabase())
         }
     }
 }

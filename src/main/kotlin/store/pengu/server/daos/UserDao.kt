@@ -10,7 +10,7 @@ import store.pengu.server.NotFoundException
 import store.pengu.server.application.RefreshToken
 import store.pengu.server.data.Pantry
 import store.pengu.server.data.Product
-import store.pengu.server.data.Shopping_list
+import store.pengu.server.data.ShoppingList
 import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
@@ -101,7 +101,7 @@ class UserDao(
                     name = it[PANTRIES.NAME],
                     latitude = it[PANTRIES.LATITUDE].toFloat(),
                     longitude = it[PANTRIES.LONGITUDE].toFloat(),
-                    product_num = 0
+                    productCount = 0
                 )
             }
     }
@@ -138,7 +138,7 @@ class UserDao(
                     name = it[PANTRIES.NAME],
                     latitude = it[PANTRIES.LATITUDE].toFloat(),
                     longitude = it[PANTRIES.LONGITUDE].toFloat(),
-                    product_num = create.fetchCount(
+                    productCount = create.fetchCount(
                         DSL.select()
                             .from(PANTRIES)
                             .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
@@ -170,13 +170,13 @@ class UserDao(
             .execute() == 1
     }
 
-    fun getShoppingLists(user_id: Long, create: DSLContext = dslContext): List<Shopping_list> {
+    fun getShoppingLists(user_id: Long, create: DSLContext = dslContext): List<ShoppingList> {
         return create.select()
             .from(SHOPPING_LIST_USERS)
             .join(SHOPPING_LIST).on(SHOPPING_LIST.ID.eq(SHOPPING_LIST_USERS.SHOPPING_LIST_ID))
             .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(user_id)))
             .fetch().map {
-                Shopping_list(
+                ShoppingList(
                     id = it[SHOPPING_LIST.ID].toLong(),
                     name = it[SHOPPING_LIST.NAME],
                     latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),

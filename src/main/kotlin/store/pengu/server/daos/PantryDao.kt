@@ -4,14 +4,11 @@ import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.data.*
-import store.pengu.server.db.pengustore.Tables
-import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantriesUsers
 import store.pengu.server.db.pengustore.tables.PantryProducts.PANTRY_PRODUCTS
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.routes.requests.PantryRequest
-import kotlin.reflect.jvm.internal.impl.resolve.constants.ULongValue
 
 class PantryDao(
     conf: Configuration
@@ -41,7 +38,7 @@ class PantryDao(
                     name = it[PANTRIES.NAME],
                     latitude = it[PANTRIES.LATITUDE].toFloat(),
                     longitude = it[PANTRIES.LONGITUDE].toFloat(),
-                    product_num = 0
+                    productCount = 0
                 )
             }
     }
@@ -67,7 +64,7 @@ class PantryDao(
                     name = it[PANTRIES.NAME],
                     latitude = it[PANTRIES.LATITUDE].toFloat(),
                     longitude = it[PANTRIES.LONGITUDE].toFloat(),
-                    product_num = create.fetchCount(
+                    productCount = create.fetchCount(
                         DSL.select()
                             .from(PANTRIES)
                             .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
