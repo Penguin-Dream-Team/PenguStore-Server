@@ -10,6 +10,7 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 
+import store.pengu.server.db.pengustore.tables.Beacons;
 import store.pengu.server.db.pengustore.tables.CrowdProductImages;
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
 import store.pengu.server.db.pengustore.tables.LocalProductImages;
@@ -22,6 +23,7 @@ import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Users;
+import store.pengu.server.db.pengustore.tables.records.BeaconsRecord;
 import store.pengu.server.db.pengustore.tables.records.CrowdProductImagesRecord;
 import store.pengu.server.db.pengustore.tables.records.CrowdProductPricesRecord;
 import store.pengu.server.db.pengustore.tables.records.LocalProductImagesRecord;
@@ -47,6 +49,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<BeaconsRecord> KEY_BEACONS_PRIMARY = Internal.createUniqueKey(Beacons.BEACONS, DSL.name("KEY_beacons_PRIMARY"), new TableField[] { Beacons.BEACONS.LATITUDE, Beacons.BEACONS.LONGITUDE }, true);
     public static final UniqueKey<CrowdProductImagesRecord> KEY_CROWD_PRODUCT_IMAGES_PRIMARY = Internal.createUniqueKey(CrowdProductImages.CROWD_PRODUCT_IMAGES, DSL.name("KEY_crowd_product_images_PRIMARY"), new TableField[] { CrowdProductImages.CROWD_PRODUCT_IMAGES.ID }, true);
     public static final UniqueKey<CrowdProductPricesRecord> KEY_CROWD_PRODUCT_PRICES_PRIMARY = Internal.createUniqueKey(CrowdProductPrices.CROWD_PRODUCT_PRICES, DSL.name("KEY_crowd_product_prices_PRIMARY"), new TableField[] { CrowdProductPrices.CROWD_PRODUCT_PRICES.BARCODE, CrowdProductPrices.CROWD_PRODUCT_PRICES.LATITUDE, CrowdProductPrices.CROWD_PRODUCT_PRICES.LONGITUDE }, true);
     public static final UniqueKey<LocalProductImagesRecord> KEY_LOCAL_PRODUCT_IMAGES_PRIMARY = Internal.createUniqueKey(LocalProductImages.LOCAL_PRODUCT_IMAGES, DSL.name("KEY_local_product_images_PRIMARY"), new TableField[] { LocalProductImages.LOCAL_PRODUCT_IMAGES.ID }, true);

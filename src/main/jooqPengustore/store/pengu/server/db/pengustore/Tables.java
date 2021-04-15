@@ -4,6 +4,7 @@
 package store.pengu.server.db.pengustore;
 
 
+import store.pengu.server.db.pengustore.tables.Beacons;
 import store.pengu.server.db.pengustore.tables.CrowdProductImages;
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
 import store.pengu.server.db.pengustore.tables.LocalProductImages;
@@ -15,6 +16,7 @@ import store.pengu.server.db.pengustore.tables.Products;
 import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
+import store.pengu.server.db.pengustore.tables.Stats;
 import store.pengu.server.db.pengustore.tables.Users;
 
 
@@ -23,6 +25,11 @@ import store.pengu.server.db.pengustore.tables.Users;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>beacons</code>.
+     */
+    public static final Beacons BEACONS = Beacons.BEACONS;
 
     /**
      * The table <code>crowd_product_images</code>.
@@ -78,6 +85,11 @@ public class Tables {
      * The table <code>shopping_list_users</code>.
      */
     public static final ShoppingListUsers SHOPPING_LIST_USERS = ShoppingListUsers.SHOPPING_LIST_USERS;
+
+    /**
+     * The table <code>stats</code>.
+     */
+    public static final Stats STATS = Stats.STATS;
 
     /**
      * The table <code>users</code>.

@@ -133,3 +133,12 @@ data class GetShopPrices(val latitude: Float, val longitude: Float)
 @Location("/cart")
 object BuyCart
 
+// Queue
+@Location("/queue/join/{latitude}/{longitude}/{num_items}")
+data class JoinQueue(val latitude: Float, val longitude: Float, val num_items: Int)
+
+@Location("/queue/leave")
+object LeaveQueue
+
+@Location("/queue/join/{latitude}/{longitude}")
+data class TimeQueue(val latitude: Float, val longitude: Float)

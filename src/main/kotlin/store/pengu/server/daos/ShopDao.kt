@@ -3,12 +3,14 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.LeaveQueue
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.routes.requests.CartRequest
+import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
 
 class ShopDao(
@@ -223,8 +225,60 @@ class ShopDao(
         }
 
         return true
+    }
+
+
+    // Queue
+
+    fun joinQueue(latitude: Float, longitude: Float, num_items: Int, create: DSLContext = dslContext): Boolean {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(BEACONS.LATITUDE.le(latitude+0.5))
+        condition = condition.and(BEACONS.LATITUDE.ge(latitude-0.5))
+        condition = condition.and(BEACONS.LONGITUDE.le(longitude+0.5))
+        condition = condition.and(BEACONS.LONGITUDE.ge(longitude-0.5))
+        val beacon = getBeacon(latitude, longitude)
+
+        var res = false
+
+        res = if (beacon != null) {
+            create.update(BEACONS)
+                .set(BEACONS.NUM_ITEMS, BEACONS.NUM_ITEMS + num_items)
+                .where(condition)
+                .execute() == 1
+        } else {
+            create.insertInto(BEACONS,
+                BEACONS.NUM_ITEMS, BEACONS.LATITUDE, BEACONS.LONGITUDE)
+                .values(num_items, latitude.toDouble(), longitude.toDouble())
+                .execute() == 1
+
+        }
+        return res
+    }
+
+    fun leaveQueue(leaveQueueRequest: LeaveQueueRequest, create: DSLContext = dslContext) : Boolean {
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(BEACONS.LATITUDE.le(leaveQueueRequest.latitude+0.5))
+        condition = condition.and(BEACONS.LATITUDE.ge(leaveQueueRequest.latitude-0.5))
+        condition = condition.and(BEACONS.LONGITUDE.le(leaveQueueRequest.longitude+0.5))
+        condition = condition.and(BEACONS.LONGITUDE.ge(leaveQueueRequest.longitude-0.5))
+
+        create.insertInto(STATS,
+            STATS.NUM_ITEMS, STATS.TIME, STATS.LATITUDE, STATS.LONGITUDE)
+            .values(leaveQueueRequest.num_items, leaveQueueRequest.time, leaveQueueRequest.latitude.toDouble(), leaveQueueRequest.longitude.toDouble())
+            .execute()
+
+        return create.update(BEACONS)
+            .set(BEACONS.NUM_ITEMS, BEACONS.NUM_ITEMS - leaveQueueRequest.num_items)
+            .where(condition)
+            .execute() == 1
+    }
+
+    /*
+    fun timeQueue(latitude: Float, longitude: Float, create: DSLContext = dslContext): Int {
 
     }
+
+     */
 
 
     // Aux
@@ -238,12 +292,30 @@ class ShopDao(
             .execute() == 1
     }
 
-
-
     fun price(barcode: String?, crowd_price: Double?, local_price:Double? ): Double {
         return if (barcode != null)
             crowd_price ?: throw NotFoundException("Crowd Price not found")
         else
             local_price ?: throw NotFoundException("Local Price not found")
+    }
+
+    fun getBeacon(latitude: Float, longitude: Float, create: DSLContext = dslContext): Beacon? {
+        // TODO Trocar estes valores pa coisas q facam sentido
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(BEACONS.LATITUDE.le(latitude+0.5))
+        condition = condition.and(BEACONS.LATITUDE.ge(latitude-0.5))
+        condition = condition.and(BEACONS.LONGITUDE.le(longitude+0.5))
+        condition = condition.and(BEACONS.LONGITUDE.ge(longitude-0.5))
+
+        return create.select()
+            .from(BEACONS)
+            .where(condition)
+            .fetchOne()?.map {
+                Beacon(
+                    num_items = it[BEACONS.NUM_ITEMS],
+                    latitude = it[BEACONS.LATITUDE].toFloat(),
+                    longitude = it[BEACONS.LONGITUDE].toFloat()
+                )
+            }
     }
 }

@@ -14,6 +14,7 @@ import store.pengu.server.daos.ShopDao
 import store.pengu.server.data.Crowd_Product_Price
 import store.pengu.server.data.Shopping_list
 import store.pengu.server.routes.requests.CartRequest
+import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
 
 fun Route.shopRoutes(
@@ -107,6 +108,26 @@ fun Route.shopRoutes(
             val cart_request = call.receive<CartRequest>()
             val entries = withContext(Dispatchers.IO) {
                 shopDao.buyCart(cart_request.requests)
+            }
+
+            call.respond(mapOf("data" to entries))
+        }
+
+
+        // Queue
+
+        post<JoinQueue> { param->
+            val entries = withContext(Dispatchers.IO) {
+                shopDao.joinQueue(param.latitude, param.longitude, param.num_items)
+            }
+
+            call.respond(mapOf("data" to entries))
+        }
+
+        post<LeaveQueue> {
+            val leaveQueueRequest = call.receive<LeaveQueueRequest>()
+            val entries = withContext(Dispatchers.IO) {
+                shopDao.leaveQueue(leaveQueueRequest)
             }
 
             call.respond(mapOf("data" to entries))

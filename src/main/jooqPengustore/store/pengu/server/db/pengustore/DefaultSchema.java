@@ -11,6 +11,7 @@ import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
+import store.pengu.server.db.pengustore.tables.Beacons;
 import store.pengu.server.db.pengustore.tables.CrowdProductImages;
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices;
 import store.pengu.server.db.pengustore.tables.LocalProductImages;
@@ -22,6 +23,7 @@ import store.pengu.server.db.pengustore.tables.Products;
 import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
+import store.pengu.server.db.pengustore.tables.Stats;
 import store.pengu.server.db.pengustore.tables.Users;
 
 
@@ -37,6 +39,11 @@ public class DefaultSchema extends SchemaImpl {
      * The reference instance of <code>DEFAULT_SCHEMA</code>
      */
     public static final DefaultSchema DEFAULT_SCHEMA = new DefaultSchema();
+
+    /**
+     * The table <code>beacons</code>.
+     */
+    public final Beacons BEACONS = Beacons.BEACONS;
 
     /**
      * The table <code>crowd_product_images</code>.
@@ -94,6 +101,11 @@ public class DefaultSchema extends SchemaImpl {
     public final ShoppingListUsers SHOPPING_LIST_USERS = ShoppingListUsers.SHOPPING_LIST_USERS;
 
     /**
+     * The table <code>stats</code>.
+     */
+    public final Stats STATS = Stats.STATS;
+
+    /**
      * The table <code>users</code>.
      */
     public final Users USERS = Users.USERS;
@@ -114,6 +126,7 @@ public class DefaultSchema extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
+            Beacons.BEACONS,
             CrowdProductImages.CROWD_PRODUCT_IMAGES,
             CrowdProductPrices.CROWD_PRODUCT_PRICES,
             LocalProductImages.LOCAL_PRODUCT_IMAGES,
@@ -125,6 +138,7 @@ public class DefaultSchema extends SchemaImpl {
             ProductsUsers.PRODUCTS_USERS,
             ShoppingList.SHOPPING_LIST,
             ShoppingListUsers.SHOPPING_LIST_USERS,
+            Stats.STATS,
             Users.USERS);
     }
 }
