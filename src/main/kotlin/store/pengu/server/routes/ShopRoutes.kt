@@ -11,8 +11,7 @@ import kotlinx.coroutines.withContext
 import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.ShopDao
-import store.pengu.server.data.Crowd_Product_Price
-import store.pengu.server.data.Shopping_list
+import store.pengu.server.data.ShoppingList
 import store.pengu.server.routes.requests.CartRequest
 import store.pengu.server.routes.requests.PriceRequest
 
@@ -26,7 +25,7 @@ fun Route.shopRoutes(
 
         post<AddShoppingList> {
             val userId = call.user.id.toLong()
-            val shopping_list = call.receive<Shopping_list>()
+            val shopping_list = call.receive<ShoppingList>()
             val response = withContext(Dispatchers.IO) {
                 try {
                     val shopping_list2 = shopDao.addShoppingList(shopping_list) ?: throw NotFoundException("Shopping List with specified id not found")
@@ -40,7 +39,7 @@ fun Route.shopRoutes(
         }
 
         put<UpdateShoppingList> {
-            val shopping_list = call.receive<Shopping_list>()
+            val shopping_list = call.receive<ShoppingList>()
             val response = withContext(Dispatchers.IO) {
                 try {
                     shopDao.updateShoppingList(shopping_list)
