@@ -10,6 +10,7 @@ import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
 
+
 class ShopDao(
     conf: Configuration
 ) {
@@ -270,12 +271,67 @@ class ShopDao(
             .execute() == 1
     }
 
-    /*
     fun timeQueue(latitude: Float, longitude: Float, create: DSLContext = dslContext): Int {
+        // TODO Trocar estes valores pa coisas q facam sentido
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(STATS.LATITUDE.le(latitude+0.5))
+        condition = condition.and(STATS.LATITUDE.ge(latitude-0.5))
+        condition = condition.and(STATS.LONGITUDE.le(longitude+0.5))
+        condition = condition.and(STATS.LONGITUDE.ge(longitude-0.5))
+
+        val points = create.select()
+            .from(STATS)
+            .where(condition)
+            .fetch().map {
+                Point(
+                    x = it[STATS.NUM_ITEMS],
+                    y = it[STATS.TIME]
+                )
+            }
+
+        condition = DSL.noCondition() // Alternatively, use trueCondition()
+        condition = condition.and(BEACONS.LATITUDE.le(latitude+0.5))
+        condition = condition.and(BEACONS.LATITUDE.ge(latitude-0.5))
+        condition = condition.and(BEACONS.LONGITUDE.le(longitude+0.5))
+        condition = condition.and(BEACONS.LONGITUDE.ge(longitude-0.5))
+
+        val num_items = create.select()
+            .from(BEACONS)
+            .where(condition)
+            .fetchOne()?.map {
+                it[BEACONS.NUM_ITEMS]
+            } ?: return 0
+
+        val n = points.size
+
+        // first pass
+        var sumx = 0.0
+        var sumy = 0.0
+        var sumx2 = 0.0
+        for (i in 0 until n) {
+            sumx += points[i].x
+            sumx2 += points[i].x * points[i].x
+            sumy += points[i].y
+        }
+        val xbar: Double = sumx / n
+        val ybar: Double = sumy / n
+
+        // second pass: compute summary statistics
+        var xxbar = 0.0
+        var yybar = 0.0
+        var xybar = 0.0
+        for (i in 0 until n) {
+            xxbar += (points[i].x - xbar) * (points[i].x - xbar)
+            yybar += (points[i].y - ybar) * (points[i].y - ybar)
+            xybar += (points[i].x - xbar) * (points[i].y - ybar)
+        }
+        var slope = xybar / xxbar
+        var intercept = ybar - slope * xbar
+
+        return (intercept + slope*num_items).toInt()
 
     }
 
-     */
 
 
     // Aux
@@ -315,4 +371,5 @@ class ShopDao(
                 )
             }
     }
+
 }

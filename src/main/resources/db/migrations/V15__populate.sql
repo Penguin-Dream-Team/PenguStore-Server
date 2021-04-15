@@ -101,6 +101,15 @@ VALUES
        (1, 2),
        (1, 3);
 
+-- Stats
+INSERT INTO STATS (num_items, time, latitude, longitude)
+VALUES
+       (10, 60, 150.25, 150.25),
+       (10, 80, 150.15, 150.15),
+       (15, 90, 150.35, 150.35),
+       (5, 40, 150.45, 150.45),
+       (10, 60, 250.25, 250.25),
+       (20, 90, 250.35, 250.35);
 
 -- Crowd_Product_Images
 -- Local_Product_Images

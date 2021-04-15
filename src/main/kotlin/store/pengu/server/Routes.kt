@@ -144,5 +144,5 @@ data class JoinQueue(val latitude: Float, val longitude: Float, val num_items: I
 @Location("/queue/leave")
 object LeaveQueue
 
-@Location("/queue/join/{latitude}/{longitude}")
+@Location("/queue/time/{latitude}/{longitude}")
 data class TimeQueue(val latitude: Float, val longitude: Float)
