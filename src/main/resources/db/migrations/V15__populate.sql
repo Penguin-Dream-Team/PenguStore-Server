@@ -30,7 +30,9 @@ VALUES
 INSERT INTO PRODUCTS (name)
 VALUES
        ("Batatas"),
-       ("Couves");
+       ("Couves"),
+       ("Cebolas"),
+       ("Pepinos");
 
 -- Pantry_Products
 INSERT INTO PANTRY_PRODUCTS (pantry_id, product_id, have_qty, want_qty)
@@ -62,7 +64,8 @@ VALUES
        ("fish15468" , 4.27, 250.25, 250.35),
        ("shirmp456564" , 6.99, 350.25, 350.25),
        ("seabird789987" , 8.89, 450.25, 450.25),
-       ("crab159357" , 10.56, 550.25, 550.25 );
+       ("crab159357" , 10.56, 550.25, 550.25 ),
+       ("cebolas123", 69.420, 150.25, 150.25);
 
 -- Local_Product_Prices
 INSERT INTO LOCAL_PRODUCT_PRICES (product_id, price, latitude, longitude)
@@ -90,7 +93,11 @@ VALUES
        (4, 1),
        (4, 4),
        (5, 1),
-       (5, 5);
+       (5, 5),
+       (6, 1),
+       (7, 1),
+       (8, 1),
+       (9, 1);
 
 -- Shopping_List_Users
 INSERT INTO SHOPPING_LIST_USERS (shopping_list_id,user_id)

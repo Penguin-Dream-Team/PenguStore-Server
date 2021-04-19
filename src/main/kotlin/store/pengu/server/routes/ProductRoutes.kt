@@ -49,6 +49,19 @@ fun Route.productRoutes(
             call.respond("data" to response)
         }
 
+        put<AddBarcode> {
+            val product = call.receive<Product>()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    productDao.addBarcode(product)
+                }
+                catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
+            }
+            call.respond("data" to response)
+        }
+
         get<GetProduct> { param ->
             val product = withContext(Dispatchers.IO) {
                 productDao.getProduct(param.id)
