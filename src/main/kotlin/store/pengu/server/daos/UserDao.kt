@@ -8,13 +8,12 @@ import store.pengu.server.ForbiddenException
 import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.application.RefreshToken
-import store.pengu.server.data.Pantry
-import store.pengu.server.data.Product
-import store.pengu.server.data.ShoppingList
-import store.pengu.server.data.User
+import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantriesUsers.PANTRIES_USERS
+import store.pengu.server.db.pengustore.tables.PantryProducts
+import store.pengu.server.db.pengustore.tables.Products
 import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers.SHOPPING_LIST_USERS
 import store.pengu.server.db.pengustore.tables.Users.USERS
@@ -107,12 +106,50 @@ class UserDao(
     }
 
     fun connectPantryToUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(
+        var res = create.insertInto(
             PANTRIES_USERS,
             PANTRIES_USERS.PANTRY_ID, PANTRIES_USERS.USER_ID
         )
             .values(ULong.valueOf(pantry_id), ULong.valueOf(user_id))
             .execute() == 1
+
+        var pantryProducts = create.select()
+            .from(PANTRIES)
+            .join(PantryProducts.PANTRY_PRODUCTS).on(PantryProducts.PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+            .join(Products.PRODUCTS).on(Products.PRODUCTS.ID.eq(PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID))
+            .where(PANTRIES.ID.eq((ULong.valueOf(pantry_id))))
+            .fetch().map {
+                ProductInPantry(
+                    productId = it[Products.PRODUCTS.ID].toLong(),
+                    pantryId = it[PANTRIES.ID].toLong(),
+                    barcode = it[Products.PRODUCTS.BARCODE],
+                    name = it[Products.PRODUCTS.NAME],
+                    amountAvailable = it[PantryProducts.PANTRY_PRODUCTS.HAVE_QTY],
+                    amountNeeded = it[PantryProducts.PANTRY_PRODUCTS.WANT_QTY]
+                )
+            }
+
+        var itr = pantryProducts.iterator()
+        var condition = DSL.noCondition() // Alternatively, use trueCondition()
+
+        itr.forEach {
+            condition = DSL.noCondition()
+            condition = condition.and(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(user_id)))
+            condition = condition.and(PRODUCTS_USERS.PRODUCT_ID.eq(ULong.valueOf(it.productId)))
+
+            var product = create.select()
+                .from(PRODUCTS_USERS)
+                .where(condition)
+                .fetchOne()?.map {
+                    it[PRODUCTS_USERS.PRODUCT_ID]
+                }
+
+            if (product == null) {
+                connectProduct(it.productId, user_id)
+            }
+        }
+
+        return res
     }
 
     fun disconnectPantryUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
