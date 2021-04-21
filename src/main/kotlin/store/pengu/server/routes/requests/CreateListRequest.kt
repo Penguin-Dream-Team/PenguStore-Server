@@ -1,9 +1,8 @@
 package store.pengu.server.routes.requests
 
-data class PantryRequest(
-    val id: Long,
-    val code: String,
+data class CreateListRequest(
     val name: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val color: String
 )

@@ -21,24 +21,28 @@ public class ShoppingList implements Serializable {
     private final String name;
     private final Double latitude;
     private final Double longitude;
+    private final String color;
 
     public ShoppingList(ShoppingList value) {
         this.id = value.id;
         this.name = value.name;
         this.latitude = value.latitude;
         this.longitude = value.longitude;
+        this.color = value.color;
     }
 
     public ShoppingList(
         ULong  id,
         String name,
         Double latitude,
-        Double longitude
+        Double longitude,
+        String color
     ) {
         this.id = id;
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.color = color;
     }
 
     /**
@@ -69,6 +73,13 @@ public class ShoppingList implements Serializable {
         return this.longitude;
     }
 
+    /**
+     * Getter for <code>shopping_list.color</code>.
+     */
+    public String getColor() {
+        return this.color;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ShoppingList (");
@@ -77,6 +88,7 @@ public class ShoppingList implements Serializable {
         sb.append(", ").append(name);
         sb.append(", ").append(latitude);
         sb.append(", ").append(longitude);
+        sb.append(", ").append(color);
 
         sb.append(")");
         return sb.toString();

@@ -13,8 +13,10 @@ import store.pengu.server.application.user
 import store.pengu.server.daos.ShopDao
 import store.pengu.server.data.ShoppingList
 import store.pengu.server.routes.requests.CartRequest
+import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
+import store.pengu.server.routes.responses.Response
 
 fun Route.shopRoutes(
     shopDao: ShopDao,
@@ -22,22 +24,24 @@ fun Route.shopRoutes(
 
     authenticate {
 
-        // Shopping Lists
-
-        post<AddShoppingList> {
-            val userId = call.user.id.toLong()
-            val shopping_list = call.receive<ShoppingList>()
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    val shopping_list2 = shopDao.addShoppingList(shopping_list) ?: throw NotFoundException("Shopping List with specified id not found")
-                    shopDao.connectShoppingList(shopping_list2.id, userId)
-                }
-                catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
+        get<ShoppingLists> {
+            val userId = call.user.id
+            val shops = withContext(Dispatchers.IO) {
+                shopDao.listShops(userId.toLong())
             }
-            call.respond(mapOf("data" to response))
+
+            call.respond(mapOf("data" to shops))
         }
+
+        post<ShoppingLists> {
+            val userId = call.user.id
+            val listRequest = call.receive<CreateListRequest>()
+            val shoppingList = withContext(Dispatchers.IO) {
+                shopDao.createShoppingList(listRequest, userId.toLong())
+            }
+            call.respond(Response(shoppingList))
+        }
+
 
         put<UpdateShoppingList> {
             val shopping_list = call.receive<ShoppingList>()

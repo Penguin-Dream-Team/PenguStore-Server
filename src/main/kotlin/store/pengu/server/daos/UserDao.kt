@@ -98,9 +98,11 @@ class UserDao(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
-                    productCount = 0
+                    latitude = it[PANTRIES.LATITUDE].toDouble(),
+                    longitude = it[PANTRIES.LONGITUDE].toDouble(),
+                    productCount = 0,
+                    color = it[PANTRIES.COLOR],
+                    false
                 )
             }
     }
@@ -173,14 +175,16 @@ class UserDao(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
+                    latitude = it[PANTRIES.LATITUDE].toDouble(),
+                    longitude = it[PANTRIES.LONGITUDE].toDouble(),
                     productCount = create.fetchCount(
                         DSL.select()
                             .from(PANTRIES)
                             .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
                             .where(PANTRIES.ID.eq(it[PANTRIES.ID]))
-                    )
+                    ),
+                    color = it[PANTRIES.COLOR],
+                    false
                 )
             }
     }
@@ -205,21 +209,6 @@ class UserDao(
         return create.delete(SHOPPING_LIST_USERS)
             .where(condition)
             .execute() == 1
-    }
-
-    fun getShoppingLists(user_id: Long, create: DSLContext = dslContext): List<ShoppingList> {
-        return create.select()
-            .from(SHOPPING_LIST_USERS)
-            .join(SHOPPING_LIST).on(SHOPPING_LIST.ID.eq(SHOPPING_LIST_USERS.SHOPPING_LIST_ID))
-            .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(user_id)))
-            .fetch().map {
-                ShoppingList(
-                    id = it[SHOPPING_LIST.ID].toLong(),
-                    name = it[SHOPPING_LIST.NAME],
-                    latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),
-                    longitude = it[SHOPPING_LIST.LONGITUDE].toFloat()
-                )
-            }
     }
 
 

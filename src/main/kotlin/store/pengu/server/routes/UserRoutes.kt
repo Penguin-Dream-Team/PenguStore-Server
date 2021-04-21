@@ -106,14 +106,6 @@ fun Route.userRoutes(
             call.respond(mapOf("data" to response))
         }
 
-        get<UserGetPantries> {
-            val userId = call.user.id.toLong()
-            val entries = withContext(Dispatchers.IO) {
-                userDao.getUserPantries(userId)
-            }
-            call.respond(mapOf("data" to entries))
-        }
-
 
         // User Shopping List
 
@@ -139,15 +131,6 @@ fun Route.userRoutes(
                 }
             }
             call.respond(mapOf("data" to response))
-        }
-
-        get<UserGetShoppingLists> {
-            val userId = call.user.id.toLong()
-            val entries = withContext(Dispatchers.IO) {
-                userDao.getShoppingLists(userId)
-            }
-
-            call.respond(mapOf("data" to entries))
         }
 
 

@@ -11,9 +11,10 @@ import kotlinx.coroutines.withContext
 import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.PantryDao
-import store.pengu.server.data.Pantry
 import store.pengu.server.data.Pantry_Product
+import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.PantryRequest
+import store.pengu.server.routes.responses.Response
 
 fun Route.pantryRoutes(
     pantryDao: PantryDao,
@@ -21,23 +22,26 @@ fun Route.pantryRoutes(
 
     authenticate {
 
-
-        // Pantries
-
-        post<AddPantry> {
-            val userId = call.user.id.toLong()
-            val pantry = call.receive<PantryRequest>()
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    val pantry2 = pantryDao.addPantry(pantry) ?: throw NotFoundException("Pantry with specified id not found")
-                    pantryDao.connectPantryToUser(pantry2.id, userId)
-                }
-                catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
+        get<PantryLists> {
+            val userId = call.user.id
+            val pantries = withContext(Dispatchers.IO) {
+                pantryDao.listPantries(userId.toLong())
             }
-            call.respond(mapOf("data" to response))
+            call.respond(Response(pantries))
         }
+
+        post<PantryLists> {
+            val userId = call.user.id
+            val listRequest = call.receive<CreateListRequest>()
+            val pantry = withContext(Dispatchers.IO) {
+                pantryDao.createPantry(listRequest, userId.toLong())
+            }
+            call.respond(Response(pantry))
+        }
+
+
+
+
 
         put<UpdatePantry> {
             val pantry = call.receive<PantryRequest>()

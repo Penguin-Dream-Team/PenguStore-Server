@@ -15,9 +15,14 @@ object UserUpdate
 object UserProfile
 
 @Location("/lists/find")
-data class LocationList(val latitude: Float, val longitude: Float)
+data class LocationList(val latitude: Double, val longitude: Double)
+
+@Location("/lists/pantries")
+object PantryLists
 
 
+@Location("/lists/shops")
+object ShoppingLists
 
 // User Login
 
@@ -39,9 +44,6 @@ data class UserConnectPantry(val code: String)
 @Location("/user/disconnectPantry/{pantry_id}")
 data class UserDisconnectPantry(val pantry_id: Long)
 
-@Location("/user/pantries")
-object UserGetPantries
-
 
 // User Shopping List
 
@@ -50,10 +52,6 @@ data class UserConnectShoppingList(val shopping_list_id: Long)
 
 @Location("/user/disconnectShoppingList/{shopping_list_id}")
 data class UserDisconnectShoppingList(val shopping_list_id: Long)
-
-@Location("/user/ShoppingLists")
-object UserGetShoppingLists
-
 
 // User Products
 
@@ -68,9 +66,6 @@ object UserGetProducts
 
 
 // Pantries
-
-@Location("/pantries/add")
-object AddPantry
 
 @Location("/pantries/update")
 object UpdatePantry
@@ -111,9 +106,6 @@ data class GetProduct(val id: Long)
 
 // Shopping Lists
 
-@Location("/shoppingLists/add")
-object  AddShoppingList
-
 @Location("/shoppingLists/update")
 object  UpdateShoppingList
 
@@ -130,7 +122,7 @@ object AddPrice
 object DeletePrice
 
 @Location("/prices/{latitude}/{longitude}")
-data class GetShopPrices(val latitude: Float, val longitude: Float)
+data class GetShopPrices(val latitude: Double, val longitude: Double)
 
 
 // Carts
@@ -139,10 +131,10 @@ object BuyCart
 
 // Queue
 @Location("/queue/join/{latitude}/{longitude}/{num_items}")
-data class JoinQueue(val latitude: Float, val longitude: Float, val num_items: Int)
+data class JoinQueue(val latitude: Double, val longitude: Double, val num_items: Int)
 
 @Location("/queue/leave")
 object LeaveQueue
 
 @Location("/queue/time/{latitude}/{longitude}")
-data class TimeQueue(val latitude: Float, val longitude: Float)
+data class TimeQueue(val latitude: Double, val longitude: Double)

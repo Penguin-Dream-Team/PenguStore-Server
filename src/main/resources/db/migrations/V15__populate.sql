@@ -5,17 +5,16 @@ VALUES
        ("Pengu", "Pengu@pengu.com", "pengu"),
        ("Pinguim3", "Pinguim3@pengu.com", "pengu"),
        ("Pinguim4", "Pinguim4@pengu.com", "pengu"),
-       ("Pinguim5", "Pinguim5@pengu.com", "pengu"),
-       ("", "", "");
+       ("Pinguim5", "Pinguim5@pengu.com", "pengu");
 
 -- Pantries
-INSERT INTO PANTRIES (code, name, latitude, longitude)
+INSERT INTO PANTRIES (code, name, latitude, longitude, color)
 VALUES
-       ("OGPANTRY", "OGPantry", 125.12, 321.32),
-       ("TuxPantry", "TuxPantry", 456.45, 654.65),
-       ("PenguPANTRY", "PenguPantry", 789.98, 987.87),
-       ("Pantry4", "Pantry4", 159.95, 951.15),
-       ("Pantry5", "Pantry5", 753.35, 357.75);
+       ("OGPANTRY", "OGPantry", 25.12, 21.32, "231 76 60"),
+       ("TuxPantry", "TuxPantry", 56.45, 54.65, "46 204 112"),
+       ("PenguPANTRY", "PenguPantry", 89.98, 87.87, "156 89 182"),
+       ("Pantry4", "Pantry4", 59.95, 51.15, "231 76 60"),
+       ("Pantry5", "Pantry5", 53.35, 57.75, "156 89 182");
 
 -- Products with barcode
 INSERT INTO PRODUCTS (barcode, name)
@@ -57,27 +56,26 @@ VALUES
 -- Crowd_Product_Prices
 INSERT INTO CROWD_PRODUCT_PRICES (barcode, price, latitude, longitude)
 VALUES
-       ("ice4510" , 1.69, 150.25, 150.25),
-       ("ice4510" , 5.26, 250.25, 250.25),
-       ("ice4510" , 6.79,  350.25, 350.25),
-       ("fish15468" , 1.13, 150.15, 150.15),
-       ("fish15468" , 4.27, 250.25, 250.35),
-       ("shirmp456564" , 6.99, 350.25, 350.25),
-       ("seabird789987" , 8.89, 450.25, 450.25),
-       ("crab159357" , 10.56, 550.25, 550.25 ),
-       ("cebolas123", 69.420, 150.25, 150.25);
+       ("ice4510" , 1.69, 50.25, 150.25),
+       ("ice4510" , 5.26, 50.25, 50.25),
+       ("fish15468" , 1.13, 50.15, 50.15),
+       ("fish15468" , 4.27, 50.25, 50.35),
+       ("shirmp456564" , 6.99, 50.25, 50.25),
+       ("seabird789987" , 8.89, 50.25, 50.25),
+       ("crab159357" , 10.56, 50.25, 50.25 ),
+       ("cebolas123", 69.420, 50.25, 150.25);
 
 -- Local_Product_Prices
 INSERT INTO LOCAL_PRODUCT_PRICES (product_id, price, latitude, longitude)
 VALUES
-        (6, 15.23, 150.25, 150.25),
-        (7, 25.22, 250.25, 250.25);
+        (6, 15.23, 50.25, 150.25),
+        (7, 25.22, 50.25, 50.25);
 -- Shopping_List
-INSERT INTO SHOPPING_LIST (name, latitude, longitude)
+INSERT INTO SHOPPING_LIST (name, latitude, longitude, color)
 VALUES
-       ("OG Shopping List", 150.25, 150.25),
-       ("PenguSuper Shopping List", 250.25, 250.25),
-       ("TuxMarket Shopping List", 350.25, 350.25);
+       ("OG Shopping List", 50.25, 150.25, "230 125 34"),
+       ("PenguSuper Shopping List", 50.25, 50.25, "46 204 112"),
+       ("TuxMarket Shopping List", 50.25, 50.25, "189 195 199");
 
 -- Product_Users
 INSERT INTO PRODUCTS_USERS(product_id, user_id)
@@ -111,12 +109,12 @@ VALUES
 -- Stats
 INSERT INTO STATS (num_items, time, latitude, longitude)
 VALUES
-       (10, 60, 150.25, 150.25),
-       (10, 80, 150.15, 150.15),
-       (15, 90, 150.35, 150.35),
-       (5, 40, 150.45, 150.45),
-       (10, 60, 250.25, 250.25),
-       (20, 90, 250.35, 250.35);
+       (10, 60, 50.25, 150.25),
+       (10, 80, 50.15, 150.15),
+       (15, 90, 50.35, 150.35),
+       (5, 40, 50.45, 150.45),
+       (10, 60, 50.25, 50.25),
+       (20, 90, 50.35, 50.35);
 
 -- Crowd_Product_Images
 -- Local_Product_Images

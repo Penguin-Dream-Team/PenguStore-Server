@@ -61,12 +61,12 @@ public class LocalProductPrices extends TableImpl<LocalProductPricesRecord> {
     /**
      * The column <code>local_product_prices.latitude</code>.
      */
-    public final TableField<LocalProductPricesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<LocalProductPricesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>local_product_prices.longitude</code>.
      */
-    public final TableField<LocalProductPricesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<LocalProductPricesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     private LocalProductPrices(Name alias, Table<LocalProductPricesRecord> aliased) {
         this(alias, aliased, null);

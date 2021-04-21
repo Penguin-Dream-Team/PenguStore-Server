@@ -12,7 +12,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row5;
+import org.jooq.Row6;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -67,12 +67,17 @@ public class Pantries extends TableImpl<PantriesRecord> {
     /**
      * The column <code>pantries.latitude</code>.
      */
-    public final TableField<PantriesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<PantriesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>pantries.longitude</code>.
      */
-    public final TableField<PantriesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<PantriesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
+
+    /**
+     * The column <code>pantries.color</code>.
+     */
+    public final TableField<PantriesRecord, String> COLOR = createField(DSL.name("color"), SQLDataType.VARCHAR(12).nullable(false), this, "");
 
     private Pantries(Name alias, Table<PantriesRecord> aliased) {
         this(alias, aliased, null);
@@ -154,11 +159,11 @@ public class Pantries extends TableImpl<PantriesRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row5 type methods
+    // Row6 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<ULong, String, String, Double, Double> fieldsRow() {
-        return (Row5) super.fieldsRow();
+    public Row6<ULong, String, String, Double, Double, String> fieldsRow() {
+        return (Row6) super.fieldsRow();
     }
 }

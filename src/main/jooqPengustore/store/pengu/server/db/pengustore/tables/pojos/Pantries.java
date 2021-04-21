@@ -22,6 +22,7 @@ public class Pantries implements Serializable {
     private final String name;
     private final Double latitude;
     private final Double longitude;
+    private final String color;
 
     public Pantries(Pantries value) {
         this.id = value.id;
@@ -29,6 +30,7 @@ public class Pantries implements Serializable {
         this.name = value.name;
         this.latitude = value.latitude;
         this.longitude = value.longitude;
+        this.color = value.color;
     }
 
     public Pantries(
@@ -36,13 +38,15 @@ public class Pantries implements Serializable {
         String code,
         String name,
         Double latitude,
-        Double longitude
+        Double longitude,
+        String color
     ) {
         this.id = id;
         this.code = code;
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.color = color;
     }
 
     /**
@@ -80,6 +84,13 @@ public class Pantries implements Serializable {
         return this.longitude;
     }
 
+    /**
+     * Getter for <code>pantries.color</code>.
+     */
+    public String getColor() {
+        return this.color;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Pantries (");
@@ -89,6 +100,7 @@ public class Pantries implements Serializable {
         sb.append(", ").append(name);
         sb.append(", ").append(latitude);
         sb.append(", ").append(longitude);
+        sb.append(", ").append(color);
 
         sb.append(")");
         return sb.toString();
