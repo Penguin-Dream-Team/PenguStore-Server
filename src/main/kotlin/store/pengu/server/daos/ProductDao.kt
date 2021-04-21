@@ -79,7 +79,7 @@ class ProductDao(
                 create.insertInto(
                     Tables.CROWD_PRODUCT_PRICES,
                     Tables.CROWD_PRODUCT_PRICES.BARCODE, Tables.CROWD_PRODUCT_PRICES.PRICE, Tables.CROWD_PRODUCT_PRICES.LATITUDE, Tables.CROWD_PRODUCT_PRICES.LONGITUDE)
-                    .values(product.barcode, it.price, it.latitude.toDouble(), it.longitude.toDouble())
+                    .values(product.barcode, it.price, it.latitude, it.longitude)
                     .execute() == 1
             }
         }

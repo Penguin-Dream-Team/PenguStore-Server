@@ -98,8 +98,8 @@ class UserDao(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toDouble(),
-                    longitude = it[PANTRIES.LONGITUDE].toDouble(),
+                    latitude = it[PANTRIES.LATITUDE],
+                    longitude = it[PANTRIES.LONGITUDE],
                     productCount = 0,
                     color = it[PANTRIES.COLOR],
                     false
@@ -175,8 +175,8 @@ class UserDao(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toDouble(),
-                    longitude = it[PANTRIES.LONGITUDE].toDouble(),
+                    latitude = it[PANTRIES.LATITUDE],
+                    longitude = it[PANTRIES.LONGITUDE],
                     productCount = create.fetchCount(
                         DSL.select()
                             .from(PANTRIES)
