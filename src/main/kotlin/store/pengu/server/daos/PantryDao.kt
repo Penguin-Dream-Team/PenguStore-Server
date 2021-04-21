@@ -29,15 +29,15 @@ class PantryDao(
             PANTRIES,
             PANTRIES.CODE, PANTRIES.NAME, PANTRIES.LATITUDE, PANTRIES.LONGITUDE
         )
-            .values(randomString, pantry.name, pantry.latitude.toDouble(), pantry.longitude.toDouble())
+            .values(randomString, pantry.name, pantry.latitude, pantry.longitude)
             .returningResult(PANTRIES.ID, PANTRIES.CODE, PANTRIES.NAME, PANTRIES.LATITUDE, PANTRIES.LONGITUDE)
             .fetchOne()?.map {
                 Pantry(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
+                    latitude = it[PANTRIES.LATITUDE],
+                    longitude = it[PANTRIES.LONGITUDE],
                     productCount = 0
                 )
             }
@@ -47,8 +47,8 @@ class PantryDao(
         return create.update(PANTRIES)
             .set(PANTRIES.CODE, pantry.code)
             .set(PANTRIES.NAME, pantry.name)
-            .set(PANTRIES.LATITUDE, pantry.latitude.toDouble())
-            .set(PANTRIES.LONGITUDE, pantry.longitude.toDouble())
+            .set(PANTRIES.LATITUDE, pantry.latitude)
+            .set(PANTRIES.LONGITUDE, pantry.longitude)
             .where(PANTRIES.ID.eq(ULong.valueOf(pantry.id)))
             .execute() == 1
     }
@@ -62,8 +62,8 @@ class PantryDao(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
+                    latitude = it[PANTRIES.LATITUDE],
+                    longitude = it[PANTRIES.LONGITUDE],
                     productCount = create.fetchCount(
                         DSL.select()
                             .from(PANTRIES)

@@ -42,7 +42,7 @@ public class Tables {
     public static final CrowdProductPrices CROWD_PRODUCT_PRICES = CrowdProductPrices.CROWD_PRODUCT_PRICES;
 
     /**
-     * The table <code>STATS</code>.
+     * The table <code>local_product_images</code>.
      */
     public static final LocalProductImages LOCAL_PRODUCT_IMAGES = LocalProductImages.LOCAL_PRODUCT_IMAGES;
 

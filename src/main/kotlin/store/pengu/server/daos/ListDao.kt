@@ -17,8 +17,8 @@ class ListDao(
 
     fun findNearbyList(
         userId: Long,
-        latitude: Float,
-        longitude: Float,
+        latitude: Double,
+        longitude: Double,
         create: DSLContext = dslContext
     ): Pair<UserListType, UserList> {
         return create.select()
@@ -30,8 +30,8 @@ class ListDao(
                 UserListType.SHOPPING_LIST to ShoppingList(
                     id = it[SHOPPING_LIST.ID].toLong(),
                     name = it[SHOPPING_LIST.NAME],
-                    latitude = it[SHOPPING_LIST.LATITUDE].toFloat(),
-                    longitude = it[SHOPPING_LIST.LONGITUDE].toFloat()
+                    latitude = it[SHOPPING_LIST.LATITUDE],
+                    longitude = it[SHOPPING_LIST.LONGITUDE]
                 )
             } ?: create.select()
             .from(USERS)
@@ -44,8 +44,8 @@ class ListDao(
                     id = it[PANTRIES.ID].toLong(),
                     code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE].toFloat(),
-                    longitude = it[PANTRIES.LONGITUDE].toFloat(),
+                    latitude = it[PANTRIES.LATITUDE],
+                    longitude = it[PANTRIES.LONGITUDE],
                     productCount = create.fetchCount(
                         DSL.select()
                             .from(PANTRIES)
@@ -58,9 +58,9 @@ class ListDao(
 
     fun <R : Record> getNearbyCondition(
         latitudeColumn: TableField<R, Double>,
-        latitude: Float,
+        latitude: Double,
         longitudeColumn: TableField<R, Double>,
-        longitude: Float,
+        longitude: Double,
         offset: Double = 0.5
     ): Condition {
         var condition = DSL.noCondition()

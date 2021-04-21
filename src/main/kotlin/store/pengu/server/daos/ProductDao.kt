@@ -52,8 +52,8 @@ class ProductDao(
                 Local_Product_Price(
                     product_id = it[LOCAL_PRODUCT_PRICES.PRODUCT_ID].toLong(),
                     price = it[LOCAL_PRODUCT_PRICES.PRICE],
-                    latitude = it[LOCAL_PRODUCT_PRICES.LATITUDE].toFloat(),
-                    longitude = it[LOCAL_PRODUCT_PRICES.LONGITUDE].toFloat()
+                    latitude = it[LOCAL_PRODUCT_PRICES.LATITUDE],
+                    longitude = it[LOCAL_PRODUCT_PRICES.LONGITUDE]
                 )
             }
 
@@ -63,10 +63,10 @@ class ProductDao(
         itr.forEach {
             condition = DSL.noCondition()
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(product.barcode))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(it.latitude+0.5))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(it.latitude-0.5))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(it.longitude+0.5))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(it.longitude-0.5))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(it.latitude+0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(it.latitude-0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(it.longitude+0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(it.longitude-0.0001))
 
             val crowd_price = create.select()
                 .from(CROWD_PRODUCT_PRICES)
@@ -79,7 +79,7 @@ class ProductDao(
                 create.insertInto(
                     Tables.CROWD_PRODUCT_PRICES,
                     Tables.CROWD_PRODUCT_PRICES.BARCODE, Tables.CROWD_PRODUCT_PRICES.PRICE, Tables.CROWD_PRODUCT_PRICES.LATITUDE, Tables.CROWD_PRODUCT_PRICES.LONGITUDE)
-                    .values(product.barcode, it.price, it.latitude.toDouble(), it.longitude.toDouble())
+                    .values(product.barcode, it.price, it.latitude, it.longitude)
                     .execute() == 1
             }
         }

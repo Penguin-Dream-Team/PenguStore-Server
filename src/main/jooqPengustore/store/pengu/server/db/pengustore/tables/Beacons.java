@@ -55,12 +55,12 @@ public class Beacons extends TableImpl<BeaconsRecord> {
     /**
      * The column <code>beacons.latitude</code>.
      */
-    public final TableField<BeaconsRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<BeaconsRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>beacons.longitude</code>.
      */
-    public final TableField<BeaconsRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<BeaconsRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     private Beacons(Name alias, Table<BeaconsRecord> aliased) {
         this(alias, aliased, null);

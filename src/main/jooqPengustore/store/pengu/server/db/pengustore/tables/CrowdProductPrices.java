@@ -60,12 +60,12 @@ public class CrowdProductPrices extends TableImpl<CrowdProductPricesRecord> {
     /**
      * The column <code>crowd_product_prices.latitude</code>.
      */
-    public final TableField<CrowdProductPricesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<CrowdProductPricesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>crowd_product_prices.longitude</code>.
      */
-    public final TableField<CrowdProductPricesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<CrowdProductPricesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     private CrowdProductPrices(Name alias, Table<CrowdProductPricesRecord> aliased) {
         this(alias, aliased, null);

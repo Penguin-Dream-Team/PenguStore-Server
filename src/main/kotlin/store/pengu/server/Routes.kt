@@ -15,7 +15,7 @@ object UserUpdate
 object UserProfile
 
 @Location("/lists/find")
-data class LocationList(val latitude: Float, val longitude: Float)
+data class LocationList(val latitude: Double, val longitude: Double)
 
 
 
@@ -130,7 +130,7 @@ object AddPrice
 object DeletePrice
 
 @Location("/prices/{latitude}/{longitude}")
-data class GetShopPrices(val latitude: Float, val longitude: Float)
+data class GetShopPrices(val latitude: Double, val longitude: Double)
 
 
 // Carts
@@ -139,10 +139,10 @@ object BuyCart
 
 // Queue
 @Location("/queue/join/{latitude}/{longitude}/{num_items}")
-data class JoinQueue(val latitude: Float, val longitude: Float, val num_items: Int)
+data class JoinQueue(val latitude: Double, val longitude: Double, val num_items: Int)
 
 @Location("/queue/leave")
 object LeaveQueue
 
 @Location("/queue/time/{latitude}/{longitude}")
-data class TimeQueue(val latitude: Float, val longitude: Float)
+data class TimeQueue(val latitude: Double, val longitude: Double)

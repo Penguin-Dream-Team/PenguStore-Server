@@ -1,6 +1,6 @@
 create table beacons (
       num_items INT,
-      latitude FLOAT NOT NULL,
-      longitude FLOAT NOT NULL,
+      latitude DOUBLE NOT NULL,
+      longitude DOUBLE NOT NULL,
       PRIMARY KEY (latitude, longitude)
 );

@@ -62,12 +62,12 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
     /**
      * The column <code>shopping_list.latitude</code>.
      */
-    public final TableField<ShoppingListRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<ShoppingListRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>shopping_list.longitude</code>.
      */
-    public final TableField<ShoppingListRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<ShoppingListRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     private ShoppingList(Name alias, Table<ShoppingListRecord> aliased) {
         this(alias, aliased, null);

@@ -55,12 +55,12 @@ public class Stats extends TableImpl<StatsRecord> {
     /**
      * The column <code>stats.latitude</code>.
      */
-    public final TableField<StatsRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<StatsRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>stats.longitude</code>.
      */
-    public final TableField<StatsRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<StatsRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     private Stats(Name alias, Table<StatsRecord> aliased) {
         this(alias, aliased, null);

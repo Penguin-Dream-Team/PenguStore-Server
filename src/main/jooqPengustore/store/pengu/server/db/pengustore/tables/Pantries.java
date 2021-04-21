@@ -67,12 +67,12 @@ public class Pantries extends TableImpl<PantriesRecord> {
     /**
      * The column <code>pantries.latitude</code>.
      */
-    public final TableField<PantriesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<PantriesRecord, Double> LATITUDE = createField(DSL.name("latitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     /**
      * The column <code>pantries.longitude</code>.
      */
-    public final TableField<PantriesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.FLOAT.nullable(false), this, "");
+    public final TableField<PantriesRecord, Double> LONGITUDE = createField(DSL.name("longitude"), SQLDataType.DOUBLE.nullable(false), this, "");
 
     private Pantries(Name alias, Table<PantriesRecord> aliased) {
         this(alias, aliased, null);

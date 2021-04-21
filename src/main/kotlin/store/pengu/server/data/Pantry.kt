@@ -4,7 +4,7 @@ data class Pantry(
     override val id: Long,
     val code: String,
     override val name: String,
-    override val latitude: Float,
-    override val longitude: Float,
+    override val latitude: Double,
+    override val longitude: Double,
     val productCount: Int
 ) : UserList(id, name, latitude, longitude)
