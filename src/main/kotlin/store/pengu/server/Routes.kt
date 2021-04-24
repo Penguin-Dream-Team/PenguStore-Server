@@ -125,11 +125,29 @@ object DeletePrice
 data class GetShopPrices(val latitude: Double, val longitude: Double)
 
 
+// Images
+
+@Location("/images/addImage")
+object AddImage
+
+@Location("/images/deleteImage")
+object DeleteImage
+
+@Location("/images/updateImage")
+object UpdateImage
+
+@Location("/images/get")
+object GetProductImages
+
+
+
 // Carts
+
 @Location("/cart")
 object BuyCart
 
 // Queue
+
 @Location("/queue/join/{latitude}/{longitude}/{num_items}")
 data class JoinQueue(val latitude: Double, val longitude: Double, val num_items: Int)
 
