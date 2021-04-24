@@ -133,12 +133,8 @@ object AddImage
 @Location("/images/deleteImage")
 object DeleteImage
 
-@Location("/images/updateImage")
-object UpdateImage
-
-@Location("/images/get")
+@Location("/image")
 object GetProductImages
-
 
 
 // Carts

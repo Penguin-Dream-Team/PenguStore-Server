@@ -121,6 +121,19 @@ fun Route.productRoutes(
             call.respond("data" to response)
 
         }
+
+        delete<DeleteImage> {
+            val imageRequest = call.receive<ImageRequest>()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    productDao.deleteImage(imageRequest)
+                }
+                catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
+            }
+            call.respond("data" to response)
+        }
     }
 
 }

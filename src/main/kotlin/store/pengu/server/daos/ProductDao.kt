@@ -124,8 +124,7 @@ class ProductDao(
                 .values(imageRequest.barcode, imageRequest.image_url)
                 .execute() == 1
 
-        }
-        else {
+        } else {
             return create.insertInto(
                 LOCAL_PRODUCT_IMAGES,
                 LOCAL_PRODUCT_IMAGES.PRODUCT_ID, LOCAL_PRODUCT_IMAGES.IMAGE_URL
@@ -135,6 +134,17 @@ class ProductDao(
         }
     }
 
+    fun deleteImage(imageRequest: ImageRequest, create: DSLContext = dslContext): Boolean {
+        if (imageRequest.barcode != null) {
+            return create.delete(CROWD_PRODUCT_IMAGES)
+                .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(imageRequest.barcode))
+                .execute() == 1
 
+        } else {
+            return create.delete(LOCAL_PRODUCT_IMAGES)
+                .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(imageRequest.product_id?.let { ULong.valueOf(it) }))
+                .execute() == 1
+        }
+    }
 
 }
