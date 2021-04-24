@@ -6,10 +6,13 @@ import org.jooq.types.ULong
 import store.pengu.server.data.Local_Product_Price
 import store.pengu.server.data.Product
 import store.pengu.server.db.pengustore.Tables
+import store.pengu.server.db.pengustore.Tables.CROWD_PRODUCT_IMAGES
+import store.pengu.server.db.pengustore.Tables.LOCAL_PRODUCT_IMAGES
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_PRICES
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ProductsUsers
 import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
+import store.pengu.server.routes.requests.ImageRequest
 
 class ProductDao(
     conf: Configuration
@@ -112,14 +115,36 @@ class ProductDao(
             .execute() == 1
     }
 
-    /*
-    fun addImageToProduct(product_x_image: Product_x_Image, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(PRODUCT_X_IMAGE,
-            PRODUCT_X_IMAGE.PRODUCT_ID, PRODUCT_X_IMAGE.IMAGE)
-            .values(product_x_image.product_id, product_x_image.image)
-            .execute() == 1
+    fun addImage(imageRequest: ImageRequest, create: DSLContext = dslContext): Boolean {
+        if (imageRequest.barcode != null) {
+            return create.insertInto(
+                CROWD_PRODUCT_IMAGES,
+                CROWD_PRODUCT_IMAGES.BARCODE, CROWD_PRODUCT_IMAGES.IMAGE_URL
+            )
+                .values(imageRequest.barcode, imageRequest.image_url)
+                .execute() == 1
+
+        } else {
+            return create.insertInto(
+                LOCAL_PRODUCT_IMAGES,
+                LOCAL_PRODUCT_IMAGES.PRODUCT_ID, LOCAL_PRODUCT_IMAGES.IMAGE_URL
+            )
+                .values(imageRequest.product_id?.let { ULong.valueOf(it) }, imageRequest.image_url)
+                .execute() == 1
+        }
     }
 
-     */
+    fun deleteImage(imageRequest: ImageRequest, create: DSLContext = dslContext): Boolean {
+        if (imageRequest.barcode != null) {
+            return create.delete(CROWD_PRODUCT_IMAGES)
+                .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(imageRequest.barcode))
+                .execute() == 1
+
+        } else {
+            return create.delete(LOCAL_PRODUCT_IMAGES)
+                .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(imageRequest.product_id?.let { ULong.valueOf(it) }))
+                .execute() == 1
+        }
+    }
 
 }
