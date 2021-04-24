@@ -151,7 +151,7 @@ class ShopDao(
                 ProductInShoppingList(
                     product_id = it[PRODUCTS.ID].toLong(),
                     pantry_id = it[PANTRIES.ID].toLong(),
-                    product_name = it[PRODUCTS.NAME],
+                    name = it[PRODUCTS.NAME],
                     barcode = it[PRODUCTS.BARCODE],
                     amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
                     amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
