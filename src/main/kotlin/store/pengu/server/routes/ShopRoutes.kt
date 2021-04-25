@@ -137,7 +137,6 @@ fun Route.shopRoutes(
         }
 
         get<TimeQueue> { param->
-            val leaveQueueRequest = call.receive<LeaveQueueRequest>()
             val entries = withContext(Dispatchers.IO) {
                 shopDao.timeQueue(param.latitude, param.longitude)
             }
