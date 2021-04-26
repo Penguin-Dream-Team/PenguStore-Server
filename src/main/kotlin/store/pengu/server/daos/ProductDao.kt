@@ -12,6 +12,7 @@ import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ProductsUsers
 import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
+import store.pengu.server.routes.requests.GetImageRequest
 import store.pengu.server.routes.requests.ImageRequest
 
 class ProductDao(
@@ -135,15 +136,34 @@ class ProductDao(
     }
 
     fun deleteImage(imageRequest: ImageRequest, create: DSLContext = dslContext): Boolean {
-        if (imageRequest.barcode != null) {
-            return create.delete(CROWD_PRODUCT_IMAGES)
+        return if (imageRequest.barcode != null) {
+            create.delete(CROWD_PRODUCT_IMAGES)
                 .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(imageRequest.barcode))
                 .execute() == 1
 
         } else {
-            return create.delete(LOCAL_PRODUCT_IMAGES)
+            create.delete(LOCAL_PRODUCT_IMAGES)
                 .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(imageRequest.product_id?.let { ULong.valueOf(it) }))
                 .execute() == 1
+        }
+    }
+
+    fun getImage(imageRequest: GetImageRequest, create: DSLContext = dslContext): List<String> {
+        return if (imageRequest.barcode != null) {
+            create.select()
+                .from(CROWD_PRODUCT_IMAGES)
+                .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(imageRequest.barcode))
+                .fetch().map {
+                    it[CROWD_PRODUCT_IMAGES.IMAGE_URL]
+                }
+
+        } else {
+            create.select()
+                .from(LOCAL_PRODUCT_IMAGES)
+                .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(imageRequest.product_id?.let { ULong.valueOf(it) }))
+                .fetch().map {
+                    it[LOCAL_PRODUCT_IMAGES.IMAGE_URL]
+                }
         }
     }
 

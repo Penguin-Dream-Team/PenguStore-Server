@@ -15,6 +15,7 @@ import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.ProductDao
 import store.pengu.server.data.Product
+import store.pengu.server.routes.requests.GetImageRequest
 import store.pengu.server.routes.requests.ImageRequest
 import java.io.File
 
@@ -127,6 +128,19 @@ fun Route.productRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.deleteImage(imageRequest)
+                }
+                catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
+            }
+            call.respond("data" to response)
+        }
+
+        get<GetProductImages> {
+            val imageRequest = call.receive<GetImageRequest>()
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    productDao.getImage(imageRequest)
                 }
                 catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
