@@ -133,9 +133,11 @@ object AddImage
 @Location("/images/deleteImage")
 object DeleteImage
 
-@Location("/image")
-object GetProductImages
+@Location("/images/barcode/{barcode}")
+data class GetProductImagesBarcode(val barcode: String)
 
+@Location("/images/productId/{product_id}")
+data class GetProductImagesProductId(val product_id: Long)
 
 // Carts
 

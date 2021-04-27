@@ -116,6 +116,26 @@ VALUES
        (10, 60, 50.25, 50.25),
        (20, 90, 50.35, 50.35);
 
--- Crowd_Product_Images
 -- Local_Product_Images
--- TODO
+INSERT INTO LOCAL_PRODUCT_IMAGES (product_id, image_url)
+VALUES
+    (1, "https://clearlakeiowa.com/wp-content/uploads/2019/11/ice-cubes-e1573665814265.jpg"),
+    (2, "https://thumbs-prod.si-cdn.com/qXrJJ-l_jMrQbARjnToD0fi-Tsg=/800x600/filters:no_upscale()/https://public-media.si-cdn.com/filer/d6/93/d6939718-4e41-44a8-a8f3-d13648d2bcd0/c3npbx.jpg"),
+    (3, "https://www.collinsdictionary.com/images/full/shrimp_74674555.jpg"),
+    (4, "https://img.theweek.in/content/dam/week/webworld/feature/lifestyle/2017/july/worldseabirdday.jpg"),
+    (5, "https://miro.medium.com/max/605/1*CXi3hdDzoMIvVi7woM05Bg@2x.jpeg"),
+    (6, "https://media-manager.noticiasaominuto.com/1920/1582634326/naom_5e5514ead7999.jpg?crop_params=eyJsYW5kc2NhcGUiOnsiY3JvcFdpZHRoIjoyNDU1LCJjcm9wSGVpZ2h0IjoxMzgxLCJjcm9wWCI6MCwiY3JvcFkiOjU4fX0="),
+    (7, "https://i.pinimg.com/originals/e9/47/e8/e947e87ca33e9a15ca82c516d96c52c7.jpg"),
+    (8, "https://cdn1.newsplex.pt/fotos/2017/5/11/584236.jpg?type=Artigo"),
+    (9, "https://belezaesaude.com/i/730/55/pepino.jpg");
+
+-- Crowd_Product_Images
+INSERT INTO CROWD_PRODUCT_IMAGES (barcode, image_url)
+VALUES
+    ("ice4510", "https://clearlakeiowa.com/wp-content/uploads/2019/11/ice-cubes-e1573665814265.jpg"),
+    ("fish15468", "https://thumbs-prod.si-cdn.com/qXrJJ-l_jMrQbARjnToD0fi-Tsg=/800x600/filters:no_upscale()/https://public-media.si-cdn.com/filer/d6/93/d6939718-4e41-44a8-a8f3-d13648d2bcd0/c3npbx.jpg"),
+    ("shirmp456564", "https://www.collinsdictionary.com/images/full/shrimp_74674555.jpg"),
+    ("seabird789987", "https://img.theweek.in/content/dam/week/webworld/feature/lifestyle/2017/july/worldseabirdday.jpg"),
+    ("crab159357", "https://miro.medium.com/max/605/1*CXi3hdDzoMIvVi7woM05Bg@2x.jpeg"),
+    ("cebolas123", "https://media-manager.noticiasaominuto.com/1920/1582634326/naom_5e5514ead7999.jpg?crop_params=eyJsYW5kc2NhcGUiOnsiY3JvcFdpZHRoIjoyNDU1LCJjcm9wSGVpZ2h0IjoxMzgxLCJjcm9wWCI6MCwiY3JvcFkiOjU4fX0=");
+

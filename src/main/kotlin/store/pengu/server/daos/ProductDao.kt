@@ -148,23 +148,21 @@ class ProductDao(
         }
     }
 
-    fun getImage(imageRequest: GetImageRequest, create: DSLContext = dslContext): List<String> {
-        return if (imageRequest.barcode != null) {
-            create.select()
-                .from(CROWD_PRODUCT_IMAGES)
-                .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(imageRequest.barcode))
-                .fetch().map {
-                    it[CROWD_PRODUCT_IMAGES.IMAGE_URL]
-                }
-
-        } else {
-            create.select()
-                .from(LOCAL_PRODUCT_IMAGES)
-                .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(imageRequest.product_id?.let { ULong.valueOf(it) }))
-                .fetch().map {
-                    it[LOCAL_PRODUCT_IMAGES.IMAGE_URL]
-                }
-        }
+    fun getImageBarcode(barcode: String, create: DSLContext = dslContext): List<String> {
+        return create.select()
+            .from(CROWD_PRODUCT_IMAGES)
+            .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(barcode))
+            .fetch().map {
+                it[CROWD_PRODUCT_IMAGES.IMAGE_URL]
+            }
     }
 
+    fun getImageProductId(productId: Long, create: DSLContext = dslContext): List<String> {
+        return create.select()
+            .from(LOCAL_PRODUCT_IMAGES)
+            .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(productId.let { ULong.valueOf(it) }))
+            .fetch().map {
+                it[LOCAL_PRODUCT_IMAGES.IMAGE_URL]
+            }
+    }
 }

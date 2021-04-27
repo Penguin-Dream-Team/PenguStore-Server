@@ -136,17 +136,28 @@ fun Route.productRoutes(
             call.respond("data" to response)
         }
 
-        get<GetProductImages> {
-            val imageRequest = call.receive<GetImageRequest>()
+        get<GetProductImagesBarcode> { param ->
             val response = withContext(Dispatchers.IO) {
                 try {
-                    productDao.getImage(imageRequest)
+                    productDao.getImageBarcode(param.barcode)
                 }
                 catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
-            call.respond("data" to response)
+            call.respond(mapOf("data" to response))
+        }
+
+        get<GetProductImagesProductId> { param ->
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    productDao.getImageProductId(param.product_id)
+                }
+                catch (e: Exception) {
+                    throw BadRequestException(e.localizedMessage)
+                }
+            }
+            call.respond(mapOf("data" to response))
         }
     }
 
