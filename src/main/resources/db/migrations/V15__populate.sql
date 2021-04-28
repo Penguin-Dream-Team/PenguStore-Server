@@ -114,7 +114,12 @@ VALUES
        (15, 90, 50.35, 150.35),
        (5, 40, 50.45, 150.45),
        (10, 60, 50.25, 50.25),
-       (20, 90, 50.35, 50.35);
+       (20, 90, 50.35, 50.35),
+       (2, 10, 50.25, 150.25),
+       (3, 12, 50.25, 150.25),
+       (1, 2, 50.25, 150.25),
+       (1, 4, 50.25, 150.25),
+       (5, 20, 50.25, 150.25);
 
 -- Local_Product_Images
 INSERT INTO LOCAL_PRODUCT_IMAGES (product_id, image_url)
@@ -139,3 +144,7 @@ VALUES
     ("crab159357", "https://miro.medium.com/max/605/1*CXi3hdDzoMIvVi7woM05Bg@2x.jpeg"),
     ("cebolas123", "https://media-manager.noticiasaominuto.com/1920/1582634326/naom_5e5514ead7999.jpg?crop_params=eyJsYW5kc2NhcGUiOnsiY3JvcFdpZHRoIjoyNDU1LCJjcm9wSGVpZ2h0IjoxMzgxLCJjcm9wWCI6MCwiY3JvcFkiOjU4fX0=");
 
+-- Beacons queue noise
+INSERT INTO BEACONS (num_items, latitude, longitude)
+VALUES
+    (15, 50.25, 150.25);
