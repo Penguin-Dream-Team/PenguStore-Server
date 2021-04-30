@@ -32,10 +32,6 @@ object UserLogin
 @Location("/register/guest")
 object UserGuestRegister
 
-@Location("/login/refresh")
-object UserLoginRefresh
-
-
 // User Pantry
 
 @Location("/user/connectPantry/{code}")

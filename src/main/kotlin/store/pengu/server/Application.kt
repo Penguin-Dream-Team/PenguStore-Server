@@ -168,25 +168,7 @@ fun Application.module(testing: Boolean = false) {
             validate { JWTAuthenticationConfig.validate(it) }
             challenge { _, _ -> throw UnauthorizedException("You need to be logged in to access this resource") }
         }
-        jwt("refresh") {
-            verifier(JWTAuthenticationConfig.verifier)
-            realm = JWTAuthenticationConfig.issuer
-            validate { JWTAuthenticationConfig.validateRefreshToken(it) }
-            challenge { _, _ -> throw UnauthorizedException("Invalid refresh token. Please login again") }
-        }
     }
-
-    install(ResourceAccessControl) {
-        whitelistAddresses {
-            +"8.8.8.8"
-            -"8.8.8.8"
-        }
-
-        apiKeys {
-            +"B5B65B1FBDB32AB359479D861AF2D"
-        }
-    }
-
 
     routing {
         loadRoutes(koin)
@@ -196,12 +178,6 @@ fun Application.module(testing: Boolean = false) {
             get<Home> {
                 call.respond(call.user)
                 //call.respondText("Welcome to the PenguStore API!!")
-            }
-        }
-
-        authenticate("refresh") {
-            post<UserLoginRefresh> {
-                call.respond(call.refresh)
             }
         }
 

@@ -23,7 +23,6 @@ fun Route.userRoutes(
 
 
     authenticate {
-
         get<Dashboard> {
             val profile = withContext(Dispatchers.IO) {
                 userDao.getProfile(call.user.id)
@@ -73,7 +72,6 @@ fun Route.userRoutes(
             }
             call.respond(response)
         }
-
     }
 
     authenticate {

@@ -7,14 +7,16 @@ import org.jooq.types.ULong
 import store.pengu.server.ForbiddenException
 import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
-import store.pengu.server.application.RefreshToken
-import store.pengu.server.data.*
+import store.pengu.server.application.LoggedUser
+import store.pengu.server.data.Pantry
+import store.pengu.server.data.Product
+import store.pengu.server.data.ProductInPantry
+import store.pengu.server.data.User
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
 import store.pengu.server.db.pengustore.tables.PantriesUsers.PANTRIES_USERS
 import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products
-import store.pengu.server.db.pengustore.tables.ShoppingList.SHOPPING_LIST
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers.SHOPPING_LIST_USERS
 import store.pengu.server.db.pengustore.tables.Users.USERS
 import store.pengu.server.routes.responses.GuestLoginResponse
@@ -66,13 +68,13 @@ class UserDao(
         }
     }
 
-    fun loginUser(username: String, password: String, create: DSLContext = dslContext): RefreshToken {
+    fun loginUser(username: String, password: String, create: DSLContext = dslContext): LoggedUser {
         return create.select(USERS.ID)
             .from(USERS)
             .where(USERS.USERNAME.eq(username))
             .and(USERS.PASSWORD.eq(password))
             .fetchOne()?.map {
-                RefreshToken(it[USERS.ID].toInt())
+                LoggedUser(it[USERS.ID].toInt())
             } ?: throw ForbiddenException("Account credentials are not correct")
     }
 
@@ -81,8 +83,8 @@ class UserDao(
             .values(username, PasswordUtils.generatePassword())
             .returningResult(USERS.ID, USERS.PASSWORD)
             .fetchOne()?.map {
-                val token = RefreshToken(it[USERS.ID].toInt())
-                GuestLoginResponse(password = it[USERS.PASSWORD], token.token, token.refreshToken)
+                val token = LoggedUser(it[USERS.ID].toInt())
+                GuestLoginResponse(password = it[USERS.PASSWORD], token.token)
             } ?: throw ForbiddenException("Error registering new account")
     }
 
