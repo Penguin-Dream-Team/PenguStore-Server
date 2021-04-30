@@ -71,11 +71,11 @@ VALUES
         (6, 15.23, 50.25, 150.25),
         (7, 25.22, 50.25, 50.25);
 -- Shopping_List
-INSERT INTO SHOPPING_LIST (name, latitude, longitude, color)
+INSERT INTO SHOPPING_LIST (name, code, latitude, longitude, color)
 VALUES
-       ("OG Shopping List", 50.25, 150.25, "230 125 34"),
-       ("PenguSuper Shopping List", 50.25, 50.25, "46 204 112"),
-       ("TuxMarket Shopping List", 50.25, 50.25, "189 195 199");
+       ("OG Shopping List", "OGS", 50.25, 150.25, "230 125 34"),
+       ("PenguSuper Shopping List", "PSL", 50.25, 50.25, "46 204 112"),
+       ("TuxMarket Shopping List", "TSL", 50.25, 50.25, "189 195 199");
 
 -- Product_Users
 INSERT INTO PRODUCTS_USERS(product_id, user_id)

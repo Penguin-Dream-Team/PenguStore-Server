@@ -18,20 +18,27 @@ class ShopDao(
 ) {
     private val dslContext = DSL.using(conf)
 
+    companion object {
+        fun getShoppingListInformation(it: Record, create: DSLContext): ShoppingList {
+            return ShoppingList(
+                id = it[SHOPPING_LIST.ID].toLong(),
+                name = it[SHOPPING_LIST.NAME],
+                code = it[SHOPPING_LIST.CODE],
+                latitude = it[SHOPPING_LIST.LATITUDE],
+                longitude = it[SHOPPING_LIST.LONGITUDE],
+                color = it[SHOPPING_LIST.COLOR],
+                shared = create.fetchCount(SHOPPING_LIST_USERS.where(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(it[SHOPPING_LIST.ID]))) > 1
+            )
+        }
+    }
+
     fun listShops(userId: Long, create: DSLContext = dslContext): List<ShoppingList> {
         return create.select()
             .from(SHOPPING_LIST)
             .join(SHOPPING_LIST_USERS).on(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(SHOPPING_LIST.ID))
             .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(userId)))
             .fetch().map {
-                ShoppingList(
-                    id = it[SHOPPING_LIST.ID].toLong(),
-                    name = it[SHOPPING_LIST.NAME],
-                    latitude = it[SHOPPING_LIST.LATITUDE],
-                    longitude = it[SHOPPING_LIST.LONGITUDE],
-                    color = it[SHOPPING_LIST.COLOR],
-                    shared = create.fetchCount(SHOPPING_LIST_USERS.where(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(it[SHOPPING_LIST.ID]))) > 1
-                )
+                getShoppingListInformation(it, create)
             }
     }
 
@@ -61,6 +68,7 @@ class ShopDao(
                     ShoppingList(
                         id = it[SHOPPING_LIST.ID].toLong(),
                         name = it[SHOPPING_LIST.NAME],
+                        code = it[SHOPPING_LIST.CODE],
                         latitude = it[SHOPPING_LIST.LATITUDE],
                         longitude = it[SHOPPING_LIST.LONGITUDE],
                         color = it[SHOPPING_LIST.COLOR],
@@ -84,6 +92,39 @@ class ShopDao(
         }
     }
 
+    fun getShoppingListByCode(code: String, create: DSLContext = dslContext): ShoppingList {
+        return create.select()
+            .from(SHOPPING_LIST)
+            .where(SHOPPING_LIST.CODE.eq(code))
+            .fetchOne()?.map {
+                getShoppingListInformation(it, create)
+            } ?: throw NotFoundException("Shopping List with specified code not found")
+    }
+
+    fun addUserToShoppingList(shoppingListId: Long, userId: Long, create: DSLContext = dslContext) {
+        try {
+            create.insertInto(SHOPPING_LIST_USERS, SHOPPING_LIST_USERS.USER_ID, SHOPPING_LIST_USERS.SHOPPING_LIST_ID)
+                .values(ULong.valueOf(userId), ULong.valueOf(shoppingListId))
+                .execute()
+        } catch (e: Exception) {
+            throw InternalServerErrorException("An error occurred")
+        }
+    }
+
+    fun userHasShoppingList(shoppingListId: Long, userId: Long, create: DSLContext = dslContext): Boolean {
+        return create.fetchExists(
+            SHOPPING_LIST_USERS.where(
+                SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)).and(
+                    SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(userId))
+                )
+            )
+        )
+    }
+
+    /**
+     *
+     */
+
 
     fun updateShoppingList(shopping_list: ShoppingList, create: DSLContext = dslContext): Boolean {
         return create.update(SHOPPING_LIST)
@@ -103,6 +144,7 @@ class ShopDao(
                 ShoppingList(
                     id = it[SHOPPING_LIST.ID].toLong(),
                     name = it[SHOPPING_LIST.NAME],
+                    code = it[SHOPPING_LIST.CODE],
                     latitude = it[SHOPPING_LIST.LATITUDE],
                     longitude = it[SHOPPING_LIST.LONGITUDE],
                     color = it[SHOPPING_LIST.COLOR],
@@ -168,10 +210,10 @@ class ShopDao(
         if (price_request.barcode != null) {
 
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+0.0002))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-0.0002))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+0.0002))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude + 0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude - 0.0002))
 
             val success = create.update(CROWD_PRODUCT_PRICES)
                 .set(CROWD_PRODUCT_PRICES.PRICE, price_request.price)
@@ -198,10 +240,10 @@ class ShopDao(
         } else {
             val productId = price_request.product_id ?: throw NotFoundException("Product Id not provided")
             condition = condition.and(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+0.0002))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-0.0002))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+0.0002))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude + 0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude - 0.0002))
 
             val success = create.update(LOCAL_PRODUCT_PRICES)
                 .set(LOCAL_PRODUCT_PRICES.PRICE, price_request.price)
@@ -236,10 +278,10 @@ class ShopDao(
         if (price_request.barcode != null) {
 
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+0.0002))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-0.0002))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+0.0002))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude + 0.0002))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude - 0.0002))
 
             return create.delete(CROWD_PRODUCT_PRICES)
                 .where(condition)
@@ -247,10 +289,10 @@ class ShopDao(
         } else {
             val productId = price_request.product_id ?: throw NotFoundException("Product Id not provided")
             condition = condition.and(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(price_request.latitude+0.0002))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude-0.0002))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude+0.0002))
-            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude-0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(price_request.longitude + 0.0002))
+            condition = condition.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(price_request.longitude - 0.0002))
 
             return create.delete(LOCAL_PRODUCT_PRICES)
                 .where(condition)
@@ -261,10 +303,10 @@ class ShopDao(
     fun getShopPrices(latitude: Double, longitude: Double, create: DSLContext = dslContext): List<ProductInShop> {
         // TODO Trocar estes valores pa coisas q facam sentido
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude+0.0001))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude-0.0001))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude+0.0001))
-        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude-0.0001))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude + 0.0001))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude - 0.0001))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.0001))
+        condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.0001))
 
         return create.select()
             .from(CROWD_PRODUCT_PRICES)
@@ -306,10 +348,10 @@ class ShopDao(
 
     fun joinQueue(latitude: Double, longitude: Double, num_items: Int, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(BEACONS.LATITUDE.le(latitude+0.0001))
-        condition = condition.and(BEACONS.LATITUDE.ge(latitude-0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.le(longitude+0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.ge(longitude-0.0001))
+        condition = condition.and(BEACONS.LATITUDE.le(latitude + 0.0001))
+        condition = condition.and(BEACONS.LATITUDE.ge(latitude - 0.0001))
+        condition = condition.and(BEACONS.LONGITUDE.le(longitude + 0.0001))
+        condition = condition.and(BEACONS.LONGITUDE.ge(longitude - 0.0001))
         val beacon = getBeacon(latitude, longitude)
 
         var res = false
@@ -320,8 +362,10 @@ class ShopDao(
                 .where(condition)
                 .execute() == 1
         } else {
-            create.insertInto(BEACONS,
-                BEACONS.NUM_ITEMS, BEACONS.LATITUDE, BEACONS.LONGITUDE)
+            create.insertInto(
+                BEACONS,
+                BEACONS.NUM_ITEMS, BEACONS.LATITUDE, BEACONS.LONGITUDE
+            )
                 .values(num_items, latitude, longitude)
                 .execute() == 1
 
@@ -331,14 +375,21 @@ class ShopDao(
 
     fun leaveQueue(leaveQueueRequest: LeaveQueueRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(BEACONS.LATITUDE.le(leaveQueueRequest.latitude+0.0001))
-        condition = condition.and(BEACONS.LATITUDE.ge(leaveQueueRequest.latitude-0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.le(leaveQueueRequest.longitude+0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.ge(leaveQueueRequest.longitude-0.0001))
+        condition = condition.and(BEACONS.LATITUDE.le(leaveQueueRequest.latitude + 0.0001))
+        condition = condition.and(BEACONS.LATITUDE.ge(leaveQueueRequest.latitude - 0.0001))
+        condition = condition.and(BEACONS.LONGITUDE.le(leaveQueueRequest.longitude + 0.0001))
+        condition = condition.and(BEACONS.LONGITUDE.ge(leaveQueueRequest.longitude - 0.0001))
 
-        create.insertInto(STATS,
-            STATS.NUM_ITEMS, STATS.TIME, STATS.LATITUDE, STATS.LONGITUDE)
-            .values(leaveQueueRequest.num_items, leaveQueueRequest.time, leaveQueueRequest.latitude, leaveQueueRequest.longitude)
+        create.insertInto(
+            STATS,
+            STATS.NUM_ITEMS, STATS.TIME, STATS.LATITUDE, STATS.LONGITUDE
+        )
+            .values(
+                leaveQueueRequest.num_items,
+                leaveQueueRequest.time,
+                leaveQueueRequest.latitude,
+                leaveQueueRequest.longitude
+            )
             .execute()
 
         return create.update(BEACONS)
@@ -350,10 +401,10 @@ class ShopDao(
     fun timeQueue(latitude: Double, longitude: Double, create: DSLContext = dslContext): Int {
         // TODO Trocar estes valores pa coisas q facam sentido
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(STATS.LATITUDE.le(latitude+0.0001))
-        condition = condition.and(STATS.LATITUDE.ge(latitude-0.0001))
-        condition = condition.and(STATS.LONGITUDE.le(longitude+0.0001))
-        condition = condition.and(STATS.LONGITUDE.ge(longitude-0.0001))
+        condition = condition.and(STATS.LATITUDE.le(latitude + 0.0001))
+        condition = condition.and(STATS.LATITUDE.ge(latitude - 0.0001))
+        condition = condition.and(STATS.LONGITUDE.le(longitude + 0.0001))
+        condition = condition.and(STATS.LONGITUDE.ge(longitude - 0.0001))
 
         val points = create.select()
             .from(STATS)
@@ -366,10 +417,10 @@ class ShopDao(
             }
 
         condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(BEACONS.LATITUDE.le(latitude+0.0001))
-        condition = condition.and(BEACONS.LATITUDE.ge(latitude-0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.le(longitude+0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.ge(longitude-0.0001))
+        condition = condition.and(BEACONS.LATITUDE.le(latitude + 0.0001))
+        condition = condition.and(BEACONS.LATITUDE.ge(latitude - 0.0001))
+        condition = condition.and(BEACONS.LONGITUDE.le(longitude + 0.0001))
+        condition = condition.and(BEACONS.LONGITUDE.ge(longitude - 0.0001))
 
         val num_items = create.select()
             .from(BEACONS)
@@ -410,15 +461,6 @@ class ShopDao(
 
 
     // Aux
-
-    fun connectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(
-            SHOPPING_LIST_USERS,
-            SHOPPING_LIST_USERS.SHOPPING_LIST_ID, SHOPPING_LIST_USERS.USER_ID
-        )
-            .values(ULong.valueOf(shopping_list_id), ULong.valueOf(user_id))
-            .execute() == 1
-    }
 
     fun price(barcode: String?, crowd_price: Double?, local_price: Double?): Double {
         return if (barcode != null)

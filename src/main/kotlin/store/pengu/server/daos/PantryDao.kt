@@ -1,17 +1,20 @@
 package store.pengu.server.daos
 
 import org.jooq.*
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.InternalServerErrorException
+import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables.PANTRIES_USERS
+import store.pengu.server.db.pengustore.Tables.PRODUCTS_USERS
 import store.pengu.server.db.pengustore.tables.Pantries.PANTRIES
-import store.pengu.server.db.pengustore.tables.PantriesUsers
 import store.pengu.server.db.pengustore.tables.PantryProducts.PANTRY_PRODUCTS
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.PantryRequest
+import javax.xml.crypto.Data
 
 class PantryDao(
     conf: Configuration
@@ -27,6 +30,24 @@ class PantryDao(
                 .map(charPool::get)
                 .joinToString("")
         }
+
+        fun getPantryInformation(it: Record, create: DSLContext): Pantry {
+            return Pantry(
+                id = it[PANTRIES.ID].toLong(),
+                name = it[PANTRIES.NAME],
+                code = it[PANTRIES.CODE],
+                latitude = it[PANTRIES.LATITUDE],
+                longitude = it[PANTRIES.LONGITUDE],
+                productCount = create.fetchCount(
+                    create.select()
+                        .from(PANTRIES)
+                        .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+                        .where(PANTRIES.ID.eq(it[PANTRIES.ID]))
+                ),
+                color = it[PANTRIES.COLOR],
+                shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[PANTRIES.ID]))) > 1
+            )
+        }
     }
 
     fun listPantries(userId: Long, create: DSLContext = dslContext): List<Pantry> {
@@ -37,8 +58,8 @@ class PantryDao(
             .fetch().map {
                 Pantry(
                     id = it[PANTRIES.ID].toLong(),
-                    code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
+                    code = it[PANTRIES.CODE],
                     latitude = it[PANTRIES.LATITUDE],
                     longitude = it[PANTRIES.LONGITUDE],
                     productCount = create.fetchCount(PANTRY_PRODUCTS.where(PANTRY_PRODUCTS.PANTRY_ID.eq(it[PANTRIES.ID]))),
@@ -77,8 +98,8 @@ class PantryDao(
                 .fetchOne()?.map {
                     Pantry(
                         id = it[PANTRIES.ID].toLong(),
-                        code = it[PANTRIES.CODE],
                         name = it[PANTRIES.NAME],
+                        code = it[PANTRIES.CODE],
                         latitude = it[PANTRIES.LATITUDE],
                         longitude = it[PANTRIES.LONGITUDE],
                         productCount = 0,
@@ -99,6 +120,60 @@ class PantryDao(
         }
     }
 
+    fun getPantryByCode(code: String, create: DSLContext = dslContext): Pantry {
+        return create.select()
+            .from(PANTRIES)
+            .where(PANTRIES.CODE.eq(code))
+            .fetchOne()?.map {
+                getPantryInformation(it, create)
+            } ?: throw NotFoundException("Pantry with specified code not found")
+    }
+
+    fun addUserToPantry(pantryId: Long, userId: Long, create: DSLContext = dslContext) {
+        create.transactionResult { configuration ->
+            val transaction = DSL.using(configuration)
+
+            try {
+                transaction.insertInto(PANTRIES_USERS, PANTRIES_USERS.USER_ID, PANTRIES_USERS.PANTRY_ID)
+                    .values(ULong.valueOf(userId), ULong.valueOf(pantryId))
+                    .execute()
+            } catch (e: DataAccessException) {
+                throw InternalServerErrorException("An error occurred")
+            }
+
+            val products = transaction.select(PANTRY_PRODUCTS.PRODUCT_ID)
+                .from(PANTRY_PRODUCTS)
+                .where(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(pantryId)))
+                .fetch().map {
+                    it[PANTRY_PRODUCTS.PRODUCT_ID]
+                }
+
+            products.forEach {
+                try {
+                    transaction.insertInto(PRODUCTS_USERS, PRODUCTS_USERS.USER_ID, PRODUCTS_USERS.PRODUCT_ID)
+                        .values(ULong.valueOf(userId), it)
+                        .onDuplicateKeyIgnore()
+                        .execute()
+                } catch (e: DataAccessException) {
+                    throw InternalServerErrorException("An error occurred")
+                }
+            }
+        }
+    }
+
+    fun userHasPantry(pantryId: Long, userId: Long, create: DSLContext = dslContext): Boolean {
+        return create.fetchExists(
+            PANTRIES_USERS.where(
+                PANTRIES_USERS.PANTRY_ID.eq(ULong.valueOf(pantryId)).and(
+                    PANTRIES_USERS.USER_ID.eq(ULong.valueOf(userId))
+                )
+            )
+        )
+    }
+
+    /**
+     *
+     */
 
     fun updatePantry(pantry: PantryRequest, create: DSLContext = dslContext): Boolean {
         return create.update(PANTRIES)
@@ -115,21 +190,7 @@ class PantryDao(
             .from(PANTRIES)
             .where(PANTRIES.ID.eq(ULong.valueOf(id)))
             .fetchOne()?.map {
-                Pantry(
-                    id = it[PANTRIES.ID].toLong(),
-                    code = it[PANTRIES.CODE],
-                    name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE],
-                    longitude = it[PANTRIES.LONGITUDE],
-                    productCount = create.fetchCount(
-                        create.select()
-                            .from(PANTRIES)
-                            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
-                            .where(PANTRIES.ID.eq(it[PANTRIES.ID]))
-                    ),
-                    color = it[PANTRIES.COLOR],
-                    shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[PANTRIES.ID]))) > 1
-                )
+                getPantryInformation(it, create)
             }
     }
 
@@ -191,17 +252,6 @@ class PantryDao(
                     amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY]
                 )
             }
-    }
-
-    // Aux
-
-    fun connectPantryToUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(
-            PantriesUsers.PANTRIES_USERS,
-            PantriesUsers.PANTRIES_USERS.PANTRY_ID, PantriesUsers.PANTRIES_USERS.USER_ID
-        )
-            .values(ULong.valueOf(pantry_id), ULong.valueOf(user_id))
-            .execute() == 1
     }
 
 }

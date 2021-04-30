@@ -91,71 +91,6 @@ class UserDao(
 
     // User Pantry
 
-    fun getPantryByCode(code: String, create: DSLContext = dslContext): Pantry? {
-        return create.select()
-            .from(PANTRIES)
-            .where(PANTRIES.CODE.eq(code))
-            .fetchOne()?.map {
-                Pantry(
-                    id = it[PANTRIES.ID].toLong(),
-                    code = it[PANTRIES.CODE],
-                    name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE],
-                    longitude = it[PANTRIES.LONGITUDE],
-                    productCount = 0,
-                    color = it[PANTRIES.COLOR],
-                    false
-                )
-            }
-    }
-
-    fun connectPantryToUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
-        var res = create.insertInto(
-            PANTRIES_USERS,
-            PANTRIES_USERS.PANTRY_ID, PANTRIES_USERS.USER_ID
-        )
-            .values(ULong.valueOf(pantry_id), ULong.valueOf(user_id))
-            .execute() == 1
-
-        var pantryProducts = create.select()
-            .from(PANTRIES)
-            .join(PantryProducts.PANTRY_PRODUCTS).on(PantryProducts.PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
-            .join(Products.PRODUCTS).on(Products.PRODUCTS.ID.eq(PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID))
-            .where(PANTRIES.ID.eq((ULong.valueOf(pantry_id))))
-            .fetch().map {
-                ProductInPantry(
-                    productId = it[Products.PRODUCTS.ID].toLong(),
-                    pantryId = it[PANTRIES.ID].toLong(),
-                    barcode = it[Products.PRODUCTS.BARCODE],
-                    name = it[Products.PRODUCTS.NAME],
-                    amountAvailable = it[PantryProducts.PANTRY_PRODUCTS.HAVE_QTY],
-                    amountNeeded = it[PantryProducts.PANTRY_PRODUCTS.WANT_QTY]
-                )
-            }
-
-        var itr = pantryProducts.iterator()
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-
-        itr.forEach {
-            condition = DSL.noCondition()
-            condition = condition.and(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(user_id)))
-            condition = condition.and(PRODUCTS_USERS.PRODUCT_ID.eq(ULong.valueOf(it.productId)))
-
-            var product = create.select()
-                .from(PRODUCTS_USERS)
-                .where(condition)
-                .fetchOne()?.map {
-                    it[PRODUCTS_USERS.PRODUCT_ID]
-                }
-
-            if (product == null) {
-                connectProduct(it.productId, user_id)
-            }
-        }
-
-        return res
-    }
-
     fun disconnectPantryUser(pantry_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(PANTRIES_USERS.PANTRY_ID.eq(ULong.valueOf(pantry_id)))
@@ -175,8 +110,8 @@ class UserDao(
             .fetch().map {
                 Pantry(
                     id = it[PANTRIES.ID].toLong(),
-                    code = it[PANTRIES.CODE],
                     name = it[PANTRIES.NAME],
+                    code = it[PANTRIES.CODE],
                     latitude = it[PANTRIES.LATITUDE],
                     longitude = it[PANTRIES.LONGITUDE],
                     productCount = create.fetchCount(
@@ -193,15 +128,6 @@ class UserDao(
 
 
     // User Shopping List
-
-    fun connectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(
-            SHOPPING_LIST_USERS,
-            SHOPPING_LIST_USERS.SHOPPING_LIST_ID, SHOPPING_LIST_USERS.USER_ID
-        )
-            .values(ULong.valueOf(shopping_list_id), ULong.valueOf(user_id))
-            .execute() == 1
-    }
 
     fun disconnectShoppingList(shopping_list_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()

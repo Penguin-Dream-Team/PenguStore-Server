@@ -19,6 +19,7 @@ public class ShoppingList implements Serializable {
 
     private final ULong  id;
     private final String name;
+    private final String code;
     private final Double latitude;
     private final Double longitude;
     private final String color;
@@ -26,6 +27,7 @@ public class ShoppingList implements Serializable {
     public ShoppingList(ShoppingList value) {
         this.id = value.id;
         this.name = value.name;
+        this.code = value.code;
         this.latitude = value.latitude;
         this.longitude = value.longitude;
         this.color = value.color;
@@ -34,12 +36,14 @@ public class ShoppingList implements Serializable {
     public ShoppingList(
         ULong  id,
         String name,
+        String code,
         Double latitude,
         Double longitude,
         String color
     ) {
         this.id = id;
         this.name = name;
+        this.code = code;
         this.latitude = latitude;
         this.longitude = longitude;
         this.color = color;
@@ -57,6 +61,13 @@ public class ShoppingList implements Serializable {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * Getter for <code>shopping_list.code</code>.
+     */
+    public String getCode() {
+        return this.code;
     }
 
     /**
@@ -86,6 +97,7 @@ public class ShoppingList implements Serializable {
 
         sb.append(id);
         sb.append(", ").append(name);
+        sb.append(", ").append(code);
         sb.append(", ").append(latitude);
         sb.append(", ").append(longitude);
         sb.append(", ").append(color);

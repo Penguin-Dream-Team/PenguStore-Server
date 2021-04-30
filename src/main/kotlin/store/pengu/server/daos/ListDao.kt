@@ -27,14 +27,7 @@ class ListDao(
             .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(userId)))
             .and(getNearbyCondition(SHOPPING_LIST.LATITUDE, latitude, SHOPPING_LIST.LONGITUDE, longitude))
             .fetchAny()?.map {
-                UserListType.SHOPPING_LIST to ShoppingList(
-                    id = it[SHOPPING_LIST.ID].toLong(),
-                    name = it[SHOPPING_LIST.NAME],
-                    latitude = it[SHOPPING_LIST.LATITUDE],
-                    longitude = it[SHOPPING_LIST.LONGITUDE],
-                    color = it[PANTRIES.COLOR],
-                    shared = create.fetchCount(SHOPPING_LIST_USERS.where(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(it[SHOPPING_LIST.ID]))) > 1
-                )
+                UserListType.SHOPPING_LIST to ShopDao.getShoppingListInformation(it, create)
             } ?: create.select()
             .from(USERS)
             .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
@@ -42,21 +35,7 @@ class ListDao(
             .where(USERS.ID.eq(ULong.valueOf(userId)))
             .and(getNearbyCondition(PANTRIES.LATITUDE, latitude, PANTRIES.LONGITUDE, longitude))
             .fetchAny()?.map {
-                UserListType.PANTRY to Pantry(
-                    id = it[PANTRIES.ID].toLong(),
-                    code = it[PANTRIES.CODE],
-                    name = it[PANTRIES.NAME],
-                    latitude = it[PANTRIES.LATITUDE],
-                    longitude = it[PANTRIES.LONGITUDE],
-                    productCount = create.fetchCount(
-                        create.select()
-                            .from(PANTRIES)
-                            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
-                            .where(PANTRIES.ID.eq(it[PANTRIES.ID]))
-                    ),
-                    color = it[PANTRIES.COLOR],
-                    shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[PANTRIES.ID]))) > 1
-                )
+                UserListType.PANTRY to PantryDao.getPantryInformation(it, create)
             } ?: throw NotFoundException("No list found nearby the specified location")
     }
 

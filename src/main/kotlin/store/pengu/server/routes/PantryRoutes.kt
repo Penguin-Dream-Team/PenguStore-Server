@@ -39,7 +39,25 @@ fun Route.pantryRoutes(
             call.respond(Response(pantry))
         }
 
+        post<ImportPantryList> { param ->
+            val userId = call.user.id
+            val pantry = withContext(Dispatchers.IO) {
+                val pantry = pantryDao.getPantryByCode(param.code)
 
+                if (pantryDao.userHasPantry(pantry.id, userId.toLong())) {
+                    throw ConflictException("You already have this pantry")
+                }
+
+                pantryDao.addUserToPantry(pantry.id, userId.toLong())
+                pantry
+            }
+
+            call.respond(Response(pantry))
+        }
+
+        /**
+         *
+         */
 
 
 
@@ -48,8 +66,7 @@ fun Route.pantryRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     pantryDao.updatePantry(pantry)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -72,33 +89,30 @@ fun Route.pantryRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     pantryDao.addPantryProduct(pantry_product)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
             call.respond(mapOf("data" to response))
         }
 
-        put <PantryUpdateProduct> {
+        put<PantryUpdateProduct> {
             val pantry_product = call.receive<Pantry_Product>()
             val response = withContext(Dispatchers.IO) {
                 try {
                     pantryDao.updatePantryProduct(pantry_product)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
             call.respond(mapOf("data" to response))
         }
 
-        delete <PantryDeleteProduct> { param ->
+        delete<PantryDeleteProduct> { param ->
             val response = withContext(Dispatchers.IO) {
                 try {
                     pantryDao.deletePantryProduct(param.pantry_id, param.product_id)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }

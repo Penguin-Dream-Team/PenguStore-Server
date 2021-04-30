@@ -42,6 +42,27 @@ fun Route.shopRoutes(
             call.respond(Response(shoppingList))
         }
 
+        post<ImportShoppingList> { param ->
+            val userId = call.user.id
+
+            val shoppingList = withContext(Dispatchers.IO) {
+                val shoppingList = shopDao.getShoppingListByCode(param.code)
+
+                if (shopDao.userHasShoppingList(shoppingList.id, userId.toLong())) {
+                    throw ConflictException("You already have this shopping list")
+                }
+
+                shopDao.addUserToShoppingList(shoppingList.id, userId.toLong())
+                shoppingList
+            }
+
+            call.respond(Response(shoppingList))
+        }
+
+        /**
+         * here
+         */
+
 
         put<UpdateShoppingList> {
             val shopping_list = call.receive<ShoppingList>()

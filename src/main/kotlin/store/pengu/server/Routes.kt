@@ -17,34 +17,46 @@ object UserProfile
 @Location("/lists/find")
 data class LocationList(val latitude: Double, val longitude: Double)
 
+/**
+ * Pantry Lists
+ */
 @Location("/lists/pantries")
 object PantryLists
 
+@Location("/lists/pantries/import/{code}")
+data class ImportPantryList(val code: String)
 
+
+/**
+ * Shopping Lists
+ */
 @Location("/lists/shops")
 object ShoppingLists
 
-// User Login
+@Location("/lists/shops/import/{code}")
+data class ImportShoppingList(val code: String)
 
+
+/**
+ * User Login
+ */
 @Location("/login")
 object UserLogin
 
 @Location("/register/guest")
 object UserGuestRegister
 
-// User Pantry
 
-@Location("/user/connectPantry/{code}")
-data class UserConnectPantry(val code: String)
+
+
+
+// User Pantry
 
 @Location("/user/disconnectPantry/{pantry_id}")
 data class UserDisconnectPantry(val pantry_id: Long)
 
 
 // User Shopping List
-
-@Location("/user/connectShoppingList/{shopping_list_id}")
-data class UserConnectShoppingList(val shopping_list_id: Long)
 
 @Location("/user/disconnectShoppingList/{shopping_list_id}")
 data class UserDisconnectShoppingList(val shopping_list_id: Long)

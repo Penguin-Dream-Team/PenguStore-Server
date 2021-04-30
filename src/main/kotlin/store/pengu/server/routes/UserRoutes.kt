@@ -77,21 +77,6 @@ fun Route.userRoutes(
     authenticate {
         // User Pantry
 
-        post<UserConnectPantry> { param ->
-            val userId = call.user.id.toLong()
-            val pantry = userDao.getPantryByCode(param.code)
-                ?: throw NotFoundException("Pantry with specified code not found")
-
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    userDao.connectPantryToUser(pantry.id, userId)
-                } catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
-            }
-            call.respond(mapOf("data" to response))
-        }
-
         delete<UserDisconnectPantry> { param ->
             val userId = call.user.id.toLong()
             val response = withContext(Dispatchers.IO) {
@@ -106,18 +91,6 @@ fun Route.userRoutes(
 
 
         // User Shopping List
-
-        post<UserConnectShoppingList> { param ->
-            val userId = call.user.id.toLong()
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    userDao.connectShoppingList(param.shopping_list_id, userId)
-                } catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
-            }
-            call.respond(mapOf("data" to response))
-        }
 
         delete<UserDisconnectShoppingList> { param ->
             val userId = call.user.id.toLong()

@@ -12,7 +12,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row5;
+import org.jooq.Row6;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -58,6 +58,11 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
      * The column <code>shopping_list.name</code>.
      */
     public final TableField<ShoppingListRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>shopping_list.code</code>.
+     */
+    public final TableField<ShoppingListRecord, String> CODE = createField(DSL.name("code"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>shopping_list.latitude</code>.
@@ -124,7 +129,7 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
 
     @Override
     public List<UniqueKey<ShoppingListRecord>> getKeys() {
-        return Arrays.<UniqueKey<ShoppingListRecord>>asList(Keys.KEY_SHOPPING_LIST_PRIMARY);
+        return Arrays.<UniqueKey<ShoppingListRecord>>asList(Keys.KEY_SHOPPING_LIST_PRIMARY, Keys.KEY_SHOPPING_LIST_CODE);
     }
 
     @Override
@@ -154,11 +159,11 @@ public class ShoppingList extends TableImpl<ShoppingListRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row5 type methods
+    // Row6 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<ULong, String, Double, Double, String> fieldsRow() {
-        return (Row5) super.fieldsRow();
+    public Row6<ULong, String, String, Double, Double, String> fieldsRow() {
+        return (Row6) super.fieldsRow();
     }
 }
