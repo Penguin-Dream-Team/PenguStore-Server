@@ -30,7 +30,7 @@ fun Route.shopRoutes(
                 shopDao.listShops(userId.toLong())
             }
 
-            call.respond(mapOf("data" to shops))
+            call.respond(Response(shops))
         }
 
         post<ShoppingLists> {
