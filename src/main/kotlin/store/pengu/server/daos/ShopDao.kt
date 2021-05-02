@@ -7,6 +7,8 @@ import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables.*
+import store.pengu.server.db.pengustore.tables.Pantries
+import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
@@ -189,15 +191,41 @@ class ShopDao(
             .leftJoin(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
             .leftJoin(LOCAL_PRODUCT_PRICES).on(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(PRODUCTS.ID))
             .where(condition)
+            .groupBy(PRODUCTS.ID)
             .fetch().map {
                 ProductInShoppingList(
                     product_id = it[PRODUCTS.ID].toLong(),
-                    pantry_id = it[PANTRIES.ID].toLong(),
                     name = it[PRODUCTS.NAME],
                     barcode = it[PRODUCTS.BARCODE],
                     amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
                     amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
-                    price = price(it[PRODUCTS.BARCODE], it[CROWD_PRODUCT_PRICES.PRICE], it[LOCAL_PRODUCT_PRICES.PRICE])
+                    price = price(it[PRODUCTS.BARCODE], it[CROWD_PRODUCT_PRICES.PRICE], it[LOCAL_PRODUCT_PRICES.PRICE]),
+                    pantries = auxGetPantry(user_id, it[PRODUCTS.ID].toLong())
+                )
+            }
+    }
+
+    fun auxGetPantry(userId: Long, productId: Long, create: DSLContext = dslContext): List<Pantry> {
+        var condition5 = DSL.noCondition() // Alternatively, use trueCondition()
+        condition5 = condition5.and(USERS.ID.eq(ULong.valueOf(userId)))
+        condition5 = condition5.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(productId)))
+
+        return create.select()
+            .from(USERS)
+            .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
+            .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
+            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+            .where(condition5)
+            .fetch().map{
+                Pantry(
+                    id = it[Pantries.PANTRIES.ID].toLong(),
+                    name = it[Pantries.PANTRIES.NAME],
+                    code = it[Pantries.PANTRIES.CODE],
+                    latitude = it[Pantries.PANTRIES.LATITUDE],
+                    longitude = it[Pantries.PANTRIES.LONGITUDE],
+                    productCount = create.fetchCount(PantryProducts.PANTRY_PRODUCTS.where(PantryProducts.PANTRY_PRODUCTS.PANTRY_ID.eq(it[Pantries.PANTRIES.ID]))),
+                    color = it[Pantries.PANTRIES.COLOR],
+                    shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[Pantries.PANTRIES.ID]))) > 1
                 )
             }
     }
