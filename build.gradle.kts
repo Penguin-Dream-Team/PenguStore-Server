@@ -81,9 +81,10 @@ dependencies {
     // Jackson data conversion
     implementation("com.fasterxml.jackson.datatype", "jackson-datatype-jsr310", jackson_datatype_version)
 
-
     jooqGenerator("mysql", "mysql-connector-java", mysql_version)
     implementation("mysql", "mysql-connector-java", mysql_version)
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
     testImplementation("io.kotest:kotest-runner-junit5:${kotest_version}")

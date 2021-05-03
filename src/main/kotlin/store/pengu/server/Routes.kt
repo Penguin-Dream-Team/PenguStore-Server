@@ -47,22 +47,23 @@ object UserLogin
 object UserGuestRegister
 
 
-
-
-
-// User Pantry
-
+/**
+ * User Pantry
+ */
 @Location("/user/disconnectPantry/{pantry_id}")
 data class UserDisconnectPantry(val pantry_id: Long)
 
 
-// User Shopping List
-
+/**
+ * User Shopping List
+ */
 @Location("/user/disconnectShoppingList/{shopping_list_id}")
 data class UserDisconnectShoppingList(val shopping_list_id: Long)
 
-// User Products
 
+/**
+ * User Products
+ */
 @Location("/user/connectProduct/{product_id}")
 data class UserConnectProduct(val product_id: Long)
 
@@ -73,8 +74,9 @@ data class UserDisconnectProduct(val product_id: Long)
 object UserGetProducts
 
 
-// Pantries
-
+/**
+ * Pantries
+ */
 @Location("/pantries/update")
 object UpdatePantry
 
@@ -82,8 +84,9 @@ object UpdatePantry
 data class GetPantry(val id: Long)
 
 
-// Pantry Products
-
+/**
+ * Pantry Products
+ */
 @Location("/pantries/addProduct")
 object  PantryAddProduct
 
@@ -97,8 +100,9 @@ data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
 data class PantryGetProducts(val id: Long)
 
 
-// Products
-
+/**
+ * Products
+ */
 @Location("/products/add")
 object AddProduct
 
@@ -112,8 +116,9 @@ object AddBarcode
 data class GetProduct(val id: Long)
 
 
-// Shopping Lists
-
+/**
+ * Shopping List
+ */
 @Location("/shoppingLists/update")
 object  UpdateShoppingList
 
@@ -121,8 +126,9 @@ object  UpdateShoppingList
 data class GenShoppingList(val shopping_list_id: Long)
 
 
-// Prices
-
+/**
+ * Prices
+ */
 @Location("/prices/addPrice")
 object AddPrice
 
@@ -133,8 +139,9 @@ object DeletePrice
 data class GetShopPrices(val latitude: Double, val longitude: Double)
 
 
-// Images
-
+/**
+ * Images
+ */
 @Location("/images/addImage")
 object AddImage
 
@@ -147,13 +154,17 @@ data class GetProductImagesBarcode(val barcode: String)
 @Location("/images/productId/{product_id}")
 data class GetProductImagesProductId(val product_id: Long)
 
-// Carts
 
+/**
+ * Carts
+ */
 @Location("/cart")
 object BuyCart
 
-// Queue
 
+/**
+ * Queue
+ */
 @Location("/queue/join/{latitude}/{longitude}/{num_items}")
 data class JoinQueue(val latitude: Double, val longitude: Double, val num_items: Int)
 
@@ -162,3 +173,10 @@ object LeaveQueue
 
 @Location("/queue/time/{latitude}/{longitude}")
 data class TimeQueue(val latitude: Double, val longitude: Double)
+
+
+/**
+ * Translation
+ */
+@Location("/translation/{string}")
+data class Translation(val string: String)
