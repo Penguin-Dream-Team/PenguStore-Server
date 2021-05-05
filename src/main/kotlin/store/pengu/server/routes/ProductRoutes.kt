@@ -161,6 +161,8 @@ fun Route.productRoutes(
         post<Ratings> { param ->
             val userId = call.user.id.toLong()
             try {
+                if (param.rating < 1 || param.rating > 5) throw IllegalArgumentException("Rating must be between 1 - 5")
+
                 val product = withContext(Dispatchers.IO) {
                     productDao.addRating(userId, param.barcode, param.rating)
                 }

@@ -150,11 +150,17 @@ class ProductDao(
 
     fun addRating(userId: Long, barcode: String, userRating: Int, create: DSLContext = dslContext): Product {
         val product = getProduct(userId, barcode) ?: throw NotFoundException("Product with specified barcode not found")
-        if (product.userRating != -1) throw Exception("User $userId already rated this product")
 
-        create.insertInto(RATINGS, RATINGS.USER_ID, RATINGS.BARCODE, RATINGS.RATING)
-            .values(ULong.valueOf(userId), barcode, userRating)
-            .execute()
+        if (product.userRating != -1)
+            create.update(RATINGS)
+                .set(RATINGS.RATING, userRating)
+                .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
+                .and(RATINGS.BARCODE.eq(barcode))
+                .execute()
+        else
+            create.insertInto(RATINGS, RATINGS.USER_ID, RATINGS.BARCODE, RATINGS.RATING)
+                .values(ULong.valueOf(userId), barcode, userRating)
+                .execute()
 
         val ratings = getProductRatings(barcode)
         val productRating = ratings.sum().toFloat() / ratings.size
