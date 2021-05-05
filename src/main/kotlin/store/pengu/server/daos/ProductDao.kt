@@ -3,16 +3,15 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
-import store.pengu.server.data.Local_Product_Price
+import store.pengu.server.data.LocalProductPrice
 import store.pengu.server.data.Product
 import store.pengu.server.db.pengustore.Tables
-import store.pengu.server.db.pengustore.Tables.CROWD_PRODUCT_IMAGES
-import store.pengu.server.db.pengustore.Tables.LOCAL_PRODUCT_IMAGES
+import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_PRICES
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ProductsUsers
 import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
-import store.pengu.server.routes.requests.GetImageRequest
+import store.pengu.server.db.pengustore.tables.Ratings
 import store.pengu.server.routes.requests.ImageRequest
 
 class ProductDao(
@@ -31,7 +30,9 @@ class ProductDao(
                     Product(
                         id = it[PRODUCTS.ID].toLong(),
                         name = it[PRODUCTS.NAME],
-                        barcode = it[PRODUCTS.BARCODE]
+                        barcode = it[PRODUCTS.BARCODE],
+                        rating = -1f,
+                        ratings = mutableListOf()
                     )
                 }
     }
@@ -53,7 +54,7 @@ class ProductDao(
             .from(LOCAL_PRODUCT_PRICES)
             .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(product.id)))
             .fetch().map{
-                Local_Product_Price(
+                LocalProductPrice(
                     product_id = it[LOCAL_PRODUCT_PRICES.PRODUCT_ID].toLong(),
                     price = it[LOCAL_PRODUCT_PRICES.PRICE],
                     latitude = it[LOCAL_PRODUCT_PRICES.LATITUDE],
@@ -96,16 +97,35 @@ class ProductDao(
             .from(PRODUCTS)
             .where(PRODUCTS.ID.eq(ULong.valueOf(id)))
             .fetchOne()?.map {
+                var ratings = mutableListOf<Int>()
+                var rating = -1f
+
+                if (it[PRODUCTS.BARCODE] != null) {
+                    ratings = getRatings(it[PRODUCTS.BARCODE])
+                    if (ratings.isNotEmpty())
+                        rating = ratings.sum().toFloat() / ratings.size
+                }
+
                 Product(
                     id = it[PRODUCTS.ID].toLong(),
                     name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE]
+                    barcode = it[PRODUCTS.BARCODE],
+                    rating = rating,
+                    ratings = ratings
                 )
             }
     }
 
 
     // Aux
+    private fun getRatings(barcode: String, create: DSLContext = dslContext): MutableList<Int> {
+        return create.select()
+            .from(RATINGS)
+            .where(RATINGS.BARCODE.eq(barcode))
+            .fetch().map {
+                it[RATINGS.RATING]
+            }
+    }
 
     fun connectProduct(product_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         return create.insertInto(

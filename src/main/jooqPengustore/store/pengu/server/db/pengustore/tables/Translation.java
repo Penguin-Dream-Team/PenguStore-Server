@@ -55,7 +55,7 @@ public class Translation extends TableImpl<TranslationRecord> {
     /**
      * The column <code>translation.translation</code>.
      */
-    public final TableField<TranslationRecord, String> TRANSLATION_ = createField(DSL.name("translation"), SQLDataType.VARCHAR(250).defaultValue(DSL.inline("NULL", SQLDataType.VARCHAR)), this, "");
+    public final TableField<TranslationRecord, String> TRANSLATION_ = createField(DSL.name("translation"), SQLDataType.VARCHAR(250).nullable(false), this, "");
 
     private Translation(Name alias, Table<TranslationRecord> aliased) {
         this(alias, aliased, null);

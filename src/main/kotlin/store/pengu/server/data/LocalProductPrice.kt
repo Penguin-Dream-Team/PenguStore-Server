@@ -1,8 +1,7 @@
 package store.pengu.server.data
 
-
-data class Crowd_Product_Price(
-    val barcode: String,
+data class LocalProductPrice(
+    val product_id: Long,
     val price: Double,
     val latitude: Double,
     val longitude: Double

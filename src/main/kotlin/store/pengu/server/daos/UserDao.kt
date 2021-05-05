@@ -167,11 +167,32 @@ class UserDao(
             .join(PRODUCTS).on(PRODUCTS.ID.eq(PRODUCTS_USERS.PRODUCT_ID))
             .where(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(user_id)))
             .fetch().map {
+                var ratings = mutableListOf<Int>()
+                var rating = -1f
+
+                if (it[Products.PRODUCTS.BARCODE] != null) {
+                    ratings = getRatings(it[Products.PRODUCTS.BARCODE])
+                    if (ratings.isNotEmpty())
+                        rating = ratings.sum().toFloat() / ratings.size
+                }
+
                 Product(
                     id = it[PRODUCTS.ID].toLong(),
                     name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE]
+                    barcode = it[PRODUCTS.BARCODE],
+                    rating = rating,
+                    ratings = ratings
                 )
+            }
+    }
+
+    // Aux
+    private fun getRatings(barcode: String, create: DSLContext = dslContext): MutableList<Int> {
+        return create.select()
+            .from(RATINGS)
+            .where(RATINGS.BARCODE.eq(barcode))
+            .fetch().map {
+                it[RATINGS.RATING]
             }
     }
 }

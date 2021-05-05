@@ -15,7 +15,6 @@ import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.ProductDao
 import store.pengu.server.data.Product
-import store.pengu.server.routes.requests.GetImageRequest
 import store.pengu.server.routes.requests.ImageRequest
 import java.io.File
 
@@ -24,9 +23,6 @@ fun Route.productRoutes(
 ) {
 
     authenticate {
-
-        // Products
-
         post<AddProduct> {
             val userId = call.user.id.toLong()
             val product = call.receive<Product>()
@@ -81,7 +77,7 @@ fun Route.productRoutes(
 
         post<AddImage> {
             val multipartData = call.receiveMultipart()
-            var fileDescription = JSONObject()
+            val fileDescription = JSONObject()
             var fileName = ""
 
             multipartData.forEachPart { part ->
@@ -91,24 +87,24 @@ fun Route.productRoutes(
                     }
                     is PartData.FileItem -> {
                         fileName = part.originalFileName as String
-                        var fileBytes = part.streamProvider().readBytes()
+                        val fileBytes = part.streamProvider().readBytes()
                         File("uploads/$fileName").writeBytes(fileBytes)
                     }
                 }
             }
 
-            var id : String = fileDescription["id"] as String
+            val id : String = fileDescription["id"] as String
 
             var barcode: String? = null
             if (fileDescription["barcode"] != null)
                 barcode = fileDescription["barcode"] as String
 
-            var product_id: String? = null
+            var productId: String? = null
             if (fileDescription["product_id"] != null)
-                product_id = fileDescription["product_id"] as String
+                productId = fileDescription["product_id"] as String
 
             val imageRequest = ImageRequest(
-                ULong.valueOf(id), barcode, product_id?.toLong(), "uploads/$fileName"
+                ULong.valueOf(id), barcode, productId?.toLong(), "uploads/$fileName"
             )
 
             val response = withContext(Dispatchers.IO) {
@@ -160,5 +156,4 @@ fun Route.productRoutes(
             call.respond(mapOf("data" to response))
         }
     }
-
 }
