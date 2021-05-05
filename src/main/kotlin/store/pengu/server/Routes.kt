@@ -112,7 +112,7 @@ object UpdateProduct
 @Location("/product/addBarcode")
 object AddBarcode
 
-@Location("product/{id}")
+@Location("/product/{id}")
 data class GetProduct(val id: Long)
 
 
@@ -180,3 +180,10 @@ data class TimeQueue(val latitude: Double, val longitude: Double)
  */
 @Location("/translation/{string}")
 data class Translation(val string: String)
+
+
+/**
+ * Ratings
+ */
+@Location("/ratings/{barcode}/{rating}")
+data class Ratings(val barcode: String, val rating: Int)

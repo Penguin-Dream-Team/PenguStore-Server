@@ -3,6 +3,7 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.NotFoundException
 import store.pengu.server.data.LocalProductPrice
 import store.pengu.server.data.Product
 import store.pengu.server.db.pengustore.Tables
@@ -118,6 +119,54 @@ class ProductDao(
                     ratings = ratings
                 )
             }
+    }
+
+    private fun getProduct(userId: Long, barcode: String, create: DSLContext = dslContext): Product? {
+        return create.select()
+            .from(PRODUCTS)
+            .where(PRODUCTS.BARCODE.eq(barcode))
+            .fetchOne()?.map {
+                var ratings = mutableListOf<Int>()
+                var userRating = -1
+                var productRating = -1f
+
+                if (it[PRODUCTS.BARCODE] != null) {
+                    ratings = getProductRatings(it[PRODUCTS.BARCODE])
+                    userRating = getUserRating(userId, it[PRODUCTS.BARCODE])
+                    if (ratings.isNotEmpty())
+                        productRating = ratings.sum().toFloat() / ratings.size
+                }
+
+                Product(
+                    id = it[PRODUCTS.ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE],
+                    productRating = productRating,
+                    userRating = userRating,
+                    ratings = ratings
+                )
+            }
+    }
+
+    fun addRating(userId: Long, barcode: String, userRating: Int, create: DSLContext = dslContext): Product {
+        val product = getProduct(userId, barcode) ?: throw NotFoundException("Product with specified barcode not found")
+        if (product.userRating != -1) throw Exception("User $userId already rated this product")
+
+        create.insertInto(RATINGS, RATINGS.USER_ID, RATINGS.BARCODE, RATINGS.RATING)
+            .values(ULong.valueOf(userId), barcode, userRating)
+            .execute()
+
+        val ratings = getProductRatings(barcode)
+        val productRating = ratings.sum().toFloat() / ratings.size
+
+        return Product(
+            id = product.id,
+            name = product.name,
+            barcode = barcode,
+            productRating = productRating,
+            userRating = userRating,
+            ratings = ratings
+        )
     }
 
 

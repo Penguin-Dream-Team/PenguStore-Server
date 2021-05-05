@@ -16,6 +16,7 @@ import store.pengu.server.application.user
 import store.pengu.server.daos.ProductDao
 import store.pengu.server.data.Product
 import store.pengu.server.routes.requests.ImageRequest
+import store.pengu.server.routes.responses.Response
 import java.io.File
 
 fun Route.productRoutes(
@@ -75,7 +76,6 @@ fun Route.productRoutes(
 
 
         // Images
-
         post<AddImage> {
             val multipartData = call.receiveMultipart()
             val fileDescription = JSONObject()
@@ -155,6 +155,20 @@ fun Route.productRoutes(
                 }
             }
             call.respond(mapOf("data" to response))
+        }
+
+        // Ratings
+        post<Ratings> { param ->
+            val userId = call.user.id.toLong()
+            try {
+                val product = withContext(Dispatchers.IO) {
+                    productDao.addRating(userId, param.barcode, param.rating)
+                }
+                call.respond(mapOf("data" to product))
+
+            } catch (e: Exception) {
+                throw BadRequestException(e.localizedMessage)
+            }
         }
     }
 }
