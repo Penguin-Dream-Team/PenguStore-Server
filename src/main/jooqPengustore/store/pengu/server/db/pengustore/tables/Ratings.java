@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Row3;
@@ -50,9 +49,9 @@ public class Ratings extends TableImpl<RatingsRecord> {
     }
 
     /**
-     * The column <code>ratings.id</code>.
+     * The column <code>ratings.user_id</code>.
      */
-    public final TableField<RatingsRecord, ULong> ID = createField(DSL.name("id"), SQLDataType.BIGINTUNSIGNED.nullable(false).identity(true), this, "");
+    public final TableField<RatingsRecord, ULong> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
 
     /**
      * The column <code>ratings.barcode</code>.
@@ -103,11 +102,6 @@ public class Ratings extends TableImpl<RatingsRecord> {
     }
 
     @Override
-    public Identity<RatingsRecord, ULong> getIdentity() {
-        return (Identity<RatingsRecord, ULong>) super.getIdentity();
-    }
-
-    @Override
     public UniqueKey<RatingsRecord> getPrimaryKey() {
         return Keys.KEY_RATINGS_PRIMARY;
     }
@@ -115,6 +109,20 @@ public class Ratings extends TableImpl<RatingsRecord> {
     @Override
     public List<UniqueKey<RatingsRecord>> getKeys() {
         return Arrays.<UniqueKey<RatingsRecord>>asList(Keys.KEY_RATINGS_PRIMARY);
+    }
+
+    @Override
+    public List<ForeignKey<RatingsRecord, ?>> getReferences() {
+        return Arrays.<ForeignKey<RatingsRecord, ?>>asList(Keys.RATINGS_IBFK_1);
+    }
+
+    private transient Users _users;
+
+    public Users users() {
+        if (_users == null)
+            _users = new Users(this, Keys.RATINGS_IBFK_1);
+
+        return _users;
     }
 
     @Override

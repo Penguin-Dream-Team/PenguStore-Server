@@ -65,8 +65,9 @@ fun Route.productRoutes(
         }
 
         get<GetProduct> { param ->
+            val userId = call.user.id.toLong()
             val product = withContext(Dispatchers.IO) {
-                productDao.getProduct(param.id)
+                productDao.getProduct(userId, param.id)
             } ?: throw NotFoundException("Product with specified id not found")
 
             call.respond(mapOf("data" to product))

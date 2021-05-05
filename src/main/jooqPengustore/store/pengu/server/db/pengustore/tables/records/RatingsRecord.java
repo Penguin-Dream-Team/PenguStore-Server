@@ -5,7 +5,7 @@ package store.pengu.server.db.pengustore.tables.records;
 
 
 import org.jooq.Field;
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Record3;
 import org.jooq.Row3;
 import org.jooq.impl.UpdatableRecordImpl;
@@ -23,17 +23,17 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>ratings.id</code>.
+     * Setter for <code>ratings.user_id</code>.
      */
-    public RatingsRecord setId(ULong value) {
+    public RatingsRecord setUserId(ULong value) {
         set(0, value);
         return this;
     }
 
     /**
-     * Getter for <code>ratings.id</code>.
+     * Getter for <code>ratings.user_id</code>.
      */
-    public ULong getId() {
+    public ULong getUserId() {
         return (ULong) get(0);
     }
 
@@ -72,8 +72,8 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<ULong> key() {
-        return (Record1) super.key();
+    public Record2<ULong, String> key() {
+        return (Record2) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -92,7 +92,7 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
 
     @Override
     public Field<ULong> field1() {
-        return Ratings.RATINGS.ID;
+        return Ratings.RATINGS.USER_ID;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
 
     @Override
     public ULong component1() {
-        return getId();
+        return getUserId();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
 
     @Override
     public ULong value1() {
-        return getId();
+        return getUserId();
     }
 
     @Override
@@ -137,7 +137,7 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
 
     @Override
     public RatingsRecord value1(ULong value) {
-        setId(value);
+        setUserId(value);
         return this;
     }
 
@@ -175,10 +175,10 @@ public class RatingsRecord extends UpdatableRecordImpl<RatingsRecord> implements
     /**
      * Create a detached, initialised RatingsRecord
      */
-    public RatingsRecord(ULong id, String barcode, Integer rating) {
+    public RatingsRecord(ULong userId, String barcode, Integer rating) {
         super(Ratings.RATINGS);
 
-        setId(id);
+        setUserId(userId);
         setBarcode(barcode);
         setRating(rating);
     }

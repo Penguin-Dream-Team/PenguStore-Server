@@ -4,6 +4,7 @@ data class Product(
     val id: Long,
     val name: String,
     val barcode: String?,
-    val rating: Float,
+    val productRating: Float,
+    val userRating: Int,
     val ratings: List<Int>
 )

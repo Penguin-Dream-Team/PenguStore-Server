@@ -17,31 +17,31 @@ public class Ratings implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final ULong   id;
+    private final ULong   userId;
     private final String  barcode;
     private final Integer rating;
 
     public Ratings(Ratings value) {
-        this.id = value.id;
+        this.userId = value.userId;
         this.barcode = value.barcode;
         this.rating = value.rating;
     }
 
     public Ratings(
-        ULong   id,
+        ULong   userId,
         String  barcode,
         Integer rating
     ) {
-        this.id = id;
+        this.userId = userId;
         this.barcode = barcode;
         this.rating = rating;
     }
 
     /**
-     * Getter for <code>ratings.id</code>.
+     * Getter for <code>ratings.user_id</code>.
      */
-    public ULong getId() {
-        return this.id;
+    public ULong getUserId() {
+        return this.userId;
     }
 
     /**
@@ -62,7 +62,7 @@ public class Ratings implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder("Ratings (");
 
-        sb.append(id);
+        sb.append(userId);
         sb.append(", ").append(barcode);
         sb.append(", ").append(rating);
 

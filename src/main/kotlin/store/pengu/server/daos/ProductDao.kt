@@ -31,7 +31,8 @@ class ProductDao(
                         id = it[PRODUCTS.ID].toLong(),
                         name = it[PRODUCTS.NAME],
                         barcode = it[PRODUCTS.BARCODE],
-                        rating = -1f,
+                        productRating = -1f,
+                        userRating = -1,
                         ratings = mutableListOf()
                     )
                 }
@@ -92,25 +93,28 @@ class ProductDao(
         return res
     }
 
-    fun getProduct(id: Long, create: DSLContext = dslContext): Product? {
+    fun getProduct(userId: Long, productId: Long, create: DSLContext = dslContext): Product? {
         return create.select()
             .from(PRODUCTS)
-            .where(PRODUCTS.ID.eq(ULong.valueOf(id)))
+            .where(PRODUCTS.ID.eq(ULong.valueOf(productId)))
             .fetchOne()?.map {
                 var ratings = mutableListOf<Int>()
-                var rating = -1f
+                var userRating = -1
+                var productRating = -1f
 
                 if (it[PRODUCTS.BARCODE] != null) {
-                    ratings = getRatings(it[PRODUCTS.BARCODE])
+                    ratings = getProductRatings(it[PRODUCTS.BARCODE])
+                    userRating = getUserRating(userId, it[PRODUCTS.BARCODE])
                     if (ratings.isNotEmpty())
-                        rating = ratings.sum().toFloat() / ratings.size
+                        productRating = ratings.sum().toFloat() / ratings.size
                 }
 
                 Product(
                     id = it[PRODUCTS.ID].toLong(),
                     name = it[PRODUCTS.NAME],
                     barcode = it[PRODUCTS.BARCODE],
-                    rating = rating,
+                    productRating = productRating,
+                    userRating = userRating,
                     ratings = ratings
                 )
             }
@@ -118,7 +122,19 @@ class ProductDao(
 
 
     // Aux
-    private fun getRatings(barcode: String, create: DSLContext = dslContext): MutableList<Int> {
+    private fun getUserRating(userId: Long, barcode: String, create: DSLContext = dslContext): Int {
+        val userRating =  create.select()
+            .from(RATINGS)
+            .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
+            .and(RATINGS.BARCODE.eq(barcode))
+            .fetchOne()?.map {
+                it[RATINGS.RATING]
+            }
+
+        return userRating ?: -1
+    }
+
+    private fun getProductRatings(barcode: String, create: DSLContext = dslContext): MutableList<Int> {
         return create.select()
             .from(RATINGS)
             .where(RATINGS.BARCODE.eq(barcode))

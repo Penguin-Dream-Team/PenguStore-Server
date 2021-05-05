@@ -145,16 +145,15 @@ VALUES
     ("cebolas123", "https://media-manager.noticiasaominuto.com/1920/1582634326/naom_5e5514ead7999.jpg?crop_params=eyJsYW5kc2NhcGUiOnsiY3JvcFdpZHRoIjoyNDU1LCJjcm9wSGVpZ2h0IjoxMzgxLCJjcm9wWCI6MCwiY3JvcFkiOjU4fX0=");
 
 -- Product Ratigns
-INSERT INTO RATINGS (barcode, rating)
+INSERT INTO RATINGS (user_id, barcode, rating)
 VALUES
-    ("seabird789987", 2),
-    ("seabird789987", 3),
-    ("crab159357", 1),
-    ("crab159357", 2),
-    ("crab159357", 3),
-    ("crab159357", 4),
-    ("crab159357", 5),
-    ("crab159357", 5);
+    (1, "seabird789987", 2),
+    (2, "seabird789987", 3),
+    (1, "crab159357", 5),
+    (2, "crab159357", 4),
+    (3, "crab159357", 4),
+    (4, "crab159357", 3),
+    (5, "crab159357", 2);
 
 -- Beacons queue noise
 INSERT INTO BEACONS (num_items, latitude, longitude)
