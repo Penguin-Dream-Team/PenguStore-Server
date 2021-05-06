@@ -21,7 +21,6 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-import org.jooq.types.ULong;
 
 import store.pengu.server.db.pengustore.DefaultSchema;
 import store.pengu.server.db.pengustore.Indexes;
@@ -53,12 +52,12 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
     /**
      * The column <code>smart_sorting.row_number</code>.
      */
-    public final TableField<SmartSortingRecord, ULong> ROW_NUMBER = createField(DSL.name("row_number"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
+    public final TableField<SmartSortingRecord, String> ROW_NUMBER = createField(DSL.name("row_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>smart_sorting.col_number</code>.
      */
-    public final TableField<SmartSortingRecord, ULong> COL_NUMBER = createField(DSL.name("col_number"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
+    public final TableField<SmartSortingRecord, String> COL_NUMBER = createField(DSL.name("col_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>smart_sorting.cell_val</code>.
@@ -171,7 +170,7 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<ULong, ULong, Integer> fieldsRow() {
+    public Row3<String, String, Integer> fieldsRow() {
         return (Row3) super.fieldsRow();
     }
 }

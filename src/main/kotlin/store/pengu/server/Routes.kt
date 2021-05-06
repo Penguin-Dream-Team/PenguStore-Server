@@ -125,8 +125,9 @@ object  UpdateShoppingList
 @Location("/shoppingList/{shopping_list_id}")
 data class GenShoppingList(val shopping_list_id: Long)
 
-@Location("/shoppingList/smartSortingInfo/{product_id}")
-data class UpdateSmartSortingEntries(val product_id: Long)
+@Location("/shoppingList/{shopping_list_id}/smartSortingInfo/{barcode}")
+data class UpdateSmartSortingEntries(val shopping_list_id: Long, val barcode: String)
+
 
 /**
  * Prices
@@ -163,8 +164,8 @@ data class GetProductImagesProductId(val product_id: Long)
 @Location("/cart")
 object BuyCart
 
-@Location("/cart/suggestion/{product_id}")
-data class GetProductSuggestion(val product_id: Long)
+@Location("/cart/suggestion/{barcode}")
+data class GetProductSuggestion(val barcode: String)
 
 /**
  * Queue

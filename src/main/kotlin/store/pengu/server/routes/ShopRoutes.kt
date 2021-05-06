@@ -82,7 +82,7 @@ fun Route.shopRoutes(
         put<UpdateSmartSortingEntries> { param ->
             val request = call.receive<UpdateSmartSortingRequest>()
             val response = withContext(Dispatchers.IO) {
-                shopDao.updateSmartSortingEntries(param.product_id, request.remainingItems)
+                shopDao.updateSmartSortingEntries(param.barcode, param.shopping_list_id, request.remainingItems)
             }
 
             call.respond(mapOf("data" to response))
@@ -136,7 +136,7 @@ fun Route.shopRoutes(
 
         get<GetProductSuggestion> { param ->
             val suggestion = withContext(Dispatchers.IO) {
-                shopDao.getProductSuggestion(param.product_id)
+                shopDao.getProductSuggestion(param.barcode)
             }
 
             call.respond(mapOf("data" to suggestion))

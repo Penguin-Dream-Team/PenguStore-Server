@@ -21,7 +21,6 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
-import org.jooq.types.ULong;
 
 import store.pengu.server.db.pengustore.DefaultSchema;
 import store.pengu.server.db.pengustore.Indexes;
@@ -53,12 +52,12 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
     /**
      * The column <code>suggestions.row_number</code>.
      */
-    public final TableField<SuggestionsRecord, ULong> ROW_NUMBER = createField(DSL.name("row_number"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
+    public final TableField<SuggestionsRecord, String> ROW_NUMBER = createField(DSL.name("row_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>suggestions.col_number</code>.
      */
-    public final TableField<SuggestionsRecord, ULong> COL_NUMBER = createField(DSL.name("col_number"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
+    public final TableField<SuggestionsRecord, String> COL_NUMBER = createField(DSL.name("col_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
      * The column <code>suggestions.cell_val</code>.
@@ -171,7 +170,7 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<ULong, ULong, Integer> fieldsRow() {
+    public Row3<String, String, Integer> fieldsRow() {
         return (Row3) super.fieldsRow();
     }
 }
