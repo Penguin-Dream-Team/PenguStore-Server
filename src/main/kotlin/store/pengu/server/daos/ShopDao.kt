@@ -121,6 +121,73 @@ class ShopDao(
         )
     }
 
+    fun getShoppingListProducts(
+        shopId: Long,
+        userId: Long,
+        create: DSLContext = dslContext
+    ): List<ProductInShoppingList> {
+        return create.transactionResult { configuration ->
+            val transaction = DSL.using(configuration)
+
+            val shop = getShoppingList(shopId, transaction)
+            val condition = ListDao.getNearbyCondition(
+                CROWD_PRODUCT_PRICES.LATITUDE,
+                shop.latitude,
+                CROWD_PRODUCT_PRICES.LONGITUDE,
+                shop.longitude
+            ).or(
+                ListDao.getNearbyCondition(
+                    LOCAL_PRODUCT_PRICES.LATITUDE,
+                    shop.latitude,
+                    LOCAL_PRODUCT_PRICES.LONGITUDE,
+                    shop.longitude
+                )
+            )
+
+            transaction.select()
+                .from(USERS)
+                .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
+                .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
+                .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+                .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
+                .leftJoin(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
+                .leftJoin(LOCAL_PRODUCT_PRICES).on(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(PRODUCTS.ID))
+                .where(USERS.ID.eq(ULong.valueOf(userId)))
+                .and(PANTRY_PRODUCTS.WANT_QTY.ge(PANTRY_PRODUCTS.HAVE_QTY + 1))
+                .and(condition)
+                .fetch().map {
+                    ProductInShoppingList(
+                        id = it[PRODUCTS.ID].toLong(),
+                        listId = it[PANTRIES.ID].toLong(),
+                        name = it[PRODUCTS.NAME],
+                        barcode = it[PRODUCTS.BARCODE],
+                        amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
+                        amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
+                        price = ProductDao.price(
+                            it[PRODUCTS.BARCODE],
+                            it[CROWD_PRODUCT_PRICES.PRICE],
+                            it[LOCAL_PRODUCT_PRICES.PRICE]
+                        ),
+                        image = ProductDao.image(
+                            barcode = it[PRODUCTS.BARCODE],
+                            id = it[PRODUCTS.ID].toLong(),
+                            transaction
+                        )
+                    )
+                }
+        }
+    }
+
+    private fun getShoppingList(id: Long, create: DSLContext = dslContext): ShoppingList {
+        return create.select()
+            .from(SHOPPING_LIST)
+            .where(SHOPPING_LIST.ID.eq(ULong.valueOf(id)))
+            .fetchOne()?.map {
+                getShoppingListInformation(it, create)
+            } ?: throw NotFoundException("Shopping List with specified code not found")
+    }
+
+
     /**
      *
      */
@@ -135,72 +202,6 @@ class ShopDao(
             .execute() == 1
     }
 
-
-    fun getShoppingList(id: Long, create: DSLContext = dslContext): ShoppingList? {
-        return create.select()
-            .from(SHOPPING_LIST)
-            .where(SHOPPING_LIST.ID.eq(ULong.valueOf(id)))
-            .fetchOne()?.map {
-                ShoppingList(
-                    id = it[SHOPPING_LIST.ID].toLong(),
-                    name = it[SHOPPING_LIST.NAME],
-                    code = it[SHOPPING_LIST.CODE],
-                    latitude = it[SHOPPING_LIST.LATITUDE],
-                    longitude = it[SHOPPING_LIST.LONGITUDE],
-                    color = it[SHOPPING_LIST.COLOR],
-                    shared = create.fetchCount(SHOPPING_LIST_USERS.where(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(it[SHOPPING_LIST.ID]))) > 1
-                )
-            }
-    }
-
-    fun genShoppingList(
-        user_id: Long,
-        latitude: Double,
-        longitude: Double,
-        create: DSLContext = dslContext
-    ): List<ProductInShoppingList> {
-        // TODO Trocar estes valores pa coisas q facam sentido
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(USERS.ID.eq(ULong.valueOf(user_id)))
-        condition = condition.and(PANTRY_PRODUCTS.WANT_QTY.ge(PANTRY_PRODUCTS.HAVE_QTY + 1))
-
-        var condition3 = DSL.noCondition() // Alternatively, use trueCondition()
-        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LATITUDE.le(latitude + 0.0001))
-        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(latitude - 0.0001))
-        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.0001))
-        condition3 = condition3.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.0001))
-
-        var condition4 = DSL.noCondition() // Alternatively, use trueCondition()
-        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LATITUDE.le(latitude + 0.0001))
-        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LATITUDE.ge(latitude - 0.0001))
-        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.0001))
-        condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.0001))
-
-        var condition2 = condition3.or(condition4)
-
-        condition = condition.and(condition2)
-
-        return create.select()
-            .from(USERS)
-            .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
-            .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
-            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
-            .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
-            .leftJoin(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
-            .leftJoin(LOCAL_PRODUCT_PRICES).on(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(PRODUCTS.ID))
-            .where(condition)
-            .fetch().map {
-                ProductInShoppingList(
-                    product_id = it[PRODUCTS.ID].toLong(),
-                    pantry_id = it[PANTRIES.ID].toLong(),
-                    name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE],
-                    amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
-                    amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
-                    price = price(it[PRODUCTS.BARCODE], it[CROWD_PRODUCT_PRICES.PRICE], it[LOCAL_PRODUCT_PRICES.PRICE])
-                )
-            }
-    }
 
     // Prices
 
@@ -461,13 +462,6 @@ class ShopDao(
 
 
     // Aux
-
-    fun price(barcode: String?, crowd_price: Double?, local_price: Double?): Double {
-        return if (barcode != null)
-            crowd_price ?: throw NotFoundException("Crowd Price not found")
-        else
-            local_price ?: throw NotFoundException("Local Price not found")
-    }
 
     fun getBeacon(latitude: Double, longitude: Double, create: DSLContext = dslContext): Beacon? {
         // TODO Trocar estes valores pa coisas q facam sentido

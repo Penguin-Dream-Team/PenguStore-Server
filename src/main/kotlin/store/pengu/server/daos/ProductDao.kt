@@ -3,6 +3,7 @@ package store.pengu.server.daos
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
+import store.pengu.server.NotFoundException
 import store.pengu.server.data.Local_Product_Price
 import store.pengu.server.data.Product
 import store.pengu.server.db.pengustore.Tables
@@ -20,27 +21,58 @@ class ProductDao(
 ) {
     private val dslContext = DSL.using(conf)
 
+    companion object {
+        fun price(barcode: String?, crowd_price: Double?, local_price: Double?): Double {
+            return if (barcode != null)
+                crowd_price ?: throw NotFoundException("Crowd Price not found")
+            else
+                local_price ?: throw NotFoundException("Local Price not found")
+        }
+
+        fun image(barcode: String?, id: Long, create: DSLContext): String? {
+            return barcode?.let { bc ->
+                create.select(CROWD_PRODUCT_IMAGES.IMAGE_URL)
+                    .from(CROWD_PRODUCT_IMAGES)
+                    .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(bc))
+                    .limit(1)
+                    .fetchOne()?.map { it[CROWD_PRODUCT_IMAGES.IMAGE_URL] }
+            } ?: create.select(LOCAL_PRODUCT_IMAGES.IMAGE_URL)
+                .from(LOCAL_PRODUCT_IMAGES)
+                .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(ULong.valueOf(id)))
+                .limit(1)
+                .fetchOne()?.map { it[LOCAL_PRODUCT_IMAGES.IMAGE_URL] }
+        }
+
+    }
+
+    /**
+     *
+     */
+
+
     // Products
 
     fun addProduct(product: Product, create: DSLContext = dslContext): Product? {
-        return  create.insertInto(PRODUCTS,
-                PRODUCTS.NAME, PRODUCTS.BARCODE)
-                .values(product.name, product.barcode)
-                .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
-                .fetchOne()?.map {
-                    Product(
-                        id = it[PRODUCTS.ID].toLong(),
-                        name = it[PRODUCTS.NAME],
-                        barcode = it[PRODUCTS.BARCODE]
-                    )
-                }
+        return create.insertInto(
+            PRODUCTS,
+            PRODUCTS.NAME, PRODUCTS.BARCODE
+        )
+            .values(product.name, product.barcode)
+            .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
+            .fetchOne()?.map {
+                Product(
+                    id = it[PRODUCTS.ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE]
+                )
+            }
     }
 
     fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
         return create.update(PRODUCTS)
-                .set(PRODUCTS.NAME, product.name)
-                .where(PRODUCTS.ID.eq(ULong.valueOf(product.id)))
-                .execute() == 1
+            .set(PRODUCTS.NAME, product.name)
+            .where(PRODUCTS.ID.eq(ULong.valueOf(product.id)))
+            .execute() == 1
     }
 
     fun addBarcode(product: Product, create: DSLContext = dslContext): Boolean {
@@ -52,7 +84,7 @@ class ProductDao(
         val localPrices = create.select()
             .from(LOCAL_PRODUCT_PRICES)
             .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(product.id)))
-            .fetch().map{
+            .fetch().map {
                 Local_Product_Price(
                     product_id = it[LOCAL_PRODUCT_PRICES.PRODUCT_ID].toLong(),
                     price = it[LOCAL_PRODUCT_PRICES.PRICE],
@@ -67,22 +99,26 @@ class ProductDao(
         itr.forEach {
             condition = DSL.noCondition()
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(product.barcode))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(it.latitude+0.0001))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(it.latitude-0.0001))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(it.longitude+0.0001))
-            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(it.longitude-0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(it.latitude + 0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(it.latitude - 0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.le(it.longitude + 0.0001))
+            condition = condition.and(CROWD_PRODUCT_PRICES.LONGITUDE.ge(it.longitude - 0.0001))
 
             val crowd_price = create.select()
                 .from(CROWD_PRODUCT_PRICES)
                 .where(condition)
-                .fetchOne()?.map{
+                .fetchOne()?.map {
                     it[CROWD_PRODUCT_PRICES.PRICE]
                 }
 
-            if (crowd_price == null){
+            if (crowd_price == null) {
                 create.insertInto(
                     Tables.CROWD_PRODUCT_PRICES,
-                    Tables.CROWD_PRODUCT_PRICES.BARCODE, Tables.CROWD_PRODUCT_PRICES.PRICE, Tables.CROWD_PRODUCT_PRICES.LATITUDE, Tables.CROWD_PRODUCT_PRICES.LONGITUDE)
+                    Tables.CROWD_PRODUCT_PRICES.BARCODE,
+                    Tables.CROWD_PRODUCT_PRICES.PRICE,
+                    Tables.CROWD_PRODUCT_PRICES.LATITUDE,
+                    Tables.CROWD_PRODUCT_PRICES.LONGITUDE
+                )
                     .values(product.barcode, it.price, it.latitude, it.longitude)
                     .execute() == 1
             }

@@ -55,6 +55,19 @@ fun Route.pantryRoutes(
             call.respond(Response(pantry))
         }
 
+        get<PantryGet> { param ->
+            val userId = call.user.id
+            val entries = withContext(Dispatchers.IO) {
+                if (!pantryDao.userHasPantry(param.id, userId.toLong())) {
+                    throw NotFoundException("Pantry not found")
+                }
+
+                pantryDao.getPantryProducts(param.id)
+            }
+
+            call.respond(Response(entries))
+        }
+
         /**
          *
          */
@@ -117,14 +130,6 @@ fun Route.pantryRoutes(
                 }
             }
             call.respond(mapOf("data" to response))
-        }
-
-        get<PantryGetProducts> { param ->
-            val entries = withContext(Dispatchers.IO) {
-                pantryDao.getPantryProducts(param.id)
-            }
-
-            call.respond(mapOf("data" to entries))
         }
     }
 

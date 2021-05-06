@@ -39,18 +39,20 @@ class ListDao(
             } ?: throw NotFoundException("No list found nearby the specified location")
     }
 
-    fun <R : Record> getNearbyCondition(
-        latitudeColumn: TableField<R, Double>,
-        latitude: Double,
-        longitudeColumn: TableField<R, Double>,
-        longitude: Double,
-        offset: Double = 0.0001
-    ): Condition {
-        var condition = DSL.noCondition()
-        condition = condition.and(latitudeColumn.le(latitude + offset))
-        condition = condition.and(latitudeColumn.ge(latitude - offset))
-        condition = condition.and(longitudeColumn.le(longitude + offset))
-        condition = condition.and(longitudeColumn.ge(longitude - offset))
-        return condition
+    companion object {
+        fun <R : Record> getNearbyCondition(
+            latitudeColumn: TableField<R, Double>,
+            latitude: Double,
+            longitudeColumn: TableField<R, Double>,
+            longitude: Double,
+            offset: Double = 0.0001
+        ): Condition {
+            var condition = DSL.noCondition()
+            condition = condition.and(latitudeColumn.le(latitude + offset))
+            condition = condition.and(latitudeColumn.ge(latitude - offset))
+            condition = condition.and(longitudeColumn.le(longitude + offset))
+            condition = condition.and(longitudeColumn.ge(longitude - offset))
+            return condition
+        }
     }
 }
