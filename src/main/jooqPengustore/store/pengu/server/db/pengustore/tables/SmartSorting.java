@@ -12,7 +12,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row3;
+import org.jooq.Row4;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -21,6 +21,7 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.types.ULong;
 
 import store.pengu.server.db.pengustore.DefaultSchema;
 import store.pengu.server.db.pengustore.Indexes;
@@ -48,6 +49,11 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
     public Class<SmartSortingRecord> getRecordType() {
         return SmartSortingRecord.class;
     }
+
+    /**
+     * The column <code>smart_sorting.shopping_list_id</code>.
+     */
+    public final TableField<SmartSortingRecord, ULong> SHOPPING_LIST_ID = createField(DSL.name("shopping_list_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
 
     /**
      * The column <code>smart_sorting.row_number</code>.
@@ -104,7 +110,7 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.SMART_SORTING_COL_NUMBER);
+        return Arrays.<Index>asList(Indexes.SMART_SORTING_COL_NUMBER, Indexes.SMART_SORTING_ROW_NUMBER);
     }
 
     @Override
@@ -119,17 +125,18 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
 
     @Override
     public List<ForeignKey<SmartSortingRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<SmartSortingRecord, ?>>asList(Keys.SMART_SORTING_IBFK_1, Keys.SMART_SORTING_IBFK_2);
+        return Arrays.<ForeignKey<SmartSortingRecord, ?>>asList(Keys.SMART_SORTING_IBFK_1, Keys.SMART_SORTING_IBFK_2, Keys.SMART_SORTING_IBFK_3);
     }
 
-    private transient Products _smartSortingIbfk_1;
+    private transient ShoppingList _shoppingList;
     private transient Products _smartSortingIbfk_2;
+    private transient Products _smartSortingIbfk_3;
 
-    public Products smartSortingIbfk_1() {
-        if (_smartSortingIbfk_1 == null)
-            _smartSortingIbfk_1 = new Products(this, Keys.SMART_SORTING_IBFK_1);
+    public ShoppingList shoppingList() {
+        if (_shoppingList == null)
+            _shoppingList = new ShoppingList(this, Keys.SMART_SORTING_IBFK_1);
 
-        return _smartSortingIbfk_1;
+        return _shoppingList;
     }
 
     public Products smartSortingIbfk_2() {
@@ -137,6 +144,13 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
             _smartSortingIbfk_2 = new Products(this, Keys.SMART_SORTING_IBFK_2);
 
         return _smartSortingIbfk_2;
+    }
+
+    public Products smartSortingIbfk_3() {
+        if (_smartSortingIbfk_3 == null)
+            _smartSortingIbfk_3 = new Products(this, Keys.SMART_SORTING_IBFK_3);
+
+        return _smartSortingIbfk_3;
     }
 
     @Override
@@ -166,11 +180,11 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row3 type methods
+    // Row4 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<String, String, Integer> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<ULong, String, String, Integer> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 }

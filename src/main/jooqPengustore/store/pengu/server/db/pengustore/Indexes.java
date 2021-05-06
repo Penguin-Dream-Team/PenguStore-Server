@@ -32,6 +32,8 @@ public class Indexes {
     public static final Index SUGGESTIONS_COL_NUMBER = Internal.createIndex(DSL.name("col_number"), Suggestions.SUGGESTIONS, new OrderField[] { Suggestions.SUGGESTIONS.COL_NUMBER }, false);
     public static final Index LOCAL_PRODUCT_IMAGES_PRODUCT_ID = Internal.createIndex(DSL.name("product_id"), LocalProductImages.LOCAL_PRODUCT_IMAGES, new OrderField[] { LocalProductImages.LOCAL_PRODUCT_IMAGES.PRODUCT_ID }, false);
     public static final Index PANTRY_PRODUCTS_PRODUCT_ID = Internal.createIndex(DSL.name("product_id"), PantryProducts.PANTRY_PRODUCTS, new OrderField[] { PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID }, false);
+    public static final Index SMART_SORTING_ROW_NUMBER = Internal.createIndex(DSL.name("row_number"), SmartSorting.SMART_SORTING, new OrderField[] { SmartSorting.SMART_SORTING.ROW_NUMBER }, false);
+    public static final Index SUGGESTIONS_ROW_NUMBER = Internal.createIndex(DSL.name("row_number"), Suggestions.SUGGESTIONS, new OrderField[] { Suggestions.SUGGESTIONS.ROW_NUMBER }, false);
     public static final Index PANTRIES_USERS_USER_ID = Internal.createIndex(DSL.name("user_id"), PantriesUsers.PANTRIES_USERS, new OrderField[] { PantriesUsers.PANTRIES_USERS.USER_ID }, false);
     public static final Index PRODUCTS_USERS_USER_ID = Internal.createIndex(DSL.name("user_id"), ProductsUsers.PRODUCTS_USERS, new OrderField[] { ProductsUsers.PRODUCTS_USERS.USER_ID }, false);
     public static final Index SHOPPING_LIST_USERS_USER_ID = Internal.createIndex(DSL.name("user_id"), ShoppingListUsers.SHOPPING_LIST_USERS, new OrderField[] { ShoppingListUsers.SHOPPING_LIST_USERS.USER_ID }, false);

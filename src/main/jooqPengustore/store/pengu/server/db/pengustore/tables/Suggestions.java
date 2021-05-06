@@ -12,7 +12,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row3;
+import org.jooq.Row4;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -21,6 +21,7 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.types.ULong;
 
 import store.pengu.server.db.pengustore.DefaultSchema;
 import store.pengu.server.db.pengustore.Indexes;
@@ -48,6 +49,11 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
     public Class<SuggestionsRecord> getRecordType() {
         return SuggestionsRecord.class;
     }
+
+    /**
+     * The column <code>suggestions.shopping_list_id</code>.
+     */
+    public final TableField<SuggestionsRecord, ULong> SHOPPING_LIST_ID = createField(DSL.name("shopping_list_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
 
     /**
      * The column <code>suggestions.row_number</code>.
@@ -104,7 +110,7 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.SUGGESTIONS_COL_NUMBER);
+        return Arrays.<Index>asList(Indexes.SUGGESTIONS_COL_NUMBER, Indexes.SUGGESTIONS_ROW_NUMBER);
     }
 
     @Override
@@ -119,17 +125,18 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
 
     @Override
     public List<ForeignKey<SuggestionsRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<SuggestionsRecord, ?>>asList(Keys.SUGGESTIONS_IBFK_1, Keys.SUGGESTIONS_IBFK_2);
+        return Arrays.<ForeignKey<SuggestionsRecord, ?>>asList(Keys.SUGGESTIONS_IBFK_1, Keys.SUGGESTIONS_IBFK_2, Keys.SUGGESTIONS_IBFK_3);
     }
 
-    private transient Products _suggestionsIbfk_1;
+    private transient ShoppingList _shoppingList;
     private transient Products _suggestionsIbfk_2;
+    private transient Products _suggestionsIbfk_3;
 
-    public Products suggestionsIbfk_1() {
-        if (_suggestionsIbfk_1 == null)
-            _suggestionsIbfk_1 = new Products(this, Keys.SUGGESTIONS_IBFK_1);
+    public ShoppingList shoppingList() {
+        if (_shoppingList == null)
+            _shoppingList = new ShoppingList(this, Keys.SUGGESTIONS_IBFK_1);
 
-        return _suggestionsIbfk_1;
+        return _shoppingList;
     }
 
     public Products suggestionsIbfk_2() {
@@ -137,6 +144,13 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
             _suggestionsIbfk_2 = new Products(this, Keys.SUGGESTIONS_IBFK_2);
 
         return _suggestionsIbfk_2;
+    }
+
+    public Products suggestionsIbfk_3() {
+        if (_suggestionsIbfk_3 == null)
+            _suggestionsIbfk_3 = new Products(this, Keys.SUGGESTIONS_IBFK_3);
+
+        return _suggestionsIbfk_3;
     }
 
     @Override
@@ -166,11 +180,11 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row3 type methods
+    // Row4 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<String, String, Integer> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<ULong, String, String, Integer> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 }
