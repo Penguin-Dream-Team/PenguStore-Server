@@ -161,6 +161,8 @@ data class GetProductImagesProductId(val product_id: Long)
 @Location("/cart")
 object BuyCart
 
+@Location("/cart/suggestion/{product_id}")
+data class GetProductSuggestion(val product_id: Long)
 
 /**
  * Queue

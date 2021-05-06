@@ -18,6 +18,7 @@ import store.pengu.server.db.pengustore.tables.Ratings;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Stats;
+import store.pengu.server.db.pengustore.tables.Suggestions;
 import store.pengu.server.db.pengustore.tables.Translation;
 import store.pengu.server.db.pengustore.tables.Users;
 
@@ -97,6 +98,11 @@ public class Tables {
      * The table <code>stats</code>.
      */
     public static final Stats STATS = Stats.STATS;
+
+    /**
+     * The table <code>suggestions</code>.
+     */
+    public static final Suggestions SUGGESTIONS = Suggestions.SUGGESTIONS;
 
     /**
      * The table <code>translation</code>.

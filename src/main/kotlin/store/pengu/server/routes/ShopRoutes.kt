@@ -59,11 +59,6 @@ fun Route.shopRoutes(
             call.respond(Response(shoppingList))
         }
 
-        /**
-         * here
-         */
-
-
         put<UpdateShoppingList> {
             val shopping_list = call.receive<ShoppingList>()
             val response = withContext(Dispatchers.IO) {
@@ -89,7 +84,6 @@ fun Route.shopRoutes(
 
 
         // Prices
-
         post<AddPrice> {
             val price_request = call.receive<PriceRequest>()
             val response = withContext(Dispatchers.IO) {
@@ -102,7 +96,6 @@ fun Route.shopRoutes(
             }
             call.respond(mapOf("data" to response))
         }
-
 
         delete<DeletePrice> {
             val price_request = call.receive<PriceRequest>()
@@ -127,7 +120,6 @@ fun Route.shopRoutes(
 
 
         // Carts
-
         post<BuyCart> {
             val cart_request = call.receive<CartRequest>()
             val entries = withContext(Dispatchers.IO) {
@@ -137,9 +129,16 @@ fun Route.shopRoutes(
             call.respond(mapOf("data" to entries))
         }
 
+        get<GetProductSuggestion> { param ->
+            val suggestion = withContext(Dispatchers.IO) {
+                shopDao.getProductSuggestion(param.product_id)
+            }
+
+            call.respond(mapOf("data" to suggestion))
+        }
+
 
         // Queue
-
         post<JoinQueue> { param->
             val entries = withContext(Dispatchers.IO) {
                 shopDao.joinQueue(param.latitude, param.longitude, param.num_items)
@@ -164,7 +163,5 @@ fun Route.shopRoutes(
 
             call.respond(mapOf("data" to entries))
         }
-
     }
-
 }

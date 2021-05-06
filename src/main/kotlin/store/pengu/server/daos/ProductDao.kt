@@ -12,7 +12,6 @@ import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ProductsUsers
 import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
-import store.pengu.server.db.pengustore.tables.Ratings
 import store.pengu.server.routes.requests.ImageRequest
 
 class ProductDao(
@@ -21,7 +20,6 @@ class ProductDao(
     private val dslContext = DSL.using(conf)
 
     // Products
-
     fun addProduct(product: Product, create: DSLContext = dslContext): Product? {
         return  create.insertInto(PRODUCTS,
                 PRODUCTS.NAME, PRODUCTS.BARCODE)
@@ -174,7 +172,6 @@ class ProductDao(
             ratings = ratings
         )
     }
-
 
     // Aux
     private fun getUserRating(userId: Long, barcode: String, create: DSLContext = dslContext): Int {

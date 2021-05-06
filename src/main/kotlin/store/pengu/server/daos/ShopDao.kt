@@ -1,5 +1,6 @@
 package store.pengu.server.daos
 
+import org.jetbrains.annotations.NotNull
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
@@ -10,9 +11,12 @@ import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.db.pengustore.tables.Suggestions
+import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
+import kotlin.Comparator
 
 
 class ShopDao(
@@ -123,11 +127,6 @@ class ShopDao(
         )
     }
 
-    /**
-     *
-     */
-
-
     fun updateShoppingList(shopping_list: ShoppingList, create: DSLContext = dslContext): Boolean {
         return create.update(SHOPPING_LIST)
             .set(SHOPPING_LIST.NAME, shopping_list.name)
@@ -136,7 +135,6 @@ class ShopDao(
             .where(SHOPPING_LIST.ID.eq(ULong.valueOf(shopping_list.id)))
             .execute() == 1
     }
-
 
     fun getShoppingList(id: Long, create: DSLContext = dslContext): ShoppingList? {
         return create.select()
@@ -178,7 +176,7 @@ class ShopDao(
         condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.le(longitude + 0.0001))
         condition4 = condition4.and(LOCAL_PRODUCT_PRICES.LONGITUDE.ge(longitude - 0.0001))
 
-        var condition2 = condition3.or(condition4)
+        val condition2 = condition3.or(condition4)
 
         condition = condition.and(condition2)
 
@@ -205,7 +203,7 @@ class ShopDao(
             }
     }
 
-    fun auxGetPantry(userId: Long, productId: Long, create: DSLContext = dslContext): List<Pantry> {
+    private fun auxGetPantry(userId: Long, productId: Long, create: DSLContext = dslContext): List<Pantry> {
         var condition5 = DSL.noCondition() // Alternatively, use trueCondition()
         condition5 = condition5.and(USERS.ID.eq(ULong.valueOf(userId)))
         condition5 = condition5.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(productId)))
@@ -231,12 +229,10 @@ class ShopDao(
     }
 
     // Prices
-
     fun addPrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
 
         if (price_request.barcode != null) {
-
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
@@ -261,8 +257,8 @@ class ShopDao(
                     .values(
                         price_request.barcode,
                         price_request.price,
-                        price_request.latitude.toDouble(),
-                        price_request.longitude.toDouble()
+                        price_request.latitude,
+                        price_request.longitude
                     )
                     .execute() == 1
         } else {
@@ -291,20 +287,18 @@ class ShopDao(
                     .values(
                         ULong.valueOf(productId),
                         price_request.price,
-                        price_request.latitude.toDouble(),
-                        price_request.longitude.toDouble()
+                        price_request.latitude,
+                        price_request.longitude
                     )
                     .execute() == 1
         }
 
     }
 
-
     fun deletePrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
 
         if (price_request.barcode != null) {
-
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
@@ -351,9 +345,7 @@ class ShopDao(
             }
     }
 
-
     // Carts
-
     fun buyCart(cart: List<Cart>, create: DSLContext = dslContext): Boolean {
         val itr = cart.iterator()
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
@@ -368,12 +360,96 @@ class ShopDao(
                 .execute()
         }
 
+        val productPairs = getPairs(cart)
+        productPairs.forEach { pair ->
+            updateMatrix(pair.first, pair.second)
+        }
+
         return true
     }
 
+    fun getProductSuggestion(productId: Long): Long {
+        val rowEntries = getMatrixEntries(productId, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
+        val colEntries = getMatrixEntries(productId, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
+
+        val suggestions = rowEntries + colEntries
+        val countSuggestions = suggestions.sumBy { it.cell_val }
+        val higherSuggestion = suggestions.maxByOrNull { it.cell_val }?.col_number!!.toLong()
+
+        println(suggestions)
+        println(higherSuggestion)
+        println(countSuggestions)
+
+        if ((higherSuggestion / countSuggestions) > 0.5) return higherSuggestion
+        return -1L
+    }
+
+    private fun getPairs(cart: List<Cart>): List<Pair<Long, Long>> {
+        val pairs = mutableListOf<Pair<Long, Long>>()
+        for (x in (cart.indices - 1)) {
+            for (y in (x + 1 until cart.size)) {
+                if (cart[x].product_id < cart[y].product_id) pairs.add(Pair(cart[x].product_id, cart[y].product_id))
+                else pairs.add(Pair(cart[y].product_id, cart[x].product_id))
+            }
+        }
+
+        return pairs
+    }
+
+    private fun updateMatrix(productId1: Long, productId2: Long, create: DSLContext = dslContext): Int {
+       var matrixEntry = getMatrixEntry(productId1, productId2)
+        if (matrixEntry == null) matrixEntry = createMatrixEntry(productId1, productId2)
+
+        create.update(SUGGESTIONS)
+            .set(SUGGESTIONS.CELL_VAL, matrixEntry.cell_val + 1)
+            .where(SUGGESTIONS.ROW_NUMBER.eq(matrixEntry.row_number))
+            .and(SUGGESTIONS.COL_NUMBER.eq(matrixEntry.col_number))
+            .execute()
+
+        return matrixEntry.cell_val + 1
+    }
+
+    private fun getMatrixEntries(
+        productId: Long,
+        tableField1: TableField<SuggestionsRecord, ULong>,
+        tableField2: TableField<SuggestionsRecord, ULong>,
+        create: DSLContext = dslContext
+    ): MutableList<MatrixEntry> {
+        return create.select()
+            .from(SUGGESTIONS)
+            .where(tableField1.eq(ULong.valueOf(productId)))
+            .fetch().map() {
+                MatrixEntry(
+                    row_number = it[tableField1],
+                    col_number = it[tableField2],
+                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                )
+            }
+    }
+
+    private fun getMatrixEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry? {
+        return create.select()
+            .from(SUGGESTIONS)
+            .where(SUGGESTIONS.ROW_NUMBER.eq(ULong.valueOf(productId1)))
+            .and(SUGGESTIONS.COL_NUMBER.eq(ULong.valueOf(productId2)))
+            .fetchOne()?.map() {
+                MatrixEntry(
+                    row_number = it[SUGGESTIONS.ROW_NUMBER],
+                    col_number = it[SUGGESTIONS.COL_NUMBER],
+                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                )
+            }
+    }
+
+    private fun createMatrixEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry {
+        create.insertInto(SUGGESTIONS, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.CELL_VAL)
+            .values(ULong.valueOf(productId1), ULong.valueOf(productId2), 0)
+            .execute()
+
+        return getMatrixEntry(productId1, productId2)!!
+    }
 
     // Queue
-
     fun joinQueue(latitude: Double, longitude: Double, num_items: Int, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(BEACONS.LATITUDE.le(latitude + 0.0001))
@@ -480,8 +556,8 @@ class ShopDao(
             yybar += (points[i].y - ybar) * (points[i].y - ybar)
             xybar += (points[i].x - xbar) * (points[i].y - ybar)
         }
-        var slope = xybar / xxbar
-        var intercept = ybar - slope * xbar
+        val slope = xybar / xxbar
+        val intercept = ybar - slope * xbar
 
         return (intercept + slope * num_items).toInt()
 
@@ -489,7 +565,6 @@ class ShopDao(
 
 
     // Aux
-
     fun price(barcode: String?, crowd_price: Double?, local_price: Double?): Double {
         return if (barcode != null)
             crowd_price ?: throw NotFoundException("Crowd Price not found")
@@ -497,7 +572,7 @@ class ShopDao(
             local_price ?: throw NotFoundException("Local Price not found")
     }
 
-    fun getBeacon(latitude: Double, longitude: Double, create: DSLContext = dslContext): Beacon? {
+    private fun getBeacon(latitude: Double, longitude: Double, create: DSLContext = dslContext): Beacon? {
         // TODO Trocar estes valores pa coisas q facam sentido
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(BEACONS.LATITUDE.le(latitude + 0.5))
@@ -516,5 +591,4 @@ class ShopDao(
                 )
             }
     }
-
 }
