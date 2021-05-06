@@ -27,7 +27,7 @@ class ListDao(
             .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(userId)))
             .and(getNearbyCondition(SHOPPING_LIST.LATITUDE, latitude, SHOPPING_LIST.LONGITUDE, longitude))
             .fetchAny()?.map {
-                UserListType.SHOPPING_LIST to ShopDao.getShoppingListInformation(it, create)
+                UserListType.SHOPPING_LIST to ShopDao.getShoppingListInformation(userId, it, create)
             } ?: create.select()
             .from(USERS)
             .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))

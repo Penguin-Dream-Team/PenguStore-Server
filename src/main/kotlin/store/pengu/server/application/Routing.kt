@@ -11,6 +11,7 @@ fun Route.loadRoutes(koin: Koin) {
     val productDao = koin.get<ProductDao>()
     val shopDao = koin.get<ShopDao>()
     val listDao = koin.get<ListDao>()
+    val translationDao = koin.get<TranslationDao>()
 
     /* CONTROLLERS */
     userRoutes(userDao = userDao)
@@ -18,4 +19,5 @@ fun Route.loadRoutes(koin: Koin) {
     pantryRoutes(pantryDao = pantryDao)
     productRoutes(productDao = productDao)
     shopRoutes(shopDao = shopDao)
+    translationRoutes(translationDao = translationDao)
 }

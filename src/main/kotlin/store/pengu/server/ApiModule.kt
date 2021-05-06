@@ -9,7 +9,6 @@ import org.jooq.impl.DefaultConfiguration
 import org.koin.core.qualifier.named
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
-import store.pengu.server.ApiModule.getDatabase
 import store.pengu.server.daos.*
 
 object ApiModule {
@@ -41,6 +40,9 @@ object ApiModule {
         }
         single {
             ListDao(getDatabase())
+        }
+        single {
+            TranslationDao(getDatabase())
         }
     }
 }

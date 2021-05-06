@@ -4,16 +4,14 @@ import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.NotFoundException
-import store.pengu.server.data.Local_Product_Price
+import store.pengu.server.data.LocalProductPrice
 import store.pengu.server.data.Product
 import store.pengu.server.db.pengustore.Tables
-import store.pengu.server.db.pengustore.Tables.CROWD_PRODUCT_IMAGES
-import store.pengu.server.db.pengustore.Tables.LOCAL_PRODUCT_IMAGES
+import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_PRICES
+import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ProductsUsers
-import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
-import store.pengu.server.routes.requests.GetImageRequest
 import store.pengu.server.routes.requests.ImageRequest
 
 class ProductDao(
@@ -51,21 +49,21 @@ class ProductDao(
 
 
     // Products
-
     fun addProduct(product: Product, create: DSLContext = dslContext): Product? {
-        return create.insertInto(
-            PRODUCTS,
-            PRODUCTS.NAME, PRODUCTS.BARCODE
-        )
-            .values(product.name, product.barcode)
-            .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
-            .fetchOne()?.map {
-                Product(
-                    id = it[PRODUCTS.ID].toLong(),
-                    name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE]
-                )
-            }
+        return  create.insertInto(PRODUCTS,
+                PRODUCTS.NAME, PRODUCTS.BARCODE)
+                .values(product.name, product.barcode)
+                .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
+                .fetchOne()?.map {
+                    Product(
+                        id = it[PRODUCTS.ID].toLong(),
+                        name = it[PRODUCTS.NAME],
+                        barcode = it[PRODUCTS.BARCODE],
+                        productRating = -1f,
+                        userRating = -1,
+                        ratings = mutableListOf()
+                    )
+                }
     }
 
     fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
@@ -84,8 +82,8 @@ class ProductDao(
         val localPrices = create.select()
             .from(LOCAL_PRODUCT_PRICES)
             .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(product.id)))
-            .fetch().map {
-                Local_Product_Price(
+            .fetch().map{
+                LocalProductPrice(
                     product_id = it[LOCAL_PRODUCT_PRICES.PRODUCT_ID].toLong(),
                     price = it[LOCAL_PRODUCT_PRICES.PRICE],
                     latitude = it[LOCAL_PRODUCT_PRICES.LATITUDE],
@@ -127,21 +125,108 @@ class ProductDao(
         return res
     }
 
-    fun getProduct(id: Long, create: DSLContext = dslContext): Product? {
+    fun getProduct(userId: Long, productId: Long, create: DSLContext = dslContext): Product? {
         return create.select()
             .from(PRODUCTS)
-            .where(PRODUCTS.ID.eq(ULong.valueOf(id)))
+            .where(PRODUCTS.ID.eq(ULong.valueOf(productId)))
             .fetchOne()?.map {
+                var ratings = mutableListOf<Int>()
+                var userRating = -1
+                var productRating = -1f
+
+                if (it[PRODUCTS.BARCODE] != null) {
+                    ratings = getProductRatings(it[PRODUCTS.BARCODE])
+                    userRating = getUserRating(userId, it[PRODUCTS.BARCODE])
+                    if (ratings.isNotEmpty())
+                        productRating = ratings.sum().toFloat() / ratings.size
+                }
+
                 Product(
                     id = it[PRODUCTS.ID].toLong(),
                     name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE]
+                    barcode = it[PRODUCTS.BARCODE],
+                    productRating = productRating,
+                    userRating = userRating,
+                    ratings = ratings
                 )
             }
     }
 
+    private fun getProduct(userId: Long, barcode: String, create: DSLContext = dslContext): Product? {
+        return create.select()
+            .from(PRODUCTS)
+            .where(PRODUCTS.BARCODE.eq(barcode))
+            .fetchOne()?.map {
+                var ratings = mutableListOf<Int>()
+                var userRating = -1
+                var productRating = -1f
+
+                if (it[PRODUCTS.BARCODE] != null) {
+                    ratings = getProductRatings(it[PRODUCTS.BARCODE])
+                    userRating = getUserRating(userId, it[PRODUCTS.BARCODE])
+                    if (ratings.isNotEmpty())
+                        productRating = ratings.sum().toFloat() / ratings.size
+                }
+
+                Product(
+                    id = it[PRODUCTS.ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE],
+                    productRating = productRating,
+                    userRating = userRating,
+                    ratings = ratings
+                )
+            }
+    }
+
+    fun addRating(userId: Long, barcode: String, userRating: Int, create: DSLContext = dslContext): Product {
+        val product = getProduct(userId, barcode) ?: throw NotFoundException("Product with specified barcode not found")
+
+        if (product.userRating != -1)
+            create.update(RATINGS)
+                .set(RATINGS.RATING, userRating)
+                .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
+                .and(RATINGS.BARCODE.eq(barcode))
+                .execute()
+        else
+            create.insertInto(RATINGS, RATINGS.USER_ID, RATINGS.BARCODE, RATINGS.RATING)
+                .values(ULong.valueOf(userId), barcode, userRating)
+                .execute()
+
+        val ratings = getProductRatings(barcode)
+        val productRating = ratings.sum().toFloat() / ratings.size
+
+        return Product(
+            id = product.id,
+            name = product.name,
+            barcode = barcode,
+            productRating = productRating,
+            userRating = userRating,
+            ratings = ratings
+        )
+    }
 
     // Aux
+    private fun getUserRating(userId: Long, barcode: String, create: DSLContext = dslContext): Int {
+        val userRating =  create.select()
+            .from(RATINGS)
+            .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
+            .and(RATINGS.BARCODE.eq(barcode))
+            .fetchOne()?.map {
+                it[RATINGS.RATING]
+            }
+
+        return userRating ?: -1
+    }
+
+    private fun getProductRatings(barcode: String, create: DSLContext = dslContext): MutableList<Int> {
+        return create.select()
+            .from(RATINGS)
+            .where(RATINGS.BARCODE.eq(barcode))
+            .fetch().map {
+                it[RATINGS.RATING]
+            }
+    }
 
     fun connectProduct(product_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
         return create.insertInto(

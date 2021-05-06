@@ -21,9 +21,12 @@ import store.pengu.server.db.pengustore.tables.PantriesUsers;
 import store.pengu.server.db.pengustore.tables.PantryProducts;
 import store.pengu.server.db.pengustore.tables.Products;
 import store.pengu.server.db.pengustore.tables.ProductsUsers;
+import store.pengu.server.db.pengustore.tables.Ratings;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
 import store.pengu.server.db.pengustore.tables.Stats;
+import store.pengu.server.db.pengustore.tables.Suggestions;
+import store.pengu.server.db.pengustore.tables.Translation;
 import store.pengu.server.db.pengustore.tables.Users;
 
 
@@ -91,6 +94,11 @@ public class DefaultSchema extends SchemaImpl {
     public final ProductsUsers PRODUCTS_USERS = ProductsUsers.PRODUCTS_USERS;
 
     /**
+     * The table <code>ratings</code>.
+     */
+    public final Ratings RATINGS = Ratings.RATINGS;
+
+    /**
      * The table <code>shopping_list</code>.
      */
     public final ShoppingList SHOPPING_LIST = ShoppingList.SHOPPING_LIST;
@@ -104,6 +112,16 @@ public class DefaultSchema extends SchemaImpl {
      * The table <code>stats</code>.
      */
     public final Stats STATS = Stats.STATS;
+
+    /**
+     * The table <code>suggestions</code>.
+     */
+    public final Suggestions SUGGESTIONS = Suggestions.SUGGESTIONS;
+
+    /**
+     * The table <code>translation</code>.
+     */
+    public final Translation TRANSLATION = Translation.TRANSLATION;
 
     /**
      * The table <code>users</code>.
@@ -136,9 +154,12 @@ public class DefaultSchema extends SchemaImpl {
             PantryProducts.PANTRY_PRODUCTS,
             Products.PRODUCTS,
             ProductsUsers.PRODUCTS_USERS,
+            Ratings.RATINGS,
             ShoppingList.SHOPPING_LIST,
             ShoppingListUsers.SHOPPING_LIST_USERS,
             Stats.STATS,
+            Suggestions.SUGGESTIONS,
+            Translation.TRANSLATION,
             Users.USERS);
     }
 }

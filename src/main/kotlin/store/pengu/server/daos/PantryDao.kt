@@ -220,7 +220,7 @@ class PantryDao(
 
     // Pantry Products
 
-    fun addPantryProduct(pantryProduct: Pantry_Product, create: DSLContext = dslContext): Boolean {
+    fun addPantryProduct(pantryProduct: PantryProduct, create: DSLContext = dslContext): Boolean {
         return create.insertInto(
             PANTRY_PRODUCTS,
             PANTRY_PRODUCTS.PANTRY_ID,
@@ -237,7 +237,7 @@ class PantryDao(
             .execute() == 1
     }
 
-    fun updatePantryProduct(pantryProduct: Pantry_Product, create: DSLContext = dslContext): Boolean {
+    fun updatePantryProduct(pantryProduct: PantryProduct, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(pantryProduct.product_id)))
         condition = condition.and(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(pantryProduct.pantry_id)))

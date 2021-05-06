@@ -2,6 +2,7 @@ package store.pengu.server.data
 
 data class ProductInShoppingList (
     override val id: Long,
+    val pantries: List<Pantry>,
     override val listId: Long,
     override val name: String,
     override val barcode: String?,

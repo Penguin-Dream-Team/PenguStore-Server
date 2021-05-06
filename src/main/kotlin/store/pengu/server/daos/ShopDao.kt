@@ -1,5 +1,6 @@
 package store.pengu.server.daos
 
+import org.jetbrains.annotations.NotNull
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
@@ -7,10 +8,15 @@ import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables.*
+import store.pengu.server.db.pengustore.tables.Pantries
+import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.db.pengustore.tables.Suggestions
+import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
+import kotlin.Comparator
 
 
 class ShopDao(
@@ -19,7 +25,7 @@ class ShopDao(
     private val dslContext = DSL.using(conf)
 
     companion object {
-        fun getShoppingListInformation(it: Record, create: DSLContext): ShoppingList {
+        fun getShoppingListInformation(userId: Long, it: Record, create: DSLContext): ShoppingList {
             return ShoppingList(
                 id = it[SHOPPING_LIST.ID].toLong(),
                 name = it[SHOPPING_LIST.NAME],
@@ -27,9 +33,56 @@ class ShopDao(
                 latitude = it[SHOPPING_LIST.LATITUDE],
                 longitude = it[SHOPPING_LIST.LONGITUDE],
                 color = it[SHOPPING_LIST.COLOR],
-                shared = create.fetchCount(SHOPPING_LIST_USERS.where(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(it[SHOPPING_LIST.ID]))) > 1
+                shared = create.fetchCount(SHOPPING_LIST_USERS.where(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(it[SHOPPING_LIST.ID]))) > 1,
+                productCount = countShoppingListProducts(
+                    userId,
+                    it[SHOPPING_LIST.LATITUDE],
+                    it[SHOPPING_LIST.LONGITUDE],
+                    create
+                )
             )
         }
+
+        fun countShoppingListProducts(
+            userId: Long,
+            latitude: Double,
+            longitude: Double,
+            create: DSLContext
+        ): Int {
+            return create.transactionResult { configuration ->
+                val transaction = DSL.using(configuration)
+
+                val condition = ListDao.getNearbyCondition(
+                    CROWD_PRODUCT_PRICES.LATITUDE,
+                    latitude,
+                    CROWD_PRODUCT_PRICES.LONGITUDE,
+                    longitude
+                ).or(
+                    ListDao.getNearbyCondition(
+                        LOCAL_PRODUCT_PRICES.LATITUDE,
+                        latitude,
+                        LOCAL_PRODUCT_PRICES.LONGITUDE,
+                        longitude
+                    )
+                )
+
+                transaction.fetchCount(
+                    transaction.select()
+                        .from(USERS)
+                        .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
+                        .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
+                        .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+                        .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
+                        .leftJoin(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
+                        .leftJoin(LOCAL_PRODUCT_PRICES).on(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(PRODUCTS.ID))
+                        .where(USERS.ID.eq(ULong.valueOf(userId)))
+                        .and(PANTRY_PRODUCTS.WANT_QTY.gt(0))
+                        .and(condition)
+                        .groupBy(PRODUCTS.ID)
+                )
+            }
+        }
+
     }
 
     fun listShops(userId: Long, create: DSLContext = dslContext): List<ShoppingList> {
@@ -38,7 +91,7 @@ class ShopDao(
             .join(SHOPPING_LIST_USERS).on(SHOPPING_LIST_USERS.SHOPPING_LIST_ID.eq(SHOPPING_LIST.ID))
             .where(SHOPPING_LIST_USERS.USER_ID.eq(ULong.valueOf(userId)))
             .fetch().map {
-                getShoppingListInformation(it, create)
+                getShoppingListInformation(userId, it, create)
             }
     }
 
@@ -72,7 +125,13 @@ class ShopDao(
                         latitude = it[SHOPPING_LIST.LATITUDE],
                         longitude = it[SHOPPING_LIST.LONGITUDE],
                         color = it[SHOPPING_LIST.COLOR],
-                        shared = false
+                        shared = false,
+                        productCount = countShoppingListProducts(
+                            userId,
+                            it[SHOPPING_LIST.LATITUDE],
+                            it[SHOPPING_LIST.LONGITUDE],
+                            transaction
+                        )
                     )
                 } ?: throw InternalServerErrorException("An error occurred")
 
@@ -92,12 +151,12 @@ class ShopDao(
         }
     }
 
-    fun getShoppingListByCode(code: String, create: DSLContext = dslContext): ShoppingList {
+    fun getShoppingListByCode(userId: Long, code: String, create: DSLContext = dslContext): ShoppingList {
         return create.select()
             .from(SHOPPING_LIST)
             .where(SHOPPING_LIST.CODE.eq(code))
             .fetchOne()?.map {
-                getShoppingListInformation(it, create)
+                getShoppingListInformation(userId, it, create)
             } ?: throw NotFoundException("Shopping List with specified code not found")
     }
 
@@ -129,7 +188,7 @@ class ShopDao(
         return create.transactionResult { configuration ->
             val transaction = DSL.using(configuration)
 
-            val shop = getShoppingList(shopId, transaction)
+            val shop = getShoppingList(userId, shopId, transaction)
             val condition = ListDao.getNearbyCondition(
                 CROWD_PRODUCT_PRICES.LATITUDE,
                 shop.latitude,
@@ -153,12 +212,13 @@ class ShopDao(
                 .leftJoin(CROWD_PRODUCT_PRICES).on(CROWD_PRODUCT_PRICES.BARCODE.eq(PRODUCTS.BARCODE))
                 .leftJoin(LOCAL_PRODUCT_PRICES).on(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(PRODUCTS.ID))
                 .where(USERS.ID.eq(ULong.valueOf(userId)))
-                .and(PANTRY_PRODUCTS.WANT_QTY.ge(PANTRY_PRODUCTS.HAVE_QTY + 1))
+                .and(PANTRY_PRODUCTS.WANT_QTY.gt(0))
                 .and(condition)
+                .groupBy(PRODUCTS.ID)
                 .fetch().map {
                     ProductInShoppingList(
                         id = it[PRODUCTS.ID].toLong(),
-                        listId = it[PANTRIES.ID].toLong(),
+                        listId = shopId,
                         name = it[PRODUCTS.NAME],
                         barcode = it[PRODUCTS.BARCODE],
                         amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
@@ -172,26 +232,12 @@ class ShopDao(
                             barcode = it[PRODUCTS.BARCODE],
                             id = it[PRODUCTS.ID].toLong(),
                             transaction
-                        )
+                        ),
+                        pantries = listOf() //auxGetPantry(user_id, it[PRODUCTS.ID].toLong())
                     )
                 }
         }
     }
-
-    private fun getShoppingList(id: Long, create: DSLContext = dslContext): ShoppingList {
-        return create.select()
-            .from(SHOPPING_LIST)
-            .where(SHOPPING_LIST.ID.eq(ULong.valueOf(id)))
-            .fetchOne()?.map {
-                getShoppingListInformation(it, create)
-            } ?: throw NotFoundException("Shopping List with specified code not found")
-    }
-
-
-    /**
-     *
-     */
-
 
     fun updateShoppingList(shopping_list: ShoppingList, create: DSLContext = dslContext): Boolean {
         return create.update(SHOPPING_LIST)
@@ -202,14 +248,57 @@ class ShopDao(
             .execute() == 1
     }
 
+    private fun getShoppingList(userId: Long, id: Long, create: DSLContext = dslContext): ShoppingList {
+        return create.select()
+            .from(SHOPPING_LIST)
+            .where(SHOPPING_LIST.ID.eq(ULong.valueOf(id)))
+            .fetchOne()?.map {
+                getShoppingListInformation(userId, it, create)
+            } ?: throw NotFoundException("Shopping List with specified code not found")
+    }
+
+
+    /**
+     *
+     */
+
+
+    private fun auxGetPantry(userId: Long, productId: Long, create: DSLContext = dslContext): List<Pantry> {
+        var condition5 = DSL.noCondition() // Alternatively, use trueCondition()
+        condition5 = condition5.and(USERS.ID.eq(ULong.valueOf(userId)))
+        condition5 = condition5.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(productId)))
+
+        return create.select()
+            .from(USERS)
+            .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
+            .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
+            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+            .where(condition5)
+            .fetch().map {
+                Pantry(
+                    id = it[Pantries.PANTRIES.ID].toLong(),
+                    name = it[Pantries.PANTRIES.NAME],
+                    code = it[Pantries.PANTRIES.CODE],
+                    latitude = it[Pantries.PANTRIES.LATITUDE],
+                    longitude = it[Pantries.PANTRIES.LONGITUDE],
+                    productCount = create.fetchCount(
+                        PantryProducts.PANTRY_PRODUCTS.where(
+                            PantryProducts.PANTRY_PRODUCTS.PANTRY_ID.eq(
+                                it[Pantries.PANTRIES.ID]
+                            )
+                        )
+                    ),
+                    color = it[Pantries.PANTRIES.COLOR],
+                    shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[Pantries.PANTRIES.ID]))) > 1
+                )
+            }
+    }
 
     // Prices
-
     fun addPrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
 
         if (price_request.barcode != null) {
-
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
@@ -234,8 +323,8 @@ class ShopDao(
                     .values(
                         price_request.barcode,
                         price_request.price,
-                        price_request.latitude.toDouble(),
-                        price_request.longitude.toDouble()
+                        price_request.latitude,
+                        price_request.longitude
                     )
                     .execute() == 1
         } else {
@@ -264,20 +353,18 @@ class ShopDao(
                     .values(
                         ULong.valueOf(productId),
                         price_request.price,
-                        price_request.latitude.toDouble(),
-                        price_request.longitude.toDouble()
+                        price_request.latitude,
+                        price_request.longitude
                     )
                     .execute() == 1
         }
 
     }
 
-
     fun deletePrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
 
         if (price_request.barcode != null) {
-
             condition = condition.and(CROWD_PRODUCT_PRICES.BARCODE.eq(price_request.barcode))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.le(price_request.latitude + 0.0002))
             condition = condition.and(CROWD_PRODUCT_PRICES.LATITUDE.ge(price_request.latitude - 0.0002))
@@ -324,9 +411,7 @@ class ShopDao(
             }
     }
 
-
     // Carts
-
     fun buyCart(cart: List<Cart>, create: DSLContext = dslContext): Boolean {
         val itr = cart.iterator()
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
@@ -341,12 +426,96 @@ class ShopDao(
                 .execute()
         }
 
+        val productPairs = getPairs(cart)
+        productPairs.forEach { pair ->
+            updateMatrix(pair.first, pair.second)
+        }
+
         return true
     }
 
+    fun getProductSuggestion(productId: Long): Long {
+        val rowEntries = getMatrixEntries(productId, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
+        val colEntries = getMatrixEntries(productId, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
+
+        val suggestions = rowEntries + colEntries
+        val countSuggestions = suggestions.sumBy { it.cell_val }
+        val higherSuggestion = suggestions.maxByOrNull { it.cell_val }?.col_number!!.toLong()
+
+        println(suggestions)
+        println(higherSuggestion)
+        println(countSuggestions)
+
+        if ((higherSuggestion / countSuggestions) > 0.5) return higherSuggestion
+        return -1L
+    }
+
+    private fun getPairs(cart: List<Cart>): List<Pair<Long, Long>> {
+        val pairs = mutableListOf<Pair<Long, Long>>()
+        for (x in (cart.indices - 1)) {
+            for (y in (x + 1 until cart.size)) {
+                if (cart[x].product_id < cart[y].product_id) pairs.add(Pair(cart[x].product_id, cart[y].product_id))
+                else pairs.add(Pair(cart[y].product_id, cart[x].product_id))
+            }
+        }
+
+        return pairs
+    }
+
+    private fun updateMatrix(productId1: Long, productId2: Long, create: DSLContext = dslContext): Int {
+        var matrixEntry = getMatrixEntry(productId1, productId2)
+        if (matrixEntry == null) matrixEntry = createMatrixEntry(productId1, productId2)
+
+        create.update(SUGGESTIONS)
+            .set(SUGGESTIONS.CELL_VAL, matrixEntry.cell_val + 1)
+            .where(SUGGESTIONS.ROW_NUMBER.eq(matrixEntry.row_number))
+            .and(SUGGESTIONS.COL_NUMBER.eq(matrixEntry.col_number))
+            .execute()
+
+        return matrixEntry.cell_val + 1
+    }
+
+    private fun getMatrixEntries(
+        productId: Long,
+        tableField1: TableField<SuggestionsRecord, ULong>,
+        tableField2: TableField<SuggestionsRecord, ULong>,
+        create: DSLContext = dslContext
+    ): MutableList<MatrixEntry> {
+        return create.select()
+            .from(SUGGESTIONS)
+            .where(tableField1.eq(ULong.valueOf(productId)))
+            .fetch().map() {
+                MatrixEntry(
+                    row_number = it[tableField1],
+                    col_number = it[tableField2],
+                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                )
+            }
+    }
+
+    private fun getMatrixEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry? {
+        return create.select()
+            .from(SUGGESTIONS)
+            .where(SUGGESTIONS.ROW_NUMBER.eq(ULong.valueOf(productId1)))
+            .and(SUGGESTIONS.COL_NUMBER.eq(ULong.valueOf(productId2)))
+            .fetchOne()?.map() {
+                MatrixEntry(
+                    row_number = it[SUGGESTIONS.ROW_NUMBER],
+                    col_number = it[SUGGESTIONS.COL_NUMBER],
+                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                )
+            }
+    }
+
+    private fun createMatrixEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry {
+        create.insertInto(SUGGESTIONS, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.CELL_VAL)
+            .values(ULong.valueOf(productId1), ULong.valueOf(productId2), 0)
+            .execute()
+
+        return getMatrixEntry(productId1, productId2)!!
+    }
 
     // Queue
-
     fun joinQueue(latitude: Double, longitude: Double, num_items: Int, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
         condition = condition.and(BEACONS.LATITUDE.le(latitude + 0.0001))
@@ -453,8 +622,8 @@ class ShopDao(
             yybar += (points[i].y - ybar) * (points[i].y - ybar)
             xybar += (points[i].x - xbar) * (points[i].y - ybar)
         }
-        var slope = xybar / xxbar
-        var intercept = ybar - slope * xbar
+        val slope = xybar / xxbar
+        val intercept = ybar - slope * xbar
 
         return (intercept + slope * num_items).toInt()
 
@@ -462,6 +631,12 @@ class ShopDao(
 
 
     // Aux
+    fun price(barcode: String?, crowd_price: Double?, local_price: Double?): Double {
+        return if (barcode != null)
+            crowd_price ?: throw NotFoundException("Crowd Price not found")
+        else
+            local_price ?: throw NotFoundException("Local Price not found")
+    }
 
     fun getBeacon(latitude: Double, longitude: Double, create: DSLContext = dslContext): Beacon? {
         // TODO Trocar estes valores pa coisas q facam sentido
@@ -482,5 +657,4 @@ class ShopDao(
                 )
             }
     }
-
 }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.PantryDao
-import store.pengu.server.data.Pantry_Product
+import store.pengu.server.data.PantryProduct
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.PantryRequest
 import store.pengu.server.routes.responses.Response
@@ -98,7 +98,7 @@ fun Route.pantryRoutes(
         // Pantry Products
 
         post<PantryAddProduct> {
-            val pantry_product = call.receive<Pantry_Product>()
+            val pantry_product = call.receive<PantryProduct>()
             val response = withContext(Dispatchers.IO) {
                 try {
                     pantryDao.addPantryProduct(pantry_product)
@@ -110,7 +110,7 @@ fun Route.pantryRoutes(
         }
 
         put<PantryUpdateProduct> {
-            val pantry_product = call.receive<Pantry_Product>()
+            val pantry_product = call.receive<PantryProduct>()
             val response = withContext(Dispatchers.IO) {
                 try {
                     pantryDao.updatePantryProduct(pantry_product)
