@@ -26,6 +26,9 @@ object PantryLists
 @Location("/lists/pantries/import/{code}")
 data class ImportPantryList(val code: String)
 
+@Location("/lists/pantries/{id}")
+data class PantryGet(val id: Long)
+
 
 /**
  * Shopping Lists
@@ -35,6 +38,10 @@ object ShoppingLists
 
 @Location("/lists/shops/import/{code}")
 data class ImportShoppingList(val code: String)
+
+@Location("/lists/shops/{id}")
+data class ShoppingListGet(val id: Long)
+
 
 
 /**
@@ -95,9 +102,6 @@ object PantryUpdateProduct
 
 @Location("/pantry/{pantry_id}/deleteProduct/{product_id}")
 data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
-
-@Location("/pantries/{id}/products")
-data class PantryGetProducts(val id: Long)
 
 
 /**

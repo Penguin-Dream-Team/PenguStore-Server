@@ -43,7 +43,7 @@ fun Route.shopRoutes(
             val userId = call.user.id
 
             val shoppingList = withContext(Dispatchers.IO) {
-                val shoppingList = shopDao.getShoppingListByCode(param.code)
+                val shoppingList = shopDao.getShoppingListByCode(userId.toLong(), param.code)
 
                 if (shopDao.userHasShoppingList(shoppingList.id, userId.toLong())) {
                     throw ConflictException("You already have this shopping list")
@@ -56,6 +56,25 @@ fun Route.shopRoutes(
             call.respond(Response(shoppingList))
         }
 
+        get<ShoppingListGet> { param ->
+            val userId = call.user.id
+            val entries = withContext(Dispatchers.IO) {
+                if (!shopDao.userHasShoppingList(param.id, userId.toLong())) {
+                    throw NotFoundException("Shopping list not found")
+                }
+
+                shopDao.getShoppingListProducts(param.id, userId.toLong())
+            }
+
+            call.respond(Response(entries))
+        }
+
+
+
+        /**
+         * here
+         */
+
         put<UpdateShoppingList> {
             val shopping_list = call.receive<ShoppingList>()
             val response = withContext(Dispatchers.IO) {
@@ -67,16 +86,6 @@ fun Route.shopRoutes(
                 }
             }
             call.respond(mapOf("data" to response))
-        }
-
-        get<GenShoppingList> { param ->
-            val userId = call.user.id.toLong()
-            val entries = withContext(Dispatchers.IO) {
-                val shoppingList = shopDao.getShoppingList(param.shopping_list_id) ?: throw NotFoundException("Shopping List with specified id not found")
-                shopDao.genShoppingList(userId, shoppingList.latitude, shoppingList.longitude)
-            }
-
-            call.respond(mapOf("data" to entries))
         }
 
         put<UpdateSmartSortingEntries> { param ->

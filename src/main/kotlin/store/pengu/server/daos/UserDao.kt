@@ -121,7 +121,7 @@ class UserDao(
                             .where(PANTRIES.ID.eq(it[PANTRIES.ID]))
                     ),
                     color = it[PANTRIES.COLOR],
-                    false
+                    shared = false
                 )
             }
     }

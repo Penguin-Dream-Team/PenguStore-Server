@@ -170,6 +170,30 @@ class PantryDao(
         )
     }
 
+    fun getPantryProducts(pantryId: Long, create: DSLContext = dslContext): List<ProductInPantry> {
+        return create.select()
+            .from(PANTRIES)
+            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
+            .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
+            .where(PANTRIES.ID.eq((ULong.valueOf(pantryId))))
+            .fetch().map {
+                ProductInPantry(
+                    id = it[PRODUCTS.ID].toLong(),
+                    listId = it[PANTRIES.ID].toLong(),
+                    barcode = it[PRODUCTS.BARCODE],
+                    name = it[PRODUCTS.NAME],
+                    amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
+                    amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
+                    image = ProductDao.image(
+                        barcode = it[PRODUCTS.BARCODE],
+                        id = it[PRODUCTS.ID].toLong(),
+                        create
+                    )
+                )
+            }
+    }
+
+
     /**
      *
      */
@@ -233,24 +257,6 @@ class PantryDao(
         return create.delete(PANTRY_PRODUCTS)
             .where(condition)
             .execute() == 1
-    }
-
-    fun getPantryProducts(pantry_id: Long, create: DSLContext = dslContext): List<ProductInPantry> {
-        return create.select()
-            .from(PANTRIES)
-            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
-            .join(PRODUCTS).on(PRODUCTS.ID.eq(PANTRY_PRODUCTS.PRODUCT_ID))
-            .where(PANTRIES.ID.eq((ULong.valueOf(pantry_id))))
-            .fetch().map {
-                ProductInPantry(
-                    productId = it[PRODUCTS.ID].toLong(),
-                    pantryId = it[PANTRIES.ID].toLong(),
-                    barcode = it[PRODUCTS.BARCODE],
-                    name = it[PRODUCTS.NAME],
-                    amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
-                    amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY]
-                )
-            }
     }
 
 }
