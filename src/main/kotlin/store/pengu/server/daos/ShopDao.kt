@@ -7,15 +7,12 @@ import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables.*
-import store.pengu.server.db.pengustore.tables.Pantries
-import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
 import java.lang.Integer.MAX_VALUE
-
 
 class ShopDao(
     conf: Configuration
@@ -255,10 +252,6 @@ class ShopDao(
             } ?: throw NotFoundException("Shopping List with specified code not found")
     }
 
-
-    /**
-     *
-     */
     fun updateSmartSortingEntries(shoppingListId: Long, barcode: String, remainingItems: List<String>, create: DSLContext = dslContext): Boolean {
         remainingItems.forEach { item ->
             if (barcode == item) return@forEach
@@ -275,37 +268,6 @@ class ShopDao(
         }
 
         return true
-    }
-
-    private fun auxGetPantry(userId: Long, productId: Long, create: DSLContext = dslContext): List<Pantry> {
-        var condition5 = DSL.noCondition() // Alternatively, use trueCondition()
-        condition5 = condition5.and(USERS.ID.eq(ULong.valueOf(userId)))
-        condition5 = condition5.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(productId)))
-
-        return create.select()
-            .from(USERS)
-            .join(PANTRIES_USERS).on(PANTRIES_USERS.USER_ID.eq(USERS.ID))
-            .join(PANTRIES).on(PANTRIES.ID.eq(PANTRIES_USERS.PANTRY_ID))
-            .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
-            .where(condition5)
-            .fetch().map {
-                Pantry(
-                    id = it[Pantries.PANTRIES.ID].toLong(),
-                    name = it[Pantries.PANTRIES.NAME],
-                    code = it[Pantries.PANTRIES.CODE],
-                    latitude = it[Pantries.PANTRIES.LATITUDE],
-                    longitude = it[Pantries.PANTRIES.LONGITUDE],
-                    productCount = create.fetchCount(
-                        PantryProducts.PANTRY_PRODUCTS.where(
-                            PantryProducts.PANTRY_PRODUCTS.PANTRY_ID.eq(
-                                it[Pantries.PANTRIES.ID]
-                            )
-                        )
-                    ),
-                    color = it[Pantries.PANTRIES.COLOR],
-                    shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[Pantries.PANTRIES.ID]))) > 1
-                )
-            }
     }
 
     private fun smartSorting(shoppingListId: Long, shoppingList: MutableList<ProductInShoppingList>): List<ProductInShoppingList> {
@@ -331,7 +293,7 @@ class ShopDao(
             .where(SMART_SORTING.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
             .and(SMART_SORTING.ROW_NUMBER.eq(productBarcode1))
             .and(SMART_SORTING.COL_NUMBER.eq(productBarcode2))
-            .fetchOne()?.map() {
+            .fetchOne()?.map {
                 MatrixEntry(
                     shopping_list_id = it[SMART_SORTING.SHOPPING_LIST_ID],
                     row_number = it[SMART_SORTING.ROW_NUMBER],
