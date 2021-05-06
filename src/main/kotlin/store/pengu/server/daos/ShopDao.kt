@@ -1,6 +1,5 @@
 package store.pengu.server.daos
 
-import org.jetbrains.annotations.NotNull
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
@@ -11,12 +10,11 @@ import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Pantries
 import store.pengu.server.db.pengustore.tables.PantryProducts
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.Suggestions
 import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
-import kotlin.Comparator
+import java.lang.Integer.MAX_VALUE
 
 
 class ShopDao(
@@ -235,7 +233,7 @@ class ShopDao(
                         ),
                         pantries = listOf() //auxGetPantry(user_id, it[PRODUCTS.ID].toLong())
                     )
-                }
+                }.run { smartSorting(this) }
         }
     }
 
@@ -262,6 +260,22 @@ class ShopDao(
      *
      */
 
+    fun updateSmartSortingEntries(productId: Long, remainingItems: List<Long>, create: DSLContext = dslContext): Boolean {
+        remainingItems.forEach { itemId ->
+            if (productId == itemId) return@forEach
+
+            var smartSortingEntry = getSmartSortingEntry(productId, itemId)
+            if (smartSortingEntry == null) smartSortingEntry = createSmartSortingEntry(productId, itemId)
+
+            create.update(SMART_SORTING)
+                .set(SMART_SORTING.CELL_VAL, smartSortingEntry.cell_val + 1)
+                .where(SMART_SORTING.ROW_NUMBER.eq(smartSortingEntry.row_number))
+                .and(SMART_SORTING.COL_NUMBER.eq(smartSortingEntry.col_number))
+                .execute()
+        }
+
+        return true
+    }
 
     private fun auxGetPantry(userId: Long, productId: Long, create: DSLContext = dslContext): List<Pantry> {
         var condition5 = DSL.noCondition() // Alternatively, use trueCondition()
@@ -292,6 +306,45 @@ class ShopDao(
                     shared = create.fetchCount(PANTRIES_USERS.where(PANTRIES_USERS.PANTRY_ID.eq(it[Pantries.PANTRIES.ID]))) > 1
                 )
             }
+    }
+
+    private fun smartSorting(shoppingList: MutableList<ProductInShoppingList>): List<ProductInShoppingList> {
+        return shoppingList.sortedWith { a, b ->
+            val entry1 = getSmartSortingEntry(a.id, b.id)
+            val entry2 = getSmartSortingEntry(b.id, a.id)
+
+            val value1 = entry1?.cell_val ?: MAX_VALUE
+            val value2 = entry2?.cell_val ?: MAX_VALUE
+
+            println(entry1)
+            println(entry2)
+            println(value1)
+            println(value2)
+
+            value1 - value2
+        }.reversed()
+    }
+
+    private fun getSmartSortingEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry? {
+        return create.select()
+            .from(SMART_SORTING)
+            .where(SMART_SORTING.ROW_NUMBER.eq(ULong.valueOf(productId1)))
+            .and(SMART_SORTING.COL_NUMBER.eq(ULong.valueOf(productId2)))
+            .fetchOne()?.map() {
+                MatrixEntry(
+                    row_number = it[SMART_SORTING.ROW_NUMBER],
+                    col_number = it[SMART_SORTING.COL_NUMBER],
+                    cell_val = it[SMART_SORTING.CELL_VAL]
+                )
+            }
+    }
+
+    private fun createSmartSortingEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry {
+        create.insertInto(SMART_SORTING, SMART_SORTING.ROW_NUMBER, SMART_SORTING.COL_NUMBER, SMART_SORTING.CELL_VAL)
+            .values(ULong.valueOf(productId1), ULong.valueOf(productId2), 0)
+            .execute()
+
+        return getSmartSortingEntry(productId1, productId2)!!
     }
 
     // Prices
@@ -428,23 +481,19 @@ class ShopDao(
 
         val productPairs = getPairs(cart)
         productPairs.forEach { pair ->
-            updateMatrix(pair.first, pair.second)
+            updateSuggestions(pair.first, pair.second)
         }
 
         return true
     }
 
     fun getProductSuggestion(productId: Long): Long {
-        val rowEntries = getMatrixEntries(productId, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
-        val colEntries = getMatrixEntries(productId, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
+        val rowEntries = getSuggestionEntries(productId, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
+        val colEntries = getSuggestionEntries(productId, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
 
         val suggestions = rowEntries + colEntries
         val countSuggestions = suggestions.sumBy { it.cell_val }
         val higherSuggestion = suggestions.maxByOrNull { it.cell_val }?.col_number!!.toLong()
-
-        println(suggestions)
-        println(higherSuggestion)
-        println(countSuggestions)
 
         if ((higherSuggestion / countSuggestions) > 0.5) return higherSuggestion
         return -1L
@@ -462,20 +511,20 @@ class ShopDao(
         return pairs
     }
 
-    private fun updateMatrix(productId1: Long, productId2: Long, create: DSLContext = dslContext): Int {
-        var matrixEntry = getMatrixEntry(productId1, productId2)
-        if (matrixEntry == null) matrixEntry = createMatrixEntry(productId1, productId2)
+    private fun updateSuggestions(productId1: Long, productId2: Long, create: DSLContext = dslContext): Int {
+       var suggestionEntry = getSuggestionEntry(productId1, productId2)
+        if (suggestionEntry == null) suggestionEntry = createSuggestionEntry(productId1, productId2)
 
         create.update(SUGGESTIONS)
-            .set(SUGGESTIONS.CELL_VAL, matrixEntry.cell_val + 1)
-            .where(SUGGESTIONS.ROW_NUMBER.eq(matrixEntry.row_number))
-            .and(SUGGESTIONS.COL_NUMBER.eq(matrixEntry.col_number))
+            .set(SUGGESTIONS.CELL_VAL, suggestionEntry.cell_val + 1)
+            .where(SUGGESTIONS.ROW_NUMBER.eq(suggestionEntry.row_number))
+            .and(SUGGESTIONS.COL_NUMBER.eq(suggestionEntry.col_number))
             .execute()
 
-        return matrixEntry.cell_val + 1
+        return suggestionEntry.cell_val + 1
     }
 
-    private fun getMatrixEntries(
+    private fun getSuggestionEntries(
         productId: Long,
         tableField1: TableField<SuggestionsRecord, ULong>,
         tableField2: TableField<SuggestionsRecord, ULong>,
@@ -493,7 +542,7 @@ class ShopDao(
             }
     }
 
-    private fun getMatrixEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry? {
+    private fun getSuggestionEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry? {
         return create.select()
             .from(SUGGESTIONS)
             .where(SUGGESTIONS.ROW_NUMBER.eq(ULong.valueOf(productId1)))
@@ -507,12 +556,12 @@ class ShopDao(
             }
     }
 
-    private fun createMatrixEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry {
+    private fun createSuggestionEntry(productId1: Long, productId2: Long, create: DSLContext = dslContext): MatrixEntry {
         create.insertInto(SUGGESTIONS, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.CELL_VAL)
             .values(ULong.valueOf(productId1), ULong.valueOf(productId2), 0)
             .execute()
 
-        return getMatrixEntry(productId1, productId2)!!
+        return getSuggestionEntry(productId1, productId2)!!
     }
 
     // Queue

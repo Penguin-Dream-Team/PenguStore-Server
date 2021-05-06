@@ -12,10 +12,7 @@ import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.ShopDao
 import store.pengu.server.data.ShoppingList
-import store.pengu.server.routes.requests.CartRequest
-import store.pengu.server.routes.requests.CreateListRequest
-import store.pengu.server.routes.requests.LeaveQueueRequest
-import store.pengu.server.routes.requests.PriceRequest
+import store.pengu.server.routes.requests.*
 import store.pengu.server.routes.responses.Response
 
 fun Route.shopRoutes(
@@ -88,6 +85,15 @@ fun Route.shopRoutes(
                     throw BadRequestException(e.localizedMessage)
                 }
             }
+            call.respond(mapOf("data" to response))
+        }
+
+        put<UpdateSmartSortingEntries> { param ->
+            val request = call.receive<UpdateSmartSortingRequest>()
+            val response = withContext(Dispatchers.IO) {
+                shopDao.updateSmartSortingEntries(param.product_id, request.remainingItems)
+            }
+
             call.respond(mapOf("data" to response))
         }
 

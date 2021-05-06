@@ -126,6 +126,8 @@ data class GetProduct(val id: Long)
 @Location("/shoppingLists/update")
 object  UpdateShoppingList
 
+@Location("/shoppingList/smartSortingInfo/{product_id}")
+data class UpdateSmartSortingEntries(val product_id: Long)
 
 /**
  * Prices

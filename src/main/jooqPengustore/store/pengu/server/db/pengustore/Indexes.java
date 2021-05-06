@@ -14,6 +14,7 @@ import store.pengu.server.db.pengustore.tables.PantriesUsers;
 import store.pengu.server.db.pengustore.tables.PantryProducts;
 import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
+import store.pengu.server.db.pengustore.tables.SmartSorting;
 import store.pengu.server.db.pengustore.tables.Suggestions;
 
 
@@ -27,6 +28,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index SMART_SORTING_COL_NUMBER = Internal.createIndex(DSL.name("col_number"), SmartSorting.SMART_SORTING, new OrderField[] { SmartSorting.SMART_SORTING.COL_NUMBER }, false);
     public static final Index SUGGESTIONS_COL_NUMBER = Internal.createIndex(DSL.name("col_number"), Suggestions.SUGGESTIONS, new OrderField[] { Suggestions.SUGGESTIONS.COL_NUMBER }, false);
     public static final Index LOCAL_PRODUCT_IMAGES_PRODUCT_ID = Internal.createIndex(DSL.name("product_id"), LocalProductImages.LOCAL_PRODUCT_IMAGES, new OrderField[] { LocalProductImages.LOCAL_PRODUCT_IMAGES.PRODUCT_ID }, false);
     public static final Index PANTRY_PRODUCTS_PRODUCT_ID = Internal.createIndex(DSL.name("product_id"), PantryProducts.PANTRY_PRODUCTS, new OrderField[] { PantryProducts.PANTRY_PRODUCTS.PRODUCT_ID }, false);

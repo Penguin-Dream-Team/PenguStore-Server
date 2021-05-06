@@ -24,6 +24,7 @@ import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.Ratings;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
+import store.pengu.server.db.pengustore.tables.SmartSorting;
 import store.pengu.server.db.pengustore.tables.Stats;
 import store.pengu.server.db.pengustore.tables.Suggestions;
 import store.pengu.server.db.pengustore.tables.Translation;
@@ -109,6 +110,11 @@ public class DefaultSchema extends SchemaImpl {
     public final ShoppingListUsers SHOPPING_LIST_USERS = ShoppingListUsers.SHOPPING_LIST_USERS;
 
     /**
+     * The table <code>smart_sorting</code>.
+     */
+    public final SmartSorting SMART_SORTING = SmartSorting.SMART_SORTING;
+
+    /**
      * The table <code>stats</code>.
      */
     public final Stats STATS = Stats.STATS;
@@ -157,6 +163,7 @@ public class DefaultSchema extends SchemaImpl {
             Ratings.RATINGS,
             ShoppingList.SHOPPING_LIST,
             ShoppingListUsers.SHOPPING_LIST_USERS,
+            SmartSorting.SMART_SORTING,
             Stats.STATS,
             Suggestions.SUGGESTIONS,
             Translation.TRANSLATION,
