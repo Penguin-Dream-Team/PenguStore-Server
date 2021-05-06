@@ -23,6 +23,7 @@ import store.pengu.server.db.pengustore.tables.ProductsUsers;
 import store.pengu.server.db.pengustore.tables.Ratings;
 import store.pengu.server.db.pengustore.tables.ShoppingList;
 import store.pengu.server.db.pengustore.tables.ShoppingListUsers;
+import store.pengu.server.db.pengustore.tables.SmartSorting;
 import store.pengu.server.db.pengustore.tables.Suggestions;
 import store.pengu.server.db.pengustore.tables.Translation;
 import store.pengu.server.db.pengustore.tables.Users;
@@ -39,6 +40,7 @@ import store.pengu.server.db.pengustore.tables.records.ProductsUsersRecord;
 import store.pengu.server.db.pengustore.tables.records.RatingsRecord;
 import store.pengu.server.db.pengustore.tables.records.ShoppingListRecord;
 import store.pengu.server.db.pengustore.tables.records.ShoppingListUsersRecord;
+import store.pengu.server.db.pengustore.tables.records.SmartSortingRecord;
 import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord;
 import store.pengu.server.db.pengustore.tables.records.TranslationRecord;
 import store.pengu.server.db.pengustore.tables.records.UsersRecord;
@@ -71,6 +73,7 @@ public class Keys {
     public static final UniqueKey<ShoppingListRecord> KEY_SHOPPING_LIST_CODE = Internal.createUniqueKey(ShoppingList.SHOPPING_LIST, DSL.name("KEY_shopping_list_code"), new TableField[] { ShoppingList.SHOPPING_LIST.CODE }, true);
     public static final UniqueKey<ShoppingListRecord> KEY_SHOPPING_LIST_PRIMARY = Internal.createUniqueKey(ShoppingList.SHOPPING_LIST, DSL.name("KEY_shopping_list_PRIMARY"), new TableField[] { ShoppingList.SHOPPING_LIST.ID }, true);
     public static final UniqueKey<ShoppingListUsersRecord> KEY_SHOPPING_LIST_USERS_PRIMARY = Internal.createUniqueKey(ShoppingListUsers.SHOPPING_LIST_USERS, DSL.name("KEY_shopping_list_users_PRIMARY"), new TableField[] { ShoppingListUsers.SHOPPING_LIST_USERS.SHOPPING_LIST_ID, ShoppingListUsers.SHOPPING_LIST_USERS.USER_ID }, true);
+    public static final UniqueKey<SmartSortingRecord> KEY_SMART_SORTING_PRIMARY = Internal.createUniqueKey(SmartSorting.SMART_SORTING, DSL.name("KEY_smart_sorting_PRIMARY"), new TableField[] { SmartSorting.SMART_SORTING.ROW_NUMBER, SmartSorting.SMART_SORTING.COL_NUMBER }, true);
     public static final UniqueKey<SuggestionsRecord> KEY_SUGGESTIONS_PRIMARY = Internal.createUniqueKey(Suggestions.SUGGESTIONS, DSL.name("KEY_suggestions_PRIMARY"), new TableField[] { Suggestions.SUGGESTIONS.ROW_NUMBER, Suggestions.SUGGESTIONS.COL_NUMBER }, true);
     public static final UniqueKey<TranslationRecord> KEY_TRANSLATION_PRIMARY = Internal.createUniqueKey(Translation.TRANSLATION, DSL.name("KEY_translation_PRIMARY"), new TableField[] { Translation.TRANSLATION.STRING }, true);
     public static final UniqueKey<UsersRecord> KEY_USERS_PRIMARY = Internal.createUniqueKey(Users.USERS, DSL.name("KEY_users_PRIMARY"), new TableField[] { Users.USERS.ID }, true);
@@ -91,6 +94,8 @@ public class Keys {
     public static final ForeignKey<RatingsRecord, UsersRecord> RATINGS_IBFK_1 = Internal.createForeignKey(Ratings.RATINGS, DSL.name("ratings_ibfk_1"), new TableField[] { Ratings.RATINGS.USER_ID }, Keys.KEY_USERS_PRIMARY, new TableField[] { Users.USERS.ID }, true);
     public static final ForeignKey<ShoppingListUsersRecord, ShoppingListRecord> SHOPPING_LIST_USERS_IBFK_1 = Internal.createForeignKey(ShoppingListUsers.SHOPPING_LIST_USERS, DSL.name("shopping_list_users_ibfk_1"), new TableField[] { ShoppingListUsers.SHOPPING_LIST_USERS.SHOPPING_LIST_ID }, Keys.KEY_SHOPPING_LIST_PRIMARY, new TableField[] { ShoppingList.SHOPPING_LIST.ID }, true);
     public static final ForeignKey<ShoppingListUsersRecord, UsersRecord> SHOPPING_LIST_USERS_IBFK_2 = Internal.createForeignKey(ShoppingListUsers.SHOPPING_LIST_USERS, DSL.name("shopping_list_users_ibfk_2"), new TableField[] { ShoppingListUsers.SHOPPING_LIST_USERS.USER_ID }, Keys.KEY_USERS_PRIMARY, new TableField[] { Users.USERS.ID }, true);
+    public static final ForeignKey<SmartSortingRecord, ProductsRecord> SMART_SORTING_IBFK_1 = Internal.createForeignKey(SmartSorting.SMART_SORTING, DSL.name("smart_sorting_ibfk_1"), new TableField[] { SmartSorting.SMART_SORTING.ROW_NUMBER }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
+    public static final ForeignKey<SmartSortingRecord, ProductsRecord> SMART_SORTING_IBFK_2 = Internal.createForeignKey(SmartSorting.SMART_SORTING, DSL.name("smart_sorting_ibfk_2"), new TableField[] { SmartSorting.SMART_SORTING.COL_NUMBER }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
     public static final ForeignKey<SuggestionsRecord, ProductsRecord> SUGGESTIONS_IBFK_1 = Internal.createForeignKey(Suggestions.SUGGESTIONS, DSL.name("suggestions_ibfk_1"), new TableField[] { Suggestions.SUGGESTIONS.ROW_NUMBER }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
     public static final ForeignKey<SuggestionsRecord, ProductsRecord> SUGGESTIONS_IBFK_2 = Internal.createForeignKey(Suggestions.SUGGESTIONS, DSL.name("suggestions_ibfk_2"), new TableField[] { Suggestions.SUGGESTIONS.COL_NUMBER }, Keys.KEY_PRODUCTS_PRIMARY, new TableField[] { Products.PRODUCTS.ID }, true);
 }
