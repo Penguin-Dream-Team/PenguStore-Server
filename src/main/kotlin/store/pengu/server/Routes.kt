@@ -126,9 +126,6 @@ data class GetProduct(val id: Long)
 @Location("/shoppingLists/update")
 object  UpdateShoppingList
 
-@Location("/shoppingList/{shopping_list_id}")
-data class GenShoppingList(val shopping_list_id: Long)
-
 @Location("/shoppingList/{shopping_list_id}/smartSortingInfo/{barcode}")
 data class UpdateSmartSortingEntries(val shopping_list_id: Long, val barcode: String)
 

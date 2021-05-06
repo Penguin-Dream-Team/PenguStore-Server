@@ -330,7 +330,7 @@ class ShopDao(
             .from(SMART_SORTING)
             .where(SMART_SORTING.ROW_NUMBER.eq(productBarcode1))
             .and(SMART_SORTING.COL_NUMBER.eq(productBarcode2))
-            .fetchOne()?.map() {
+            .fetchOne()?.map {
                 MatrixEntry(
                     row_number = it[SMART_SORTING.ROW_NUMBER],
                     col_number = it[SMART_SORTING.COL_NUMBER],
@@ -545,7 +545,7 @@ class ShopDao(
         return create.select()
             .from(SUGGESTIONS)
             .where(tableField1.eq(barcode))
-            .fetch().map() {
+            .fetch().map {
                 MatrixEntry(
                     row_number = it[tableField1],
                     col_number = it[tableField2],
