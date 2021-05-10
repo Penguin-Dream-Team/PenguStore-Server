@@ -31,7 +31,7 @@ object JWTAuthenticationConfig {
         .withIssuer(issuer)
         .build()
 
-    fun makeToken(userId: Int): String = JWT.create()
+    fun makeToken(userId: Long): String = JWT.create()
         .withSubject("Authentication")
         .withIssuer(issuer)
         .withClaim(JWTClaims.ID, userId)
@@ -45,7 +45,7 @@ object JWTAuthenticationConfig {
             throw BadRequestException("Invalid token")
         }
 
-        return LoggedUser(jwtCredential.payload.getClaim(JWTClaims.ID).asInt())
+        return LoggedUser(jwtCredential.payload.getClaim(JWTClaims.ID).asLong())
     }
 }
 
@@ -57,6 +57,6 @@ object JWTClaims {
 }
 
 data class LoggedUser(
-    val id: Int,
+    val id: Long,
     val token: String = JWTAuthenticationConfig.makeToken(id)
 ) : Principal

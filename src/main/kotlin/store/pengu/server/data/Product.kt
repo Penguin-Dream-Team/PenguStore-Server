@@ -6,5 +6,6 @@ data class Product(
     val barcode: String?,
     val productRating: Float,
     val userRating: Int,
-    val ratings: List<Int>
+    val ratings: List<Int>,
+    val image: String?
 )

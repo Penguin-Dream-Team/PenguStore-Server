@@ -131,14 +131,6 @@ fun Route.userRoutes(
             call.respond(mapOf("data" to response))
         }
 
-        get<UserGetProducts> {
-            val userId = call.user.id.toLong()
-            val entries = withContext(Dispatchers.IO) {
-                userDao.getProducts(userId)
-            }
-
-            call.respond(mapOf("data" to entries))
-        }
     }
 
 }

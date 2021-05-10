@@ -28,10 +28,10 @@ class UserDao(
     private val dslContext = DSL.using(conf)
 
     // User Login
-    fun getProfile(id: Int, create: DSLContext = dslContext): User {
+    fun getProfile(id: Long, create: DSLContext = dslContext): User {
         return create.select()
             .from(USERS)
-            .where(USERS.ID.eq(ULong.valueOf(id.toLong())))
+            .where(USERS.ID.eq(ULong.valueOf(id)))
             .fetchOne()?.map {
                 User(
                     username = it[USERS.USERNAME],
@@ -41,13 +41,13 @@ class UserDao(
     }
 
     fun updateUser(
-        userId: Int,
+        userId: Long,
         username: String?,
         email: String?,
         password: String?,
         create: DSLContext = dslContext
     ): User {
-        val id = ULong.valueOf(userId.toLong())
+        val id = ULong.valueOf(userId)
         val success = create.update(USERS).set(USERS.ID, id).apply {
             if (!username.isNullOrBlank()) {
                 set(USERS.USERNAME, username)
@@ -74,7 +74,7 @@ class UserDao(
             .where(USERS.USERNAME.eq(username))
             .and(USERS.PASSWORD.eq(password))
             .fetchOne()?.map {
-                LoggedUser(it[USERS.ID].toInt())
+                LoggedUser(it[USERS.ID].toLong())
             } ?: throw ForbiddenException("Account credentials are not correct")
     }
 
@@ -83,7 +83,7 @@ class UserDao(
             .values(username, PasswordUtils.generatePassword())
             .returningResult(USERS.ID, USERS.PASSWORD)
             .fetchOne()?.map {
-                val token = LoggedUser(it[USERS.ID].toInt())
+                val token = LoggedUser(it[USERS.ID].toLong())
                 GuestLoginResponse(password = it[USERS.PASSWORD], token.token)
             } ?: throw ForbiddenException("Error registering new account")
     }
@@ -161,53 +161,5 @@ class UserDao(
             .execute() == 1
     }
 
-    fun getProducts(userId: Long, create: DSLContext = dslContext): List<Product> {
-        return create.select()
-            .from(PRODUCTS_USERS)
-            .join(PRODUCTS).on(PRODUCTS.ID.eq(PRODUCTS_USERS.PRODUCT_ID))
-            .where(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(userId)))
-            .fetch().map {
-                var ratings = mutableListOf<Int>()
-                var userRating = -1
-                var productRating = -1f
-
-                if (it[Products.PRODUCTS.BARCODE] != null) {
-                    ratings = getProductRatings(it[Products.PRODUCTS.BARCODE])
-                    userRating = getUserRating(userId, it[Products.PRODUCTS.BARCODE])
-                    if (ratings.isNotEmpty())
-                        productRating = ratings.sum().toFloat() / ratings.size
-                }
-
-                Product(
-                    id = it[Products.PRODUCTS.ID].toLong(),
-                    name = it[Products.PRODUCTS.NAME],
-                    barcode = it[Products.PRODUCTS.BARCODE],
-                    productRating = productRating,
-                    userRating = userRating,
-                    ratings = ratings
-                )
-            }
-    }
-
     // Aux
-    private fun getUserRating(userId: Long, barcode: String, create: DSLContext = dslContext): Int {
-        val userRating =  create.select()
-            .from(RATINGS)
-            .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
-            .and(RATINGS.BARCODE.eq(barcode))
-            .fetchOne()?.map {
-                it[RATINGS.RATING]
-            }
-
-        return userRating ?: -1
-    }
-
-    private fun getProductRatings(barcode: String, create: DSLContext = dslContext): MutableList<Int> {
-        return create.select()
-            .from(RATINGS)
-            .where(RATINGS.BARCODE.eq(barcode))
-            .fetch().map {
-                it[RATINGS.RATING]
-            }
-    }
 }

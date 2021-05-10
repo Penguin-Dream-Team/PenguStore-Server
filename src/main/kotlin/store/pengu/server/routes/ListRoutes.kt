@@ -19,7 +19,7 @@ fun Route.listRoutes(
         get<LocationList> { params ->
             val userId = call.user.id
             val (type, list) = withContext(Dispatchers.IO) {
-                listDao.findNearbyList(userId.toLong(), params.latitude, params.longitude)
+                listDao.findNearbyList(userId, params.latitude, params.longitude)
             }
             call.respond(UserListResponse(type, list))
         }

@@ -25,7 +25,7 @@ fun Route.pantryRoutes(
         get<PantryLists> {
             val userId = call.user.id
             val pantries = withContext(Dispatchers.IO) {
-                pantryDao.listPantries(userId.toLong())
+                pantryDao.listPantries(userId)
             }
             call.respond(Response(pantries))
         }
@@ -34,7 +34,7 @@ fun Route.pantryRoutes(
             val userId = call.user.id
             val listRequest = call.receive<CreateListRequest>()
             val pantry = withContext(Dispatchers.IO) {
-                pantryDao.createPantry(listRequest, userId.toLong())
+                pantryDao.createPantry(listRequest, userId)
             }
             call.respond(Response(pantry))
         }
@@ -44,11 +44,11 @@ fun Route.pantryRoutes(
             val pantry = withContext(Dispatchers.IO) {
                 val pantry = pantryDao.getPantryByCode(param.code)
 
-                if (pantryDao.userHasPantry(pantry.id, userId.toLong())) {
+                if (pantryDao.userHasPantry(pantry.id, userId)) {
                     throw ConflictException("You already have this pantry")
                 }
 
-                pantryDao.addUserToPantry(pantry.id, userId.toLong())
+                pantryDao.addUserToPantry(pantry.id, userId)
                 pantry
             }
 
@@ -58,7 +58,7 @@ fun Route.pantryRoutes(
         get<PantryGet> { param ->
             val userId = call.user.id
             val entries = withContext(Dispatchers.IO) {
-                if (!pantryDao.userHasPantry(param.id, userId.toLong())) {
+                if (!pantryDao.userHasPantry(param.id, userId)) {
                     throw NotFoundException("Pantry not found")
                 }
 

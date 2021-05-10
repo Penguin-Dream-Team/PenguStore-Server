@@ -1,6 +1,8 @@
 package store.pengu.server.daos
 
-import org.jooq.*
+import org.jooq.Configuration
+import org.jooq.DSLContext
+import org.jooq.Record
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.NotFoundException
@@ -41,29 +43,90 @@ class ProductDao(
                 .fetchOne()?.map { it[LOCAL_PRODUCT_IMAGES.IMAGE_URL] }
         }
 
+        fun getProductInformation(userId: Long, it: Record, create: DSLContext): Product {
+            var ratings = emptyList<Int>()
+            var userRating = 0
+            var productRating = 0f
+
+            val id = it[PRODUCTS.ID].toLong()
+            val barcode = it[PRODUCTS.BARCODE]
+            barcode?.let {
+                ratings = getProductRatings(it, create)
+                userRating = getUserRating(userId, barcode, create)
+                if (ratings.isNotEmpty()) {
+                    productRating = ratings.sum().toFloat() / ratings.size
+                }
+            }
+
+            return Product(
+                id = id,
+                name = it[PRODUCTS.NAME],
+                barcode = barcode,
+                productRating = productRating,
+                userRating = userRating,
+                ratings = ratings,
+                image = image(barcode, id, create)
+            )
+        }
+
+        private fun getUserRating(userId: Long, barcode: String, create: DSLContext): Int {
+            return create.select()
+                .from(RATINGS)
+                .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
+                .and(RATINGS.BARCODE.eq(barcode))
+                .fetchOne()?.map {
+                    it[RATINGS.RATING]
+                } ?: 0
+        }
+
+        private fun getProductRatings(barcode: String, create: DSLContext): List<Int> {
+            return create.select()
+                .from(RATINGS)
+                .where(RATINGS.BARCODE.eq(barcode))
+                .fetch().map {
+                    it[RATINGS.RATING]
+                }
+        }
+    }
+
+    fun getAllProducts(userId: Long, create: DSLContext = dslContext): List<Product> {
+
+        return create.transactionResult { configuration ->
+            val transaction = DSL.using(configuration)
+            transaction.select()
+                .from(PRODUCTS_USERS)
+                .join(PRODUCTS).on(PRODUCTS.ID.eq(PRODUCTS_USERS.PRODUCT_ID))
+                .where(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(userId)))
+                .fetch().map {
+                    getProductInformation(userId, it, transaction)
+                }
+        }
     }
 
     /**
-     *
+     * REWRTIE
      */
 
 
     // Products
     fun addProduct(product: Product, create: DSLContext = dslContext): Product? {
-        return  create.insertInto(PRODUCTS,
-                PRODUCTS.NAME, PRODUCTS.BARCODE)
-                .values(product.name, product.barcode)
-                .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
-                .fetchOne()?.map {
-                    Product(
-                        id = it[PRODUCTS.ID].toLong(),
-                        name = it[PRODUCTS.NAME],
-                        barcode = it[PRODUCTS.BARCODE],
-                        productRating = -1f,
-                        userRating = -1,
-                        ratings = mutableListOf()
-                    )
-                }
+        return create.insertInto(
+            PRODUCTS,
+            PRODUCTS.NAME, PRODUCTS.BARCODE
+        )
+            .values(product.name, product.barcode)
+            .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
+            .fetchOne()?.map {
+                Product(
+                    id = it[PRODUCTS.ID].toLong(),
+                    name = it[PRODUCTS.NAME],
+                    barcode = it[PRODUCTS.BARCODE],
+                    productRating = -1f,
+                    userRating = -1,
+                    ratings = mutableListOf(),
+                    image = ""
+                )
+            }
     }
 
     fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
@@ -82,7 +145,7 @@ class ProductDao(
         val localPrices = create.select()
             .from(LOCAL_PRODUCT_PRICES)
             .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(product.id)))
-            .fetch().map{
+            .fetch().map {
                 LocalProductPrice(
                     product_id = it[LOCAL_PRODUCT_PRICES.PRODUCT_ID].toLong(),
                     price = it[LOCAL_PRODUCT_PRICES.PRICE],
@@ -147,7 +210,8 @@ class ProductDao(
                     barcode = it[PRODUCTS.BARCODE],
                     productRating = productRating,
                     userRating = userRating,
-                    ratings = ratings
+                    ratings = ratings,
+                    image = ""
                 )
             }
     }
@@ -174,7 +238,8 @@ class ProductDao(
                     barcode = it[PRODUCTS.BARCODE],
                     productRating = productRating,
                     userRating = userRating,
-                    ratings = ratings
+                    ratings = ratings,
+                    image = ""
                 )
             }
     }
@@ -202,13 +267,14 @@ class ProductDao(
             barcode = barcode,
             productRating = productRating,
             userRating = userRating,
-            ratings = ratings
+            ratings = ratings,
+            image = ""
         )
     }
 
     // Aux
     private fun getUserRating(userId: Long, barcode: String, create: DSLContext = dslContext): Int {
-        val userRating =  create.select()
+        val userRating = create.select()
             .from(RATINGS)
             .where(RATINGS.USER_ID.eq(ULong.valueOf(userId)))
             .and(RATINGS.BARCODE.eq(barcode))

@@ -43,6 +43,17 @@ data class ImportShoppingList(val code: String)
 data class ShoppingListGet(val id: Long)
 
 
+/**
+ * Products
+ */
+
+@Location("products")
+object ListProducts
+
+/**
+ * NEEDS REWRITE
+ */
+
 
 /**
  * User Login
@@ -76,9 +87,6 @@ data class UserConnectProduct(val product_id: Long)
 
 @Location("/user/disconnectProduct/{product_id}")
 data class UserDisconnectProduct(val product_id: Long)
-
-@Location("user/products")
-object UserGetProducts
 
 
 /**

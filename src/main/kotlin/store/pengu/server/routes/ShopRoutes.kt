@@ -24,7 +24,7 @@ fun Route.shopRoutes(
         get<ShoppingLists> {
             val userId = call.user.id
             val shops = withContext(Dispatchers.IO) {
-                shopDao.listShops(userId.toLong())
+                shopDao.listShops(userId)
             }
 
             call.respond(Response(shops))
@@ -34,7 +34,7 @@ fun Route.shopRoutes(
             val userId = call.user.id
             val listRequest = call.receive<CreateListRequest>()
             val shoppingList = withContext(Dispatchers.IO) {
-                shopDao.createShoppingList(listRequest, userId.toLong())
+                shopDao.createShoppingList(listRequest, userId)
             }
             call.respond(Response(shoppingList))
         }
@@ -43,13 +43,13 @@ fun Route.shopRoutes(
             val userId = call.user.id
 
             val shoppingList = withContext(Dispatchers.IO) {
-                val shoppingList = shopDao.getShoppingListByCode(userId.toLong(), param.code)
+                val shoppingList = shopDao.getShoppingListByCode(userId, param.code)
 
-                if (shopDao.userHasShoppingList(shoppingList.id, userId.toLong())) {
+                if (shopDao.userHasShoppingList(shoppingList.id, userId)) {
                     throw ConflictException("You already have this shopping list")
                 }
 
-                shopDao.addUserToShoppingList(shoppingList.id, userId.toLong())
+                shopDao.addUserToShoppingList(shoppingList.id, userId)
                 shoppingList
             }
 
@@ -59,11 +59,11 @@ fun Route.shopRoutes(
         get<ShoppingListGet> { param ->
             val userId = call.user.id
             val entries = withContext(Dispatchers.IO) {
-                if (!shopDao.userHasShoppingList(param.id, userId.toLong())) {
+                if (!shopDao.userHasShoppingList(param.id, userId)) {
                     throw NotFoundException("Shopping list not found")
                 }
 
-                shopDao.getShoppingListProducts(param.id, userId.toLong())
+                shopDao.getShoppingListProducts(param.id, userId)
             }
 
             call.respond(Response(entries))

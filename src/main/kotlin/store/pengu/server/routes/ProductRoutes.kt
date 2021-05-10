@@ -22,6 +22,18 @@ import java.io.File
 fun Route.productRoutes(
     productDao: ProductDao,
 ) {
+    authenticate {
+        get<ListProducts> {
+            val userId = call.user.id
+
+            val products = withContext(Dispatchers.IO) {
+                productDao.getAllProducts(userId)
+            }
+
+            call.respond(Response(products))
+        }
+    }
+
 
     authenticate {
         post<AddProduct> {
