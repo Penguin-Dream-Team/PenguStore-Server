@@ -311,6 +311,10 @@ class ShopDao(
         return getSmartSortingEntry(shoppingListId, productBarcode1, productBarcode2)!!
     }
 
+    /**
+     *
+     */
+
     // Prices
     fun addPrice(price_request: PriceRequest, create: DSLContext = dslContext): Boolean {
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
