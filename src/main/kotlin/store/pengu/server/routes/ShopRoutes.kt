@@ -63,7 +63,7 @@ fun Route.shopRoutes(
                     throw NotFoundException("Shopping list not found")
                 }
 
-                shopDao.getShoppingListProducts(param.id, userId)
+                shopDao.getShoppingListProducts(param.id, userId, call.requestUrl)
             }
 
             call.respond(Response(entries))

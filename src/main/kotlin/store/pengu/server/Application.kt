@@ -16,6 +16,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.*
+import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
 import org.jooq.exception.DataAccessException
 import org.koin.core.context.startKoin
@@ -24,6 +25,7 @@ import store.pengu.server.application.*
 import store.pengu.server.application.features.GuestRoutes
 import store.pengu.server.application.features.ResourceAccessControl
 import store.pengu.server.application.features.guestOnly
+import java.io.File
 import java.time.Duration
 import java.time.Instant
 
@@ -182,12 +184,15 @@ fun Application.module(testing: Boolean = false) {
         }
 
         /* STATIC FILES */
-        static("/static") {
-            resources("static")
+        static("/uploads") {
+            files(File("uploads/"))
         }
         resource("/favicon.ico", "static/favicon.ico")
     }
 }
+
+val ApplicationCall.requestUrl: String
+    get() = request.origin.run { "${scheme}://${host}:${port}" }
 
 abstract class PenguStoreException(val statusCode: HttpStatusCode, open val content: Any) : RuntimeException("")
 data class ForbiddenException(override val content: Any) : PenguStoreException(HttpStatusCode.Forbidden, content)

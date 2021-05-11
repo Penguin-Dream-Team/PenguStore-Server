@@ -50,6 +50,10 @@ data class ShoppingListGet(val id: Long)
 @Location("products")
 object ListProducts
 
+@Location("/products")
+object CreateProduct
+
+
 /**
  * NEEDS REWRITE
  */
@@ -115,9 +119,6 @@ data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
 /**
  * Products
  */
-@Location("/products/add")
-object AddProduct
-
 @Location("/products/update")
 object UpdateProduct
 

@@ -178,6 +178,7 @@ class ShopDao(
     fun getShoppingListProducts(
         shopId: Long,
         userId: Long,
+        requestUrl: String,
         create: DSLContext = dslContext
     ): List<ProductInShoppingList> {
         return create.transactionResult { configuration ->
@@ -226,6 +227,7 @@ class ShopDao(
                         image = ProductDao.image(
                             barcode = it[PRODUCTS.BARCODE],
                             id = it[PRODUCTS.ID].toLong(),
+                            requestUrl,
                             transaction
                         ),
                         pantries = listOf() //auxGetPantry(user_id, it[PRODUCTS.ID].toLong())

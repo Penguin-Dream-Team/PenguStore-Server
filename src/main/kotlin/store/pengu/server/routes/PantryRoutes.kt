@@ -62,7 +62,7 @@ fun Route.pantryRoutes(
                     throw NotFoundException("Pantry not found")
                 }
 
-                pantryDao.getPantryProducts(param.id)
+                pantryDao.getPantryProducts(param.id, call.requestUrl)
             }
 
             call.respond(Response(entries))

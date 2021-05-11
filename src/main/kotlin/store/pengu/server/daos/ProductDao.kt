@@ -1,19 +1,26 @@
 package store.pengu.server.daos
 
+import io.ktor.http.*
+import org.jetbrains.annotations.NotNull
 import org.jooq.Configuration
 import org.jooq.DSLContext
 import org.jooq.Record
+import org.jooq.TableField
 import org.jooq.impl.DSL
+import org.jooq.impl.TableImpl
 import org.jooq.types.ULong
+import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.LocalProductPrice
 import store.pengu.server.data.Product
 import store.pengu.server.db.pengustore.Tables
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_PRICES
+import store.pengu.server.db.pengustore.tables.LocalProductImages
 import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.ProductsUsers
+import store.pengu.server.db.pengustore.tables.records.LocalProductImagesRecord
 import store.pengu.server.routes.requests.ImageRequest
 
 class ProductDao(
@@ -29,8 +36,8 @@ class ProductDao(
                 local_price ?: throw NotFoundException("Local Price not found")
         }
 
-        fun image(barcode: String?, id: Long, create: DSLContext): String? {
-            return barcode?.let { bc ->
+        fun image(barcode: String?, id: Long, requestUrl: String, create: DSLContext): String? {
+            val img = barcode?.let { bc ->
                 create.select(CROWD_PRODUCT_IMAGES.IMAGE_URL)
                     .from(CROWD_PRODUCT_IMAGES)
                     .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(bc))
@@ -41,9 +48,12 @@ class ProductDao(
                 .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(ULong.valueOf(id)))
                 .limit(1)
                 .fetchOne()?.map { it[LOCAL_PRODUCT_IMAGES.IMAGE_URL] }
+            return img?.run {
+                if (this.startsWith("http")) this else "$requestUrl/$this"
+            }
         }
 
-        fun getProductInformation(userId: Long, it: Record, create: DSLContext): Product {
+        fun getProductInformation(userId: Long, it: Record, requestUrl: String, create: DSLContext): Product {
             var ratings = emptyList<Int>()
             var userRating = 0
             var productRating = 0f
@@ -65,7 +75,7 @@ class ProductDao(
                 productRating = productRating,
                 userRating = userRating,
                 ratings = ratings,
-                image = image(barcode, id, create)
+                image = image(barcode, id, requestUrl, create)
             )
         }
 
@@ -89,8 +99,7 @@ class ProductDao(
         }
     }
 
-    fun getAllProducts(userId: Long, create: DSLContext = dslContext): List<Product> {
-
+    fun getAllProducts(userId: Long, requestUrl: String, create: DSLContext = dslContext): List<Product> {
         return create.transactionResult { configuration ->
             val transaction = DSL.using(configuration)
             transaction.select()
@@ -98,9 +107,78 @@ class ProductDao(
                 .join(PRODUCTS).on(PRODUCTS.ID.eq(PRODUCTS_USERS.PRODUCT_ID))
                 .where(PRODUCTS_USERS.USER_ID.eq(ULong.valueOf(userId)))
                 .fetch().map {
-                    getProductInformation(userId, it, transaction)
+                    getProductInformation(userId, it, requestUrl, transaction)
                 }
         }
+    }
+
+    fun createProduct(
+        userId: Long,
+        name: String,
+        barcode: String?,
+        image: String?,
+        requestUrl: String,
+        create: DSLContext = dslContext
+    ): Product {
+        return create.transactionResult { configuration ->
+            val transaction = DSL.using(configuration)
+            val product = transaction.insertInto(PRODUCTS, PRODUCTS.NAME, PRODUCTS.BARCODE)
+                .values(name, barcode)
+                .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
+                .fetchOne()?.map {
+                    Product(
+                        id = it[PRODUCTS.ID].toLong(),
+                        name = it[PRODUCTS.NAME],
+                        barcode = it[PRODUCTS.BARCODE],
+                        productRating = 0f,
+                        userRating = 0,
+                        ratings = emptyList(),
+                        image = null
+                    )
+                } ?: throw InternalServerErrorException("Could not create product")
+
+            transaction.insertInto(PRODUCTS_USERS, PRODUCTS_USERS.PRODUCT_ID, PRODUCTS_USERS.USER_ID)
+                .values(ULong.valueOf(product.id), ULong.valueOf(userId))
+                .execute()
+
+            val imageUrl = image?.let {
+                if (barcode == null) {
+                    createImage(
+                        ULong.valueOf(product.id),
+                        it,
+                        LOCAL_PRODUCT_IMAGES,
+                        LOCAL_PRODUCT_IMAGES.PRODUCT_ID,
+                        LOCAL_PRODUCT_IMAGES.IMAGE_URL,
+                        transaction
+                    )
+                } else {
+                    createImage(
+                        product.barcode,
+                        it,
+                        CROWD_PRODUCT_IMAGES,
+                        CROWD_PRODUCT_IMAGES.BARCODE,
+                        CROWD_PRODUCT_IMAGES.IMAGE_URL,
+                        transaction
+                    )
+                }
+            }
+
+            product.copy(image = "$requestUrl/$imageUrl")
+        }
+    }
+
+    private fun <T : Record, R> createImage(
+        id: R,
+        image: String,
+        table: TableImpl<T>,
+        idColumn: TableField<T, R>,
+        imageColumn: TableField<T, String>,
+        create: DSLContext
+    ): String? {
+        return create.insertInto(table, idColumn, imageColumn)
+            .values(id, image)
+            .returningResult(imageColumn)
+            .fetchOne()?.map { it[imageColumn] }
     }
 
     /**
@@ -109,25 +187,6 @@ class ProductDao(
 
 
     // Products
-    fun addProduct(product: Product, create: DSLContext = dslContext): Product? {
-        return create.insertInto(
-            PRODUCTS,
-            PRODUCTS.NAME, PRODUCTS.BARCODE
-        )
-            .values(product.name, product.barcode)
-            .returningResult(PRODUCTS.ID, PRODUCTS.NAME, PRODUCTS.BARCODE)
-            .fetchOne()?.map {
-                Product(
-                    id = it[PRODUCTS.ID].toLong(),
-                    name = it[PRODUCTS.NAME],
-                    barcode = it[PRODUCTS.BARCODE],
-                    productRating = -1f,
-                    userRating = -1,
-                    ratings = mutableListOf(),
-                    image = ""
-                )
-            }
-    }
 
     fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
         return create.update(PRODUCTS)
@@ -292,15 +351,6 @@ class ProductDao(
             .fetch().map {
                 it[RATINGS.RATING]
             }
-    }
-
-    fun connectProduct(product_id: Long, user_id: Long, create: DSLContext = dslContext): Boolean {
-        return create.insertInto(
-            ProductsUsers.PRODUCTS_USERS,
-            ProductsUsers.PRODUCTS_USERS.PRODUCT_ID, ProductsUsers.PRODUCTS_USERS.USER_ID
-        )
-            .values(ULong.valueOf(product_id), ULong.valueOf(user_id))
-            .execute() == 1
     }
 
     fun addImage(imageRequest: ImageRequest, create: DSLContext = dslContext): Boolean {

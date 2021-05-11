@@ -170,7 +170,7 @@ class PantryDao(
         )
     }
 
-    fun getPantryProducts(pantryId: Long, create: DSLContext = dslContext): List<ProductInPantry> {
+    fun getPantryProducts(pantryId: Long, requestUrl: String, create: DSLContext = dslContext): List<ProductInPantry> {
         return create.select()
             .from(PANTRIES)
             .join(PANTRY_PRODUCTS).on(PANTRY_PRODUCTS.PANTRY_ID.eq(PANTRIES.ID))
@@ -187,6 +187,7 @@ class PantryDao(
                     image = ProductDao.image(
                         barcode = it[PRODUCTS.BARCODE],
                         id = it[PRODUCTS.ID].toLong(),
+                        requestUrl,
                         create
                     )
                 )

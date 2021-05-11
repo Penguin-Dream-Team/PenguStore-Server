@@ -2,6 +2,7 @@ package store.pengu.server.routes
 
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.features.*
 import io.ktor.http.content.*
 import io.ktor.locations.*
 import io.ktor.request.*
@@ -12,12 +13,17 @@ import kotlinx.coroutines.withContext
 import org.jooq.tools.json.JSONObject
 import org.jooq.types.ULong
 import store.pengu.server.*
+import store.pengu.server.BadRequestException
+import store.pengu.server.NotFoundException
 import store.pengu.server.application.user
 import store.pengu.server.daos.ProductDao
 import store.pengu.server.data.Product
+import store.pengu.server.routes.requests.CreateProductRequest
 import store.pengu.server.routes.requests.ImageRequest
 import store.pengu.server.routes.responses.Response
 import java.io.File
+import java.time.Instant
+import java.util.*
 
 fun Route.productRoutes(
     productDao: ProductDao,
@@ -27,37 +33,43 @@ fun Route.productRoutes(
             val userId = call.user.id
 
             val products = withContext(Dispatchers.IO) {
-                productDao.getAllProducts(userId)
+                productDao.getAllProducts(userId, call.requestUrl)
             }
 
             call.respond(Response(products))
+        }
+
+        post<CreateProduct> {
+            val userId = call.user.id
+            val request = call.receive<CreateProductRequest>()
+            val response = withContext(Dispatchers.IO) {
+                val image = request.image?.let {
+                    val bytes = Base64.getMimeDecoder().decode(it)
+                    val path = "uploads/${request.name}_${Instant.now().epochSecond}.jpg"
+                    File(path).writeBytes(bytes)
+                    path
+                }
+                try {
+                    productDao.createProduct(userId, request.name, request.barcode, image, call.requestUrl)
+                } catch (e: Exception) {
+                    image?.let {
+                        File(it).delete()
+                    }
+                    throw e
+                }
+            }
+            call.respond(Response(response))
         }
     }
 
 
     authenticate {
-        post<AddProduct> {
-            val userId = call.user.id.toLong()
-            val product = call.receive<Product>()
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    val product2 = productDao.addProduct(product) ?: throw NotFoundException("Product with specified id not found")
-                    productDao.connectProduct(product2.id, userId)
-                }
-                catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
-            }
-            call.respond(mapOf("data" to response))
-        }
-
         put<UpdateProduct> {
             val product = call.receive<Product>()
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.updateProduct(product)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -69,8 +81,7 @@ fun Route.productRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.addBarcode(product)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -106,7 +117,7 @@ fun Route.productRoutes(
                 }
             }
 
-            val id : String = fileDescription["id"] as String
+            val id: String = fileDescription["id"] as String
 
             var barcode: String? = null
             if (fileDescription["barcode"] != null)
@@ -123,8 +134,7 @@ fun Route.productRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.addImage(imageRequest)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -137,8 +147,7 @@ fun Route.productRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.deleteImage(imageRequest)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -149,8 +158,7 @@ fun Route.productRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.getImageBarcode(param.barcode)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -161,8 +169,7 @@ fun Route.productRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     productDao.getImageProductId(param.product_id)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
