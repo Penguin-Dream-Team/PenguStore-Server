@@ -15,7 +15,6 @@ import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
-import java.lang.Integer.MAX_VALUE
 
 class ShopDao(
     conf: Configuration,
@@ -305,28 +304,28 @@ class ShopDao(
         shoppingList: MutableList<ProductInShoppingList>
     ): List<ProductInShoppingList> {
         return shoppingList.sortedWith { a, b ->
-            var entry1 = MatrixEntry(ULong.valueOf(-1), "", "", MAX_VALUE)
-            var entry2 = MatrixEntry(ULong.valueOf(-1), "", "", MAX_VALUE)
+            var entry1 = MatrixEntry(ULong.valueOf(-1), "", "", 0)
+            var entry2 = MatrixEntry(ULong.valueOf(-1), "", "", 0)
 
             if (a.barcode != null && b.barcode != null) {
                 entry1 = getSmartSortingEntry(shoppingListId, a.barcode, b.barcode) ?: MatrixEntry(
                     ULong.valueOf(-1),
                     "",
                     "",
-                    MAX_VALUE
+                    0
                 )
                 entry2 = getSmartSortingEntry(shoppingListId, b.barcode, a.barcode) ?: MatrixEntry(
                     ULong.valueOf(-1),
                     "",
                     "",
-                    MAX_VALUE
+                    0
                 )
             }
 
-            val value1 = entry1.cell_val
-            val value2 = entry2.cell_val
-
-            value1 - value2
+            return@sortedWith if (a.barcode != null && b.barcode != null) entry2.cell_val - entry1.cell_val
+            else if (a.barcode != null && b.barcode == null) -1
+            else if (b.barcode != null && a.barcode == null) 1
+            else 0
         }
     }
 
