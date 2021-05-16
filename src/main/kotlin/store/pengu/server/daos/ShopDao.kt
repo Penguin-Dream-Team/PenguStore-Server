@@ -322,9 +322,6 @@ class ShopDao(
                 )
             }
 
-            println("value ${a.barcode} over ${b.barcode} ${entry1.cell_val}")
-            println("value ${b.barcode} over ${a.barcode} ${entry2.cell_val}")
-
             return@sortedWith if (a.barcode != null && b.barcode != null) entry2.cell_val - entry1.cell_val
             else if (a.barcode != null && b.barcode == null) -1
             else if (b.barcode != null && a.barcode == null) 1
