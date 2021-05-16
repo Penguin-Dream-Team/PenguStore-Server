@@ -1,5 +1,5 @@
 -- Users
-INSERT INTO USERS (username, email, password)
+INSERT INTO users (username, email, password)
 VALUES
        ("Tux", "Tux@pengu.com", "tux"),
        ("Pengu", "Pengu@pengu.com", "pengu"),
@@ -8,7 +8,7 @@ VALUES
        ("Pinguim5", "Pinguim5@pengu.com", "pengu");
 
 -- Pantries
-INSERT INTO PANTRIES (code, name, latitude, longitude, color)
+INSERT INTO pantries (code, name, latitude, longitude, color)
 VALUES
        ("OGPANTRY", "OGPantry", 25.12, 21.32, "231 76 60"),
        ("TuxPantry", "TuxPantry", 56.45, 54.65, "46 204 112"),
@@ -17,7 +17,7 @@ VALUES
        ("Pantry5", "Pantry5", 53.35, 57.75, "156 89 182");
 
 -- Products with barcode
-INSERT INTO PRODUCTS (barcode, name)
+INSERT INTO products (barcode, name)
 VALUES
        ("ice4510", "Ice"),
        ("fish15468", "Fish"),
@@ -26,7 +26,7 @@ VALUES
        ("crab159357", "Crab");
 
 -- Products without barcode
-INSERT INTO PRODUCTS (name)
+INSERT INTO products (name)
 VALUES
        ("Batatas"),
        ("Couves"),
@@ -34,7 +34,7 @@ VALUES
        ("Pepinos");
 
 -- Pantry_Products
-INSERT INTO PANTRY_PRODUCTS (pantry_id, product_id, have_qty, want_qty)
+INSERT INTO pantry_products (pantry_id, product_id, have_qty, want_qty)
 VALUES
        (1, 1, 2, 3),
        (1, 2, 3, 3),
@@ -45,7 +45,7 @@ VALUES
        (2, 2, 3, 5);
 
 -- Pantry_Users
-INSERT INTO PANTRIES_USERS (pantry_id, user_id)
+INSERT INTO pantries_users (pantry_id, user_id)
 VALUES
        (1, 1),
        (1, 2),
@@ -54,7 +54,7 @@ VALUES
        (2, 2);
 
 -- Crowd_Product_Prices
-INSERT INTO CROWD_PRODUCT_PRICES (barcode, price, latitude, longitude)
+INSERT INTO crowd_product_prices (barcode, price, latitude, longitude)
 VALUES
        ("ice4510" , 1.69, 50.25, 150.25),
        ("ice4510" , 5.26, 50.25, 50.25),
@@ -66,19 +66,19 @@ VALUES
        ("cebolas123", 69.420, 50.25, 150.25);
 
 -- Local_Product_Prices
-INSERT INTO LOCAL_PRODUCT_PRICES (product_id, price, latitude, longitude)
+INSERT INTO local_product_prices (product_id, price, latitude, longitude)
 VALUES
         (6, 15.23, 50.25, 150.25),
         (7, 25.22, 50.25, 50.25);
 -- Shopping_List
-INSERT INTO SHOPPING_LIST (name, code, latitude, longitude, color)
+INSERT INTO shopping_list (name, code, latitude, longitude, color)
 VALUES
        ("OG Shopping List", "OGS", 50.25, 150.25, "230 125 34"),
        ("PenguSuper Shopping List", "PSL", 50.25, 50.25, "46 204 112"),
        ("TuxMarket Shopping List", "TSL", 50.25, 50.25, "189 195 199");
 
 -- Product_Users
-INSERT INTO PRODUCTS_USERS(product_id, user_id)
+INSERT INTO products_users(product_id, user_id)
 VALUES
        (1, 1),
        (1, 2),
@@ -98,7 +98,7 @@ VALUES
        (9, 1);
 
 -- Shopping_List_Users
-INSERT INTO SHOPPING_LIST_USERS (shopping_list_id,user_id)
+INSERT INTO shopping_list_users (shopping_list_id,user_id)
 VALUES
        (1, 1),
        (2, 1),
@@ -107,7 +107,7 @@ VALUES
        (1, 3);
 
 -- Stats
-INSERT INTO STATS (num_items, time, latitude, longitude)
+INSERT INTO stats (num_items, time, latitude, longitude)
 VALUES
        (10, 60, 50.25, 150.25),
        (10, 80, 50.15, 150.15),
@@ -122,7 +122,7 @@ VALUES
        (5, 20, 50.25, 150.25);
 
 -- Local_Product_Images
-INSERT INTO LOCAL_PRODUCT_IMAGES (product_id, image_url)
+INSERT INTO local_product_images (product_id, image_url)
 VALUES
     (1, "https://clearlakeiowa.com/wp-content/uploads/2019/11/ice-cubes-e1573665814265.jpg"),
     (2, "https://thumbs-prod.si-cdn.com/qXrJJ-l_jMrQbARjnToD0fi-Tsg=/800x600/filters:no_upscale()/https://public-media.si-cdn.com/filer/d6/93/d6939718-4e41-44a8-a8f3-d13648d2bcd0/c3npbx.jpg"),
@@ -135,7 +135,7 @@ VALUES
     (9, "https://belezaesaude.com/i/730/55/pepino.jpg");
 
 -- Crowd_Product_Images
-INSERT INTO CROWD_PRODUCT_IMAGES (barcode, image_url)
+INSERT INTO crowd_product_images (barcode, image_url)
 VALUES
     ("ice4510", "https://clearlakeiowa.com/wp-content/uploads/2019/11/ice-cubes-e1573665814265.jpg"),
     ("fish15468", "https://thumbs-prod.si-cdn.com/qXrJJ-l_jMrQbARjnToD0fi-Tsg=/800x600/filters:no_upscale()/https://public-media.si-cdn.com/filer/d6/93/d6939718-4e41-44a8-a8f3-d13648d2bcd0/c3npbx.jpg"),
@@ -145,7 +145,7 @@ VALUES
     ("cebolas123", "https://media-manager.noticiasaominuto.com/1920/1582634326/naom_5e5514ead7999.jpg?crop_params=eyJsYW5kc2NhcGUiOnsiY3JvcFdpZHRoIjoyNDU1LCJjcm9wSGVpZ2h0IjoxMzgxLCJjcm9wWCI6MCwiY3JvcFkiOjU4fX0=");
 
 -- Product Ratigns
-INSERT INTO RATINGS (user_id, barcode, rating)
+INSERT INTO ratings (user_id, barcode, rating)
 VALUES
     (1, "seabird789987", 2),
     (2, "seabird789987", 3),
@@ -156,6 +156,6 @@ VALUES
     (5, "crab159357", 2);
 
 -- Beacons queue noise
-INSERT INTO BEACONS (num_items, latitude, longitude)
+INSERT INTO beacons (num_items, latitude, longitude)
 VALUES
     (15, 50.25, 150.25);
