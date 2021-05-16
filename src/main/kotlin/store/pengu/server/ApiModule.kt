@@ -36,7 +36,7 @@ object ApiModule {
             ProductDao(getDatabase())
         }
         single {
-            ShopDao(getDatabase())
+            ShopDao(getDatabase(), get<ProductDao>())
         }
         single {
             ListDao(getDatabase())

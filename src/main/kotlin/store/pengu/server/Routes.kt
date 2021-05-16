@@ -29,6 +29,9 @@ data class ImportPantryList(val code: String)
 @Location("/lists/pantries/{id}")
 data class PantryGet(val id: Long)
 
+@Location("/lists/pantries/{id}/missing")
+data class MissingProductPantryList(val id: Long)
+
 
 /**
  * Shopping Lists
@@ -47,11 +50,23 @@ data class ShoppingListGet(val id: Long)
  * Products
  */
 
-@Location("products")
+@Location("/products")
 object ListProducts
 
 @Location("/products")
 object CreateProduct
+
+@Location("/products/{id}")
+data class GetProduct(val id: Long)
+
+@Location("/products/{id}/pantries")
+data class ProductPantryLists(val id: Long)
+
+@Location("/products/{id}/shops")
+data class ProductShoppingLists(val id: Long)
+
+@Location("/products/{id}/images")
+data class ProductImages(val id: Long)
 
 
 /**
@@ -125,9 +140,6 @@ object UpdateProduct
 @Location("/product/addBarcode")
 object AddBarcode
 
-@Location("/product/{id}")
-data class GetProduct(val id: Long)
-
 
 /**
  * Shopping List
@@ -160,12 +172,6 @@ object AddImage
 
 @Location("/images/deleteImage")
 object DeleteImage
-
-@Location("/images/barcode/{barcode}")
-data class GetProductImagesBarcode(val barcode: String)
-
-@Location("/images/productId/{product_id}")
-data class GetProductImagesProductId(val product_id: Long)
 
 
 /**

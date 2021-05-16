@@ -1,8 +1,10 @@
 package store.pengu.server.data
 
+import store.pengu.server.data.productlists.ProductPantryListEntry
+
 data class ProductInShoppingList (
     override val id: Long,
-    val pantries: List<Pantry>,
+    val pantries: List<ProductPantryListEntry>,
     override val listId: Long,
     override val name: String,
     override val barcode: String?,

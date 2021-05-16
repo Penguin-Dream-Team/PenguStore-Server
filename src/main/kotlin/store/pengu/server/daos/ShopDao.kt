@@ -1,6 +1,9 @@
 package store.pengu.server.daos
 
-import org.jooq.*
+import org.jooq.Configuration
+import org.jooq.DSLContext
+import org.jooq.Record
+import org.jooq.TableField
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.InternalServerErrorException
@@ -15,11 +18,21 @@ import store.pengu.server.routes.requests.PriceRequest
 import java.lang.Integer.MAX_VALUE
 
 class ShopDao(
-    conf: Configuration
+    conf: Configuration,
+    val productDao: ProductDao
 ) {
     private val dslContext = DSL.using(conf)
 
     companion object {
+        private fun generateCode(): String {
+            val charPool = (('A'..'Z') + ('0'..'9')).toMutableList()
+
+            return (1..8)
+                .map { kotlin.random.Random.nextInt(0, charPool.size) }
+                .map(charPool::get)
+                .joinToString("")
+        }
+
         fun getShoppingListInformation(userId: Long, it: Record, create: DSLContext): ShoppingList {
             return ShoppingList(
                 id = it[SHOPPING_LIST.ID].toLong(),
@@ -99,14 +112,22 @@ class ShopDao(
             val transaction = DSL.using(configuration)
             val shoppingList = transaction.insertInto(
                 SHOPPING_LIST,
+                SHOPPING_LIST.CODE,
                 SHOPPING_LIST.NAME,
                 SHOPPING_LIST.LATITUDE,
                 SHOPPING_LIST.LONGITUDE,
                 SHOPPING_LIST.COLOR
             )
-                .values(listRequest.name, listRequest.latitude, listRequest.longitude, listRequest.color)
+                .values(
+                    generateCode(),
+                    listRequest.name,
+                    listRequest.latitude,
+                    listRequest.longitude,
+                    listRequest.color
+                )
                 .returningResult(
                     SHOPPING_LIST.ID,
+                    SHOPPING_LIST.CODE,
                     SHOPPING_LIST.NAME,
                     SHOPPING_LIST.LATITUDE,
                     SHOPPING_LIST.LONGITUDE,
@@ -212,13 +233,15 @@ class ShopDao(
                 .and(condition)
                 .groupBy(PRODUCTS.ID)
                 .fetch().map {
+                    val pantries = productDao.getProductPantryLists(userId, it[PRODUCTS.ID].toLong(), create)
+                            .filter { p -> p.amountNeeded > 0 }
                     ProductInShoppingList(
                         id = it[PRODUCTS.ID].toLong(),
                         listId = shopId,
                         name = it[PRODUCTS.NAME],
                         barcode = it[PRODUCTS.BARCODE],
-                        amountAvailable = it[PANTRY_PRODUCTS.HAVE_QTY],
-                        amountNeeded = it[PANTRY_PRODUCTS.WANT_QTY],
+                        amountAvailable = pantries.sumOf { productPantryListEntry -> productPantryListEntry.amountAvailable },
+                        amountNeeded = pantries.sumOf { productPantryListEntry -> productPantryListEntry.amountNeeded },
                         price = ProductDao.price(
                             it[PRODUCTS.BARCODE],
                             it[CROWD_PRODUCT_PRICES.PRICE],
@@ -230,7 +253,7 @@ class ShopDao(
                             requestUrl,
                             transaction
                         ),
-                        pantries = listOf() //auxGetPantry(user_id, it[PRODUCTS.ID].toLong())
+                        pantries = pantries
                     )
                 }.run { smartSorting(shopId, this) }
         }
@@ -254,7 +277,12 @@ class ShopDao(
             } ?: throw NotFoundException("Shopping List with specified code not found")
     }
 
-    fun updateSmartSortingEntries(shoppingListId: Long, barcode: String, remainingItems: List<String>, create: DSLContext = dslContext): Boolean {
+    fun updateSmartSortingEntries(
+        shoppingListId: Long,
+        barcode: String,
+        remainingItems: List<String>,
+        create: DSLContext = dslContext
+    ): Boolean {
         remainingItems.forEach { item ->
             if (barcode == item) return@forEach
 
@@ -272,14 +300,27 @@ class ShopDao(
         return true
     }
 
-    private fun smartSorting(shoppingListId: Long, shoppingList: MutableList<ProductInShoppingList>): List<ProductInShoppingList> {
+    private fun smartSorting(
+        shoppingListId: Long,
+        shoppingList: MutableList<ProductInShoppingList>
+    ): List<ProductInShoppingList> {
         return shoppingList.sortedWith { a, b ->
             var entry1 = MatrixEntry(ULong.valueOf(-1), "", "", MAX_VALUE)
             var entry2 = MatrixEntry(ULong.valueOf(-1), "", "", MAX_VALUE)
 
             if (a.barcode != null && b.barcode != null) {
-                entry1 = getSmartSortingEntry(shoppingListId, a.barcode, b.barcode) ?: MatrixEntry(ULong.valueOf(-1), "", "", MAX_VALUE)
-                entry2 = getSmartSortingEntry(shoppingListId, b.barcode, a.barcode) ?: MatrixEntry(ULong.valueOf(-1), "", "", MAX_VALUE)
+                entry1 = getSmartSortingEntry(shoppingListId, a.barcode, b.barcode) ?: MatrixEntry(
+                    ULong.valueOf(-1),
+                    "",
+                    "",
+                    MAX_VALUE
+                )
+                entry2 = getSmartSortingEntry(shoppingListId, b.barcode, a.barcode) ?: MatrixEntry(
+                    ULong.valueOf(-1),
+                    "",
+                    "",
+                    MAX_VALUE
+                )
             }
 
             val value1 = entry1.cell_val
@@ -289,7 +330,12 @@ class ShopDao(
         }
     }
 
-    private fun getSmartSortingEntry(shoppingListId: Long, productBarcode1: String, productBarcode2: String, create: DSLContext = dslContext): MatrixEntry? {
+    private fun getSmartSortingEntry(
+        shoppingListId: Long,
+        productBarcode1: String,
+        productBarcode2: String,
+        create: DSLContext = dslContext
+    ): MatrixEntry? {
         return create.select()
             .from(SMART_SORTING)
             .where(SMART_SORTING.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
@@ -305,8 +351,19 @@ class ShopDao(
             }
     }
 
-    private fun createSmartSortingEntry(shoppingListId: Long, productBarcode1: String, productBarcode2: String, create: DSLContext = dslContext): MatrixEntry {
-        create.insertInto(SMART_SORTING, SMART_SORTING.SHOPPING_LIST_ID, SMART_SORTING.ROW_NUMBER, SMART_SORTING.COL_NUMBER, SMART_SORTING.CELL_VAL)
+    private fun createSmartSortingEntry(
+        shoppingListId: Long,
+        productBarcode1: String,
+        productBarcode2: String,
+        create: DSLContext = dslContext
+    ): MatrixEntry {
+        create.insertInto(
+            SMART_SORTING,
+            SMART_SORTING.SHOPPING_LIST_ID,
+            SMART_SORTING.ROW_NUMBER,
+            SMART_SORTING.COL_NUMBER,
+            SMART_SORTING.CELL_VAL
+        )
             .values(ULong.valueOf(shoppingListId), productBarcode1, productBarcode2, 0)
             .execute()
 
@@ -493,9 +550,15 @@ class ShopDao(
         return pairs
     }
 
-    private fun updateSuggestions(shoppingListId: Long, productBarcode1: String, productBarcode2: String, create: DSLContext = dslContext): Int {
-       var suggestionEntry = getSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)
-        if (suggestionEntry == null) suggestionEntry = createSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)
+    private fun updateSuggestions(
+        shoppingListId: Long,
+        productBarcode1: String,
+        productBarcode2: String,
+        create: DSLContext = dslContext
+    ): Int {
+        var suggestionEntry = getSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)
+        if (suggestionEntry == null) suggestionEntry =
+            createSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)
 
         create.update(SUGGESTIONS)
             .set(SUGGESTIONS.CELL_VAL, suggestionEntry.cell_val + 1)
@@ -528,7 +591,12 @@ class ShopDao(
             }
     }
 
-    private fun getSuggestionEntry(shoppingListId: Long, productBarcode1: String, productBarcode2: String, create: DSLContext = dslContext): MatrixEntry? {
+    private fun getSuggestionEntry(
+        shoppingListId: Long,
+        productBarcode1: String,
+        productBarcode2: String,
+        create: DSLContext = dslContext
+    ): MatrixEntry? {
         return create.select()
             .from(SUGGESTIONS)
             .where(SUGGESTIONS.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
@@ -544,8 +612,19 @@ class ShopDao(
             }
     }
 
-    private fun createSuggestionEntry(shoppingListId: Long, productBarcode1: String, productBarcode2: String, create: DSLContext = dslContext): MatrixEntry {
-        create.insertInto(SUGGESTIONS, SUGGESTIONS.SHOPPING_LIST_ID, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.CELL_VAL)
+    private fun createSuggestionEntry(
+        shoppingListId: Long,
+        productBarcode1: String,
+        productBarcode2: String,
+        create: DSLContext = dslContext
+    ): MatrixEntry {
+        create.insertInto(
+            SUGGESTIONS,
+            SUGGESTIONS.SHOPPING_LIST_ID,
+            SUGGESTIONS.ROW_NUMBER,
+            SUGGESTIONS.COL_NUMBER,
+            SUGGESTIONS.CELL_VAL
+        )
             .values(ULong.valueOf(shoppingListId), productBarcode1, productBarcode2, 0)
             .execute()
 
