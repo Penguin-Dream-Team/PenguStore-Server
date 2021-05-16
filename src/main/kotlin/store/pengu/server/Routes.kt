@@ -177,11 +177,11 @@ object DeleteImage
 /**
  * Carts
  */
-@Location("/cart/{shopping_list_id}")
-data class BuyCart(val shopping_list_id: Long)
+@Location("/cart")
+object BuyCart
 
-@Location("/cart/{shopping_list_id}/suggestion/{barcode}")
-data class GetProductSuggestion(val shopping_list_id: Long, val barcode: String)
+@Location("/cart/suggestion/{barcode}")
+data class GetProductSuggestion(val barcode: String)
 
 
 /**

@@ -563,7 +563,7 @@ class ProductDao(
         return res
     }
 
-    private fun getProduct(userId: Long, barcode: String, create: DSLContext = dslContext): Product? {
+    fun getProduct(userId: Long, barcode: String, create: DSLContext = dslContext): Product {
         return create.select()
             .from(PRODUCTS)
             .where(PRODUCTS.BARCODE.eq(barcode))
@@ -588,7 +588,7 @@ class ProductDao(
                     ratings = ratings,
                     image = ""
                 )
-            }
+            } ?: throw NotFoundException("Product with barcode not found")
     }
 
     fun addRating(userId: Long, barcode: String, userRating: Int, create: DSLContext = dslContext): Product {

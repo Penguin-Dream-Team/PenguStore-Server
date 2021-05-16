@@ -51,9 +51,9 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
     }
 
     /**
-     * The column <code>suggestions.shopping_list_id</code>.
+     * The column <code>suggestions.user_id</code>.
      */
-    public final TableField<SuggestionsRecord, ULong> SHOPPING_LIST_ID = createField(DSL.name("shopping_list_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
+    public final TableField<SuggestionsRecord, ULong> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
 
     /**
      * The column <code>suggestions.row_number</code>.
@@ -128,15 +128,15 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
         return Arrays.<ForeignKey<SuggestionsRecord, ?>>asList(Keys.SUGGESTIONS_IBFK_1, Keys.SUGGESTIONS_IBFK_2, Keys.SUGGESTIONS_IBFK_3);
     }
 
-    private transient ShoppingList _shoppingList;
+    private transient Users _users;
     private transient Products _suggestionsIbfk_2;
     private transient Products _suggestionsIbfk_3;
 
-    public ShoppingList shoppingList() {
-        if (_shoppingList == null)
-            _shoppingList = new ShoppingList(this, Keys.SUGGESTIONS_IBFK_1);
+    public Users users() {
+        if (_users == null)
+            _users = new Users(this, Keys.SUGGESTIONS_IBFK_1);
 
-        return _shoppingList;
+        return _users;
     }
 
     public Products suggestionsIbfk_2() {

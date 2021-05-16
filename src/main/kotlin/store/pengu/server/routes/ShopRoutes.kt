@@ -135,20 +135,22 @@ fun Route.shopRoutes(
 
         // Carts
         post<BuyCart> { param ->
+            val userId = call.user.id
             val cart_request = call.receive<CartRequest>()
             val entries = withContext(Dispatchers.IO) {
-                shopDao.buyCart(param.shopping_list_id, cart_request.requests)
+                shopDao.buyCart(userId, cart_request.requests)
             }
 
             call.respond(mapOf("data" to entries))
         }
 
         get<GetProductSuggestion> { param ->
+            val userId = call.user.id
             val suggestion = withContext(Dispatchers.IO) {
-                shopDao.getProductSuggestion(param.shopping_list_id, param.barcode)
+                shopDao.getProductSuggestion(userId, param.barcode)
             }
 
-            call.respond(mapOf("data" to suggestion))
+            call.respond(Response(suggestion))
         }
 
 

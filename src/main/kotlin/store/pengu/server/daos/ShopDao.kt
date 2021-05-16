@@ -342,7 +342,7 @@ class ShopDao(
             .and(SMART_SORTING.COL_NUMBER.eq(productBarcode2))
             .fetchOne()?.map {
                 MatrixEntry(
-                    shopping_list_id = it[SMART_SORTING.SHOPPING_LIST_ID],
+                    id = it[SMART_SORTING.SHOPPING_LIST_ID],
                     row_number = it[SMART_SORTING.ROW_NUMBER],
                     col_number = it[SMART_SORTING.COL_NUMBER],
                     cell_val = it[SMART_SORTING.CELL_VAL]
@@ -491,7 +491,7 @@ class ShopDao(
     }
 
     // Carts
-    fun buyCart(shoppingListId: Long, cart: List<Cart>, create: DSLContext = dslContext): Boolean {
+    fun buyCart(userId: Long, cart: List<Cart>, create: DSLContext = dslContext): Boolean {
         val itr = cart.iterator()
         val cartProductsBarcode = mutableListOf<String>()
         var condition = DSL.noCondition() // Alternatively, use trueCondition()
@@ -517,15 +517,15 @@ class ShopDao(
 
         val productPairs = getPairs(cartProductsBarcode)
         productPairs.forEach { pair ->
-            updateSuggestions(shoppingListId, pair.first, pair.second)
+            updateSuggestions(userId, pair.first, pair.second)
         }
 
         return true
     }
 
-    fun getProductSuggestion(shoppingListId: Long, barcode: String): String {
-        val rowEntries = getSuggestionEntries(shoppingListId, barcode, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
-        val colEntries = getSuggestionEntries(shoppingListId, barcode, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
+    fun getProductSuggestion(userId: Long, barcode: String): Product {
+        val rowEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
+        val colEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
 
         val suggestions = rowEntries + colEntries
         if (suggestions.isEmpty()) throw NotFoundException("No suggestion found")
@@ -533,7 +533,9 @@ class ShopDao(
         val countSuggestions = suggestions.sumBy { it.cell_val }
         val higherSuggestion = suggestions.maxByOrNull { it.cell_val }
 
-        if ((higherSuggestion!!.cell_val / countSuggestions) > 0.5) return higherSuggestion.col_number
+        if ((higherSuggestion!!.cell_val / countSuggestions) > 0.5) {
+            return productDao.getProduct(userId, higherSuggestion.col_number)
+        }
         throw NotFoundException("No suggestion found")
     }
 
@@ -550,18 +552,18 @@ class ShopDao(
     }
 
     private fun updateSuggestions(
-        shoppingListId: Long,
+        userId: Long,
         productBarcode1: String,
         productBarcode2: String,
         create: DSLContext = dslContext
     ): Int {
-        var suggestionEntry = getSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)
+        var suggestionEntry = getSuggestionEntry(userId, productBarcode1, productBarcode2)
         if (suggestionEntry == null) suggestionEntry =
-            createSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)
+            createSuggestionEntry(userId, productBarcode1, productBarcode2)
 
         create.update(SUGGESTIONS)
             .set(SUGGESTIONS.CELL_VAL, suggestionEntry.cell_val + 1)
-            .where(SUGGESTIONS.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
+            .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
             .and(SUGGESTIONS.ROW_NUMBER.eq(suggestionEntry.row_number))
             .and(SUGGESTIONS.COL_NUMBER.eq(suggestionEntry.col_number))
             .execute()
@@ -570,19 +572,20 @@ class ShopDao(
     }
 
     private fun getSuggestionEntries(
-        shoppingListId: Long,
+        userId: Long,
         barcode: String,
         tableField1: TableField<SuggestionsRecord, String>,
         tableField2: TableField<SuggestionsRecord, String>,
         create: DSLContext = dslContext
     ): MutableList<MatrixEntry> {
+
         return create.select()
             .from(SUGGESTIONS)
-            .where(SUGGESTIONS.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
+            .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
             .and(tableField1.eq(barcode))
             .fetch().map() {
                 MatrixEntry(
-                    shopping_list_id = it[SUGGESTIONS.SHOPPING_LIST_ID],
+                    id = it[SUGGESTIONS.USER_ID],
                     row_number = it[tableField1],
                     col_number = it[tableField2],
                     cell_val = it[SUGGESTIONS.CELL_VAL]
@@ -591,19 +594,19 @@ class ShopDao(
     }
 
     private fun getSuggestionEntry(
-        shoppingListId: Long,
+        userId: Long,
         productBarcode1: String,
         productBarcode2: String,
         create: DSLContext = dslContext
     ): MatrixEntry? {
         return create.select()
             .from(SUGGESTIONS)
-            .where(SUGGESTIONS.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
+            .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
             .and(SUGGESTIONS.ROW_NUMBER.eq(productBarcode1))
             .and(SUGGESTIONS.COL_NUMBER.eq(productBarcode2))
             .fetchOne()?.map() {
                 MatrixEntry(
-                    shopping_list_id = it[SUGGESTIONS.SHOPPING_LIST_ID],
+                    id = it[SUGGESTIONS.USER_ID],
                     row_number = it[SUGGESTIONS.ROW_NUMBER],
                     col_number = it[SUGGESTIONS.COL_NUMBER],
                     cell_val = it[SUGGESTIONS.CELL_VAL]
@@ -612,22 +615,22 @@ class ShopDao(
     }
 
     private fun createSuggestionEntry(
-        shoppingListId: Long,
+        userId: Long,
         productBarcode1: String,
         productBarcode2: String,
         create: DSLContext = dslContext
     ): MatrixEntry {
         create.insertInto(
             SUGGESTIONS,
-            SUGGESTIONS.SHOPPING_LIST_ID,
+            SUGGESTIONS.USER_ID,
             SUGGESTIONS.ROW_NUMBER,
             SUGGESTIONS.COL_NUMBER,
             SUGGESTIONS.CELL_VAL
         )
-            .values(ULong.valueOf(shoppingListId), productBarcode1, productBarcode2, 0)
+            .values(ULong.valueOf(userId), productBarcode1, productBarcode2, 0)
             .execute()
 
-        return getSuggestionEntry(shoppingListId, productBarcode1, productBarcode2)!!
+        return getSuggestionEntry(userId, productBarcode1, productBarcode2)!!
     }
 
     // Queue

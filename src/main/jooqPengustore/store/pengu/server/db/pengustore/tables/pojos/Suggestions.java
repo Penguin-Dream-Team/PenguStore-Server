@@ -17,35 +17,35 @@ public class Suggestions implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final ULong   shoppingListId;
+    private final ULong   userId;
     private final String  rowNumber;
     private final String  colNumber;
     private final Integer cellVal;
 
     public Suggestions(Suggestions value) {
-        this.shoppingListId = value.shoppingListId;
+        this.userId = value.userId;
         this.rowNumber = value.rowNumber;
         this.colNumber = value.colNumber;
         this.cellVal = value.cellVal;
     }
 
     public Suggestions(
-        ULong   shoppingListId,
+        ULong   userId,
         String  rowNumber,
         String  colNumber,
         Integer cellVal
     ) {
-        this.shoppingListId = shoppingListId;
+        this.userId = userId;
         this.rowNumber = rowNumber;
         this.colNumber = colNumber;
         this.cellVal = cellVal;
     }
 
     /**
-     * Getter for <code>suggestions.shopping_list_id</code>.
+     * Getter for <code>suggestions.user_id</code>.
      */
-    public ULong getShoppingListId() {
-        return this.shoppingListId;
+    public ULong getUserId() {
+        return this.userId;
     }
 
     /**
@@ -73,7 +73,7 @@ public class Suggestions implements Serializable {
     public String toString() {
         StringBuilder sb = new StringBuilder("Suggestions (");
 
-        sb.append(shoppingListId);
+        sb.append(userId);
         sb.append(", ").append(rowNumber);
         sb.append(", ").append(colNumber);
         sb.append(", ").append(cellVal);
