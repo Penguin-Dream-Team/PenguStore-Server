@@ -156,6 +156,6 @@ VALUES
     (5, "crab159357", 2);
 
 -- Beacons queue noise
-INSERT INTO beacons (num_items, latitude, longitude)
-VALUES
-    (15, 50.25, 150.25);
+-- INSERT INTO beacons (num_items, latitude, longitude)
+-- VALUES
+    -- (15, 50.25, 150.25);

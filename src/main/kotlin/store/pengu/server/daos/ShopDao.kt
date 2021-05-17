@@ -500,14 +500,14 @@ class ShopDao(
             condition = condition.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(it.product_id)))
             condition = condition.and(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(it.pantry_id)))
 
-            cartProductsBarcode.add(
-                create.select()
-                    .from(PRODUCTS)
-                    .where(PRODUCTS.ID.eq(ULong.valueOf(it.product_id)))
-                    .fetchOne()?.map() {
-                        it[PRODUCTS.BARCODE]
-                    }!!
-            )
+            create.select()
+                .from(PRODUCTS)
+                .where(PRODUCTS.ID.eq(ULong.valueOf(it.product_id)))
+                .fetchOne()?.let {
+                    it[PRODUCTS.BARCODE]?.let {
+                        cartProductsBarcode.add(it)
+                    }
+                }
 
             create.update(PANTRY_PRODUCTS)
                 .set(PANTRY_PRODUCTS.HAVE_QTY, PANTRY_PRODUCTS.HAVE_QTY + it.amount)
