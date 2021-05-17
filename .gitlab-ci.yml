@@ -1,0 +1,42 @@
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  MYSQL_ROOT_PASSWORD: "yes"
+  MYSQL_DATABASE: "pengustore"
+  MYSQL_USER: "pengustore"
+  MYSQL_PASSWORD: "pengustore"
+  DB_HOST: "mysql"
+  DB_PORT: 3306
+  DB_DATABASE: "apengustore"
+  DB_USER: "pengustore"
+  DB_PASSWORD: "pengustore"
+
+services:
+  - mysql:latest
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: gradle:latest
+  script: gradle build :dockerCreateDockerfile
+  artifacts:
+    paths:
+      - build/docker
+    expire_in: 1 week
+
+build_image:
+  image: docker:git
+  stage: deploy
+  dependencies:
+    - build
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - cd build/docker
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
