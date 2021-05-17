@@ -12,6 +12,7 @@ import store.pengu.server.ConflictException
 import store.pengu.server.InternalServerErrorException
 import store.pengu.server.NotFoundException
 import store.pengu.server.data.LocalProductPrice
+import store.pengu.server.data.MatrixEntry
 import store.pengu.server.data.Product
 import store.pengu.server.data.ShoppingList
 import store.pengu.server.data.productlists.ProductPantryListEntry
@@ -21,6 +22,7 @@ import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.CrowdProductPrices.CROWD_PRODUCT_PRICES
 import store.pengu.server.db.pengustore.tables.LocalProductPrices.LOCAL_PRODUCT_PRICES
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
+import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.ImageRequest
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -384,6 +386,53 @@ class ProductDao(
             .fetchOne()?.map {
                 getProductInformation(userId, it, requestUrl, create)
             } ?: throw NotFoundException("Product not found")
+    }
+
+    fun getProduct(userId: Long, barcode: String, requestUrl: String, create: DSLContext = dslContext): Product {
+        return create.select()
+            .from(PRODUCTS)
+            .where(PRODUCTS.BARCODE.eq(barcode))
+            .fetchOne()?.map {
+                getProductInformation(userId, it, requestUrl, create)
+            } ?: throw NotFoundException("Product with barcode not found")
+    }
+
+    private fun getSuggestionEntries(
+        userId: Long,
+        barcode: String,
+        tableField1: TableField<SuggestionsRecord, String>,
+        tableField2: TableField<SuggestionsRecord, String>,
+        create: DSLContext = dslContext
+    ): List<MatrixEntry> {
+
+        return create.select()
+            .from(SUGGESTIONS)
+            .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
+            .and(tableField1.eq(barcode))
+            .fetch().map() {
+                MatrixEntry(
+                    id = it[SUGGESTIONS.USER_ID],
+                    row_number = it[tableField1],
+                    col_number = it[tableField2],
+                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                )
+            }
+    }
+
+    fun getProductSuggestion(userId: Long, barcode: String, requestUrl: String): Product {
+        val rowEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
+        val colEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
+
+        val suggestions = rowEntries + colEntries
+        if (suggestions.isEmpty()) throw NotFoundException("No suggestion found")
+
+        val countSuggestions = suggestions.sumBy { it.cell_val }
+        val higherSuggestion = suggestions.maxByOrNull { it.cell_val }
+
+        if ((higherSuggestion!!.cell_val / countSuggestions) > 0.5) {
+            return getProduct(userId, higherSuggestion.col_number, requestUrl)
+        }
+        throw NotFoundException("No suggestion found")
     }
 
     private fun addProductLocalPrice(

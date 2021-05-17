@@ -153,6 +153,15 @@ fun Route.productRoutes(
             }
             call.respond(Response(ratings))
         }
+
+        get<GetProductSuggestion> { param ->
+            val userId = call.user.id
+            val suggestion = withContext(Dispatchers.IO) {
+                productDao.getProductSuggestion(userId, param.barcode, call.requestUrl)
+            }
+
+            call.respond(Response(suggestion))
+        }
     }
 
     /**

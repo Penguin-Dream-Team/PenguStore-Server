@@ -23,17 +23,17 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>suggestions.shopping_list_id</code>.
+     * Setter for <code>suggestions.user_id</code>.
      */
-    public SuggestionsRecord setShoppingListId(ULong value) {
+    public SuggestionsRecord setUserId(ULong value) {
         set(0, value);
         return this;
     }
 
     /**
-     * Getter for <code>suggestions.shopping_list_id</code>.
+     * Getter for <code>suggestions.user_id</code>.
      */
-    public ULong getShoppingListId() {
+    public ULong getUserId() {
         return (ULong) get(0);
     }
 
@@ -107,7 +107,7 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public Field<ULong> field1() {
-        return Suggestions.SUGGESTIONS.SHOPPING_LIST_ID;
+        return Suggestions.SUGGESTIONS.USER_ID;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public ULong component1() {
-        return getShoppingListId();
+        return getUserId();
     }
 
     @Override
@@ -147,7 +147,7 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public ULong value1() {
-        return getShoppingListId();
+        return getUserId();
     }
 
     @Override
@@ -167,7 +167,7 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public SuggestionsRecord value1(ULong value) {
-        setShoppingListId(value);
+        setUserId(value);
         return this;
     }
 
@@ -212,10 +212,10 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
     /**
      * Create a detached, initialised SuggestionsRecord
      */
-    public SuggestionsRecord(ULong shoppingListId, String rowNumber, String colNumber, Integer cellVal) {
+    public SuggestionsRecord(ULong userId, String rowNumber, String colNumber, Integer cellVal) {
         super(Suggestions.SUGGESTIONS);
 
-        setShoppingListId(shoppingListId);
+        setUserId(userId);
         setRowNumber(rowNumber);
         setColNumber(colNumber);
         setCellVal(cellVal);
