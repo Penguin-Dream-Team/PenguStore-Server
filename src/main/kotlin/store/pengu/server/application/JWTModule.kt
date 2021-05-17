@@ -22,8 +22,8 @@ object JWTAuthenticationConfig {
 
     private const val secret = "zAP5MBA4B4Ijz0MZaS48"
     const val issuer = "pengu.store"
-    private const val validityInMs = 36_000_00 * 6 // 1 hours
-    //private const val validityInMs = 100_00 * 1 // 10 seconds
+    private const val validityInMs = 3_600_000 * 24 * 2 // 2 dias
+    //private const val validityInMs = 10_000 * 1 // 10 seconds
     private val algorithm = Algorithm.HMAC512(secret)
 
     val verifier: JWTVerifier = JWT
