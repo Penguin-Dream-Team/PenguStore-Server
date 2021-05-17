@@ -68,6 +68,9 @@ data class ProductShoppingLists(val id: Long)
 @Location("/products/{id}/images")
 data class ProductImages(val id: Long)
 
+@Location("/products/{id}/rate/{rating}")
+data class RateProduct(val id: Long, val rating: Int)
+
 
 /**
  * NEEDS REWRITE
@@ -203,9 +206,3 @@ data class TimeQueue(val latitude: Double, val longitude: Double)
 @Location("/translation/{string}")
 data class Translation(val string: String)
 
-
-/**
- * Ratings
- */
-@Location("/ratings/{barcode}/{rating}")
-data class Ratings(val barcode: String, val rating: Int)

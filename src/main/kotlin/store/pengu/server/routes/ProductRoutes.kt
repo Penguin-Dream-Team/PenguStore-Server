@@ -2,7 +2,6 @@ package store.pengu.server.routes
 
 import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.features.*
 import io.ktor.http.content.*
 import io.ktor.locations.*
 import io.ktor.request.*
@@ -13,8 +12,6 @@ import kotlinx.coroutines.withContext
 import org.jooq.tools.json.JSONObject
 import org.jooq.types.ULong
 import store.pengu.server.*
-import store.pengu.server.BadRequestException
-import store.pengu.server.NotFoundException
 import store.pengu.server.application.user
 import store.pengu.server.daos.ProductDao
 import store.pengu.server.data.Product
@@ -146,8 +143,21 @@ fun Route.productRoutes(
 
             call.respond(Response(images))
         }
+
+        post<RateProduct> { params ->
+            val userId = call.user.id
+            if (params.rating !in 0..5) throw BadRequestException("Rating must be between 0 - 5")
+
+            val ratings = withContext(Dispatchers.IO) {
+                productDao.rateProduct(userId, params.id, params.rating)
+            }
+            call.respond(Response(ratings))
+        }
     }
 
+    /**
+     * HERE
+     */
 
     authenticate {
         put<UpdateProduct> {
@@ -231,20 +241,5 @@ fun Route.productRoutes(
             call.respond("data" to response)
         }
 
-        // Ratings
-        post<Ratings> { param ->
-            val userId = call.user.id.toLong()
-            try {
-                if (param.rating < 1 || param.rating > 5) throw IllegalArgumentException("Rating must be between 1 - 5")
-
-                val product = withContext(Dispatchers.IO) {
-                    productDao.addRating(userId, param.barcode, param.rating)
-                }
-                call.respond(mapOf("data" to product))
-
-            } catch (e: Exception) {
-                throw BadRequestException(e.localizedMessage)
-            }
-        }
     }
 }
