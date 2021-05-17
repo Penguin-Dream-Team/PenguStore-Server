@@ -37,7 +37,7 @@ class ProductDao(
             return if (url.startsWith("http")) {
                 url
             } else {
-                "$requestUrl/uploads/${URLEncoder.encode(url.split("/").last(), Charset.forName("utf-8"))}"
+                "$requestUrl/uploads/${URLEncoder.encode(url.split("/").last(), "utf-8")}"
             }
         }
 
