@@ -280,6 +280,8 @@ class ShopDao(
         remainingItems: List<String>,
         create: DSLContext = dslContext
     ): Boolean {
+        println(barcode)
+        println(remainingItems)
         remainingItems.forEach { item ->
             if (barcode == item) return@forEach
 
