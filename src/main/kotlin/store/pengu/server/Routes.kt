@@ -71,6 +71,9 @@ data class ProductImages(val id: Long)
 @Location("/products/{id}/rate/{rating}")
 data class RateProduct(val id: Long, val rating: Int)
 
+@Location("/products/{id}")
+data class EditProduct(val id: Long)
+
 
 /**
  * NEEDS REWRITE
@@ -127,9 +130,9 @@ data class GetPantry(val id: Long)
 @Location("/pantries/addProduct")
 object  PantryAddProduct
 
+
 @Location("/pantries/updateProduct")
 object PantryUpdateProduct
-
 @Location("/pantry/{pantry_id}/deleteProduct/{product_id}")
 data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
 
@@ -137,8 +140,6 @@ data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
 /**
  * Products
  */
-@Location("/products/update")
-object UpdateProduct
 
 @Location("/product/addBarcode")
 object AddBarcode

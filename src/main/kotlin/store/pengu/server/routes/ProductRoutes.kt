@@ -15,10 +15,7 @@ import store.pengu.server.*
 import store.pengu.server.application.user
 import store.pengu.server.daos.ProductDao
 import store.pengu.server.data.Product
-import store.pengu.server.routes.requests.AddProductToPantryRequest
-import store.pengu.server.routes.requests.AddProductToShopRequest
-import store.pengu.server.routes.requests.CreateProductRequest
-import store.pengu.server.routes.requests.ImageRequest
+import store.pengu.server.routes.requests.*
 import store.pengu.server.routes.responses.Response
 import java.io.File
 import java.time.Instant
@@ -154,13 +151,22 @@ fun Route.productRoutes(
             call.respond(Response(ratings))
         }
 
-        get<GetProductSuggestion> { param ->
+        get<GetProductSuggestion> { params ->
             val userId = call.user.id
             val suggestion = withContext(Dispatchers.IO) {
-                productDao.getProductSuggestion(userId, param.barcode, call.requestUrl)
+                productDao.getProductSuggestion(userId, params.barcode, call.requestUrl)
             }
 
             call.respond(Response(suggestion))
+        }
+
+        post<EditProduct> { params ->
+            val userId = call.user.id
+            val request = call.receiveOrNull<EditProductRequest>() ?: throw BadRequestException("")
+            val product = withContext(Dispatchers.IO) {
+                productDao.updateProduct(userId, params.id, request.name, request.barcode, call.requestUrl)
+            }
+            call.respond(Response(product))
         }
     }
 
@@ -169,17 +175,6 @@ fun Route.productRoutes(
      */
 
     authenticate {
-        put<UpdateProduct> {
-            val product = call.receive<Product>()
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    productDao.updateProduct(product)
-                } catch (e: Exception) {
-                    throw BadRequestException(e.localizedMessage)
-                }
-            }
-            call.respond("data" to response)
-        }
 
         put<AddBarcode> {
             val product = call.receive<Product>()

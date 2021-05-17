@@ -580,6 +580,30 @@ class ProductDao(
             }
     }
 
+    fun updateProduct(
+        userId: Long,
+        productId: Long,
+        newName: String,
+        newBarcode: String?,
+        requestUrl: String,
+        create: DSLContext = dslContext
+    ): Product {
+        getProduct(userId, productId, requestUrl, create)
+
+        try {
+            create.update(PRODUCTS)
+                .set(PRODUCTS.NAME, newName)
+                .set(PRODUCTS.BARCODE, newBarcode)
+                .where(PRODUCTS.ID.eq(ULong.valueOf(productId)))
+                .execute()
+        } catch(e: Exception) {
+            throw ConflictException("A product with that barcode already exists")
+        }
+
+        // again to refresh ratings and stuff
+        return getProduct(userId, productId, requestUrl, create)
+    }
+
 
     /**
      * REWRTIE
@@ -587,13 +611,6 @@ class ProductDao(
 
 
     // Products
-
-    fun updateProduct(product: Product, create: DSLContext = dslContext): Boolean {
-        return create.update(PRODUCTS)
-            .set(PRODUCTS.NAME, product.name)
-            .where(PRODUCTS.ID.eq(ULong.valueOf(product.id)))
-            .execute() == 1
-    }
 
     fun addBarcode(product: Product, create: DSLContext = dslContext): Boolean {
         val res = create.update(PRODUCTS)
