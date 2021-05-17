@@ -4,7 +4,6 @@ import org.jooq.*
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.NotFoundException
-import store.pengu.server.data.Pantry
 import store.pengu.server.data.ShoppingList
 import store.pengu.server.data.UserList
 import store.pengu.server.db.pengustore.Tables.*
@@ -14,6 +13,19 @@ class ListDao(
     conf: Configuration
 ) {
     private val dslContext = DSL.using(conf)
+
+    fun findNearbyShoppingList(
+        userId: Long,
+        latitude: Double,
+        longitude: Double,
+        create: DSLContext = dslContext
+    ): ShoppingList {
+        val (listType, list) = findNearbyList(userId, latitude, longitude, create)
+        if (listType != UserListType.SHOPPING_LIST) {
+            throw NotFoundException("No list found nearby the specified location")
+        }
+        return list as ShoppingList
+    }
 
     fun findNearbyList(
         userId: Long,

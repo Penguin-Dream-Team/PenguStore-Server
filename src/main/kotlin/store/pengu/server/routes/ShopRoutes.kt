@@ -10,12 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import store.pengu.server.*
 import store.pengu.server.application.user
+import store.pengu.server.daos.ListDao
 import store.pengu.server.daos.ShopDao
 import store.pengu.server.data.ShoppingList
 import store.pengu.server.routes.requests.*
 import store.pengu.server.routes.responses.Response
 
 fun Route.shopRoutes(
+    listDao: ListDao,
     shopDao: ShopDao,
 ) {
 
@@ -70,7 +72,6 @@ fun Route.shopRoutes(
         }
 
 
-
         /**
          * here
          */
@@ -80,8 +81,7 @@ fun Route.shopRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     shopDao.updateShoppingList(shopping_list)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -103,8 +103,7 @@ fun Route.shopRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     shopDao.addPrice(price_request)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -116,8 +115,7 @@ fun Route.shopRoutes(
             val response = withContext(Dispatchers.IO) {
                 try {
                     shopDao.deletePrice(price_request)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     throw BadRequestException(e.localizedMessage)
                 }
             }
@@ -146,7 +144,7 @@ fun Route.shopRoutes(
 
 
         // Queue
-        post<JoinQueue> { param->
+        post<JoinQueue> { param ->
             val entries = withContext(Dispatchers.IO) {
                 shopDao.joinQueue(param.latitude, param.longitude, param.num_items)
             }
@@ -163,9 +161,11 @@ fun Route.shopRoutes(
             call.respond(mapOf("data" to entries))
         }
 
-        get<TimeQueue> { param->
+        get<TimeQueue> { params ->
+            val userId = call.user.id
             val entries = withContext(Dispatchers.IO) {
-                shopDao.timeQueue(param.latitude, param.longitude)
+                val list = listDao.findNearbyShoppingList(userId, params.latitude, params.longitude)
+                shopDao.timeQueue(list.latitude, list.longitude)
             }
 
             call.respond(mapOf("data" to entries))

@@ -74,6 +74,8 @@ data class RateProduct(val id: Long, val rating: Int)
 @Location("/products/{id}")
 data class EditProduct(val id: Long)
 
+@Location("/queue/time")
+data class TimeQueue(val latitude: Double, val longitude: Double)
 
 /**
  * NEEDS REWRITE
@@ -196,9 +198,6 @@ data class JoinQueue(val latitude: Double, val longitude: Double, val num_items:
 
 @Location("/queue/leave")
 object LeaveQueue
-
-@Location("/queue/time/{latitude}/{longitude}")
-data class TimeQueue(val latitude: Double, val longitude: Double)
 
 
 /**

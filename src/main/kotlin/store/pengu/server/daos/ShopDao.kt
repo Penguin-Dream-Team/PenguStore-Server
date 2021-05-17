@@ -3,7 +3,6 @@ package store.pengu.server.daos
 import org.jooq.Configuration
 import org.jooq.DSLContext
 import org.jooq.Record
-import org.jooq.TableField
 import org.jooq.impl.DSL
 import org.jooq.types.ULong
 import store.pengu.server.InternalServerErrorException
@@ -11,7 +10,6 @@ import store.pengu.server.NotFoundException
 import store.pengu.server.data.*
 import store.pengu.server.db.pengustore.Tables.*
 import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
-import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.CreateListRequest
 import store.pengu.server.routes.requests.LeaveQueueRequest
 import store.pengu.server.routes.requests.PriceRequest
@@ -233,7 +231,7 @@ class ShopDao(
                 .groupBy(PRODUCTS.ID)
                 .fetch().map {
                     val pantries = productDao.getProductPantryLists(userId, it[PRODUCTS.ID].toLong(), create)
-                            .filter { p -> p.amountNeeded > 0 }
+                        .filter { p -> p.amountNeeded > 0 }
                     ProductInShoppingList(
                         id = it[PRODUCTS.ID].toLong(),
                         listId = shopId,
@@ -649,16 +647,10 @@ class ShopDao(
     }
 
     fun timeQueue(latitude: Double, longitude: Double, create: DSLContext = dslContext): Int {
-        // TODO Trocar estes valores pa coisas q facam sentido
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(STATS.LATITUDE.le(latitude + 0.0001))
-        condition = condition.and(STATS.LATITUDE.ge(latitude - 0.0001))
-        condition = condition.and(STATS.LONGITUDE.le(longitude + 0.0001))
-        condition = condition.and(STATS.LONGITUDE.ge(longitude - 0.0001))
-
         val points = create.select()
             .from(STATS)
-            .where(condition)
+            .where(STATS.LATITUDE.eq(latitude))
+            .and(STATS.LONGITUDE.eq(longitude))
             .fetch().map {
                 Point(
                     x = it[STATS.NUM_ITEMS],
@@ -666,15 +658,10 @@ class ShopDao(
                 )
             }
 
-        condition = DSL.noCondition() // Alternatively, use trueCondition()
-        condition = condition.and(BEACONS.LATITUDE.le(latitude + 0.0001))
-        condition = condition.and(BEACONS.LATITUDE.ge(latitude - 0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.le(longitude + 0.0001))
-        condition = condition.and(BEACONS.LONGITUDE.ge(longitude - 0.0001))
-
-        val num_items = create.select()
+        val numItems = create.select()
             .from(BEACONS)
-            .where(condition)
+            .where(BEACONS.LATITUDE.eq(latitude))
+            .and(BEACONS.LONGITUDE.eq(longitude))
             .fetchOne()?.map {
                 it[BEACONS.NUM_ITEMS]
             } ?: return 0
@@ -705,7 +692,7 @@ class ShopDao(
         val slope = xybar / xxbar
         val intercept = ybar - slope * xbar
 
-        return (intercept + slope * num_items).toInt()
+        return (intercept + slope * numItems).toInt()
 
     }
 

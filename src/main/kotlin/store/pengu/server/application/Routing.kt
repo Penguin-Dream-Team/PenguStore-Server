@@ -18,6 +18,6 @@ fun Route.loadRoutes(koin: Koin) {
     listRoutes(listDao = listDao)
     pantryRoutes(pantryDao = pantryDao)
     productRoutes(productDao = productDao)
-    shopRoutes(shopDao = shopDao)
+    shopRoutes(listDao = listDao, shopDao = shopDao)
     translationRoutes(translationDao = translationDao)
 }
