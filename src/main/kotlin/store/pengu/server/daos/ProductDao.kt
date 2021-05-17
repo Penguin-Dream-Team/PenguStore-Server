@@ -25,7 +25,6 @@ import store.pengu.server.db.pengustore.tables.Products.PRODUCTS
 import store.pengu.server.db.pengustore.tables.records.SuggestionsRecord
 import store.pengu.server.routes.requests.ImageRequest
 import java.net.URLEncoder
-import java.nio.charset.Charset
 
 class ProductDao(
     conf: Configuration
@@ -588,22 +587,103 @@ class ProductDao(
         requestUrl: String,
         create: DSLContext = dslContext
     ): Product {
-        getProduct(userId, productId, requestUrl, create)
+        val product = getProduct(userId, productId, requestUrl, create)
+
 
         try {
-            create.update(PRODUCTS)
-                .set(PRODUCTS.NAME, newName)
-                .set(PRODUCTS.BARCODE, newBarcode)
-                .where(PRODUCTS.ID.eq(ULong.valueOf(productId)))
-                .execute()
-        } catch(e: Exception) {
+            create.transaction { configuration ->
+                val transaction = DSL.using(configuration)
+                transaction.update(PRODUCTS)
+                    .set(PRODUCTS.NAME, newName)
+                    .set(PRODUCTS.BARCODE, newBarcode)
+                    .where(PRODUCTS.ID.eq(ULong.valueOf(productId)))
+                    .execute()
+
+                // Copy from crowd to local
+                if (newBarcode.isNullOrBlank() && product.barcode != newBarcode) {
+                    transaction.select()
+                        .from(CROWD_PRODUCT_IMAGES)
+                        .where(CROWD_PRODUCT_IMAGES.BARCODE.eq(product.barcode))
+                        .fetch().forEach {
+                            transaction.insertInto(
+                                LOCAL_PRODUCT_IMAGES,
+                                LOCAL_PRODUCT_IMAGES.PRODUCT_ID,
+                                LOCAL_PRODUCT_IMAGES.IMAGE_URL
+                            )
+                                .values(ULong.valueOf(productId), it[CROWD_PRODUCT_IMAGES.IMAGE_URL])
+                                .executeAsync()
+                        }
+                    transaction.select()
+                        .from(CROWD_PRODUCT_PRICES)
+                        .where(CROWD_PRODUCT_PRICES.BARCODE.eq(product.barcode))
+                        .fetch().forEach {
+                            transaction.insertInto(
+                                LOCAL_PRODUCT_PRICES,
+                                LOCAL_PRODUCT_PRICES.PRODUCT_ID,
+                                LOCAL_PRODUCT_PRICES.PRICE,
+                                LOCAL_PRODUCT_PRICES.LATITUDE,
+                                LOCAL_PRODUCT_PRICES.LONGITUDE,
+                            )
+                                .values(
+                                    ULong.valueOf(productId),
+                                    it[CROWD_PRODUCT_PRICES.PRICE],
+                                    it[CROWD_PRODUCT_PRICES.LATITUDE],
+                                    it[CROWD_PRODUCT_PRICES.LONGITUDE]
+                                )
+                                .executeAsync()
+                        }
+                }
+                // Copy from local to crowd
+                else if (product.barcode.isNullOrBlank() && product.barcode != newBarcode) {
+                    transaction.select()
+                        .from(LOCAL_PRODUCT_IMAGES)
+                        .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(ULong.valueOf(productId)))
+                        .fetch().forEach {
+                            transaction.insertInto(
+                                CROWD_PRODUCT_IMAGES,
+                                CROWD_PRODUCT_IMAGES.BARCODE,
+                                CROWD_PRODUCT_IMAGES.IMAGE_URL
+                            )
+                                .values(newBarcode, it[LOCAL_PRODUCT_IMAGES.IMAGE_URL])
+                                .executeAsync()
+                        }
+
+                    transaction.delete(LOCAL_PRODUCT_IMAGES)
+                        .where(LOCAL_PRODUCT_IMAGES.PRODUCT_ID.eq(ULong.valueOf(productId)))
+                        .execute()
+
+                    transaction.select()
+                        .from(LOCAL_PRODUCT_PRICES)
+                        .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
+                        .fetch().forEach {
+                            transaction.insertInto(
+                                CROWD_PRODUCT_PRICES,
+                                CROWD_PRODUCT_PRICES.BARCODE,
+                                CROWD_PRODUCT_PRICES.PRICE,
+                                CROWD_PRODUCT_PRICES.LATITUDE,
+                                CROWD_PRODUCT_PRICES.LONGITUDE,
+                            )
+                                .values(
+                                    newBarcode,
+                                    it[LOCAL_PRODUCT_PRICES.PRICE],
+                                    it[LOCAL_PRODUCT_PRICES.LATITUDE],
+                                    it[LOCAL_PRODUCT_PRICES.LONGITUDE]
+                                )
+                                .executeAsync()
+                        }
+                    transaction.delete(LOCAL_PRODUCT_PRICES)
+                        .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
+                        .execute()
+
+                }
+            }
+        } catch (e: Exception) {
             throw ConflictException("A product with that barcode already exists")
         }
 
         // again to refresh ratings and stuff
         return getProduct(userId, productId, requestUrl, create)
     }
-
 
     /**
      * REWRTIE
