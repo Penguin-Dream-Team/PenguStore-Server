@@ -63,7 +63,7 @@ fun Route.productRoutes(
             val request = call.receiveOrNull<AddProductToPantryRequest>()
                 ?: throw BadRequestException("Missing request information")
 
-            val products = withContext(Dispatchers.IO) {
+            val product = withContext(Dispatchers.IO) {
                 productDao.addProductToPantryList(
                     userId,
                     params.id,
@@ -73,7 +73,7 @@ fun Route.productRoutes(
                 )
             }
 
-            call.respond(Response(products))
+            call.respond(Response(product))
         }
 
         get<MissingProductPantryList> { params ->
@@ -164,7 +164,14 @@ fun Route.productRoutes(
             val userId = call.user.id
             val request = call.receiveOrNull<EditProductRequest>() ?: throw BadRequestException("")
             val product = withContext(Dispatchers.IO) {
-                productDao.updateProduct(userId, params.id, request.name, request.barcode, call.requestUrl)
+                val image = request.imageData?.let {
+                    val bytes = Base64.getMimeDecoder().decode(it)
+                    val imageName = request.name.run { replace(" ", "-") }
+                    val path = "uploads/${imageName}_${Instant.now().epochSecond}.jpg"
+                    File(path).writeBytes(bytes)
+                    path
+                }
+                productDao.updateProduct(userId, params.id, request.name, request.barcode, image, call.requestUrl)
             }
             call.respond(Response(product))
         }

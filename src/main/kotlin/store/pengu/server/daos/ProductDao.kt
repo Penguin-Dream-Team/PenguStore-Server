@@ -200,7 +200,7 @@ class ProductDao(
         needQty: Int,
         create: DSLContext = dslContext
     ): ProductPantryListEntry {
-        val product = getProduct(userId, productId, "", create) ?: throw NotFoundException("Product not found")
+        val product = getProduct(userId, productId, "", create)
 
         val pantry = create.select()
             .from(PANTRIES)
@@ -210,6 +210,28 @@ class ProductDao(
             .fetchOne()?.map {
                 PantryDao.getPantryInformation(it, create)
             } ?: throw NotFoundException("Pantry not found for this user")
+
+        // REMOVE
+        if (needQty == haveQty && needQty == 0) {
+            try {
+                create.delete(PANTRY_PRODUCTS)
+                    .where(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(pantryId)))
+                    .and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(productId)))
+                    .execute()
+            } catch (e: Exception) {
+            }
+            return ProductPantryListEntry(
+                listId = pantry.id,
+                listName = pantry.name,
+                color = pantry.color,
+                amountAvailable = haveQty,
+                amountNeeded = needQty,
+                isShared = pantry.shared,
+                latitude = pantry.latitude,
+                longitude = pantry.longitude,
+            )
+        }
+
         return try {
             create.insertInto(
                 PANTRY_PRODUCTS,
@@ -584,6 +606,7 @@ class ProductDao(
         productId: Long,
         newName: String,
         newBarcode: String?,
+        image: String?,
         requestUrl: String,
         create: DSLContext = dslContext
     ): Product {
@@ -675,6 +698,27 @@ class ProductDao(
                         .where(LOCAL_PRODUCT_PRICES.PRODUCT_ID.eq(ULong.valueOf(productId)))
                         .execute()
 
+                }
+                image?.let {
+                    if (newBarcode == null) {
+                        createImage(
+                            ULong.valueOf(product.id),
+                            it,
+                            LOCAL_PRODUCT_IMAGES,
+                            LOCAL_PRODUCT_IMAGES.PRODUCT_ID,
+                            LOCAL_PRODUCT_IMAGES.IMAGE_URL,
+                            transaction
+                        )
+                    } else {
+                        createImage(
+                            product.barcode,
+                            it,
+                            CROWD_PRODUCT_IMAGES,
+                            CROWD_PRODUCT_IMAGES.BARCODE,
+                            CROWD_PRODUCT_IMAGES.IMAGE_URL,
+                            transaction
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
