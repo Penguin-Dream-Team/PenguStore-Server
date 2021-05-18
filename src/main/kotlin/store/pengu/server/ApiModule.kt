@@ -23,8 +23,8 @@ object ApiModule {
         single {
             val config = get<APIConfig>().database
             Flyway.configure()
-                .dataSource(get(named("api")))
-                .schemas(config.database)
+                .dataSource(HikariDataSource(config.toHikariConfig()))
+                .locations("filesystem:src/main/resources/db/migrations")
                 .load()
         }
         single(named("database")) {
