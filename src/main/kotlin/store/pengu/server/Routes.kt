@@ -132,9 +132,9 @@ data class GetPantry(val id: Long)
 @Location("/pantries/addProduct")
 object  PantryAddProduct
 
-
 @Location("/pantries/updateProduct")
 object PantryUpdateProduct
+
 @Location("/pantry/{pantry_id}/deleteProduct/{product_id}")
 data class PantryDeleteProduct(val pantry_id: Long, val product_id: Long)
 

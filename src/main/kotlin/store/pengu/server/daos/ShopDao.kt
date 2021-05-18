@@ -511,7 +511,7 @@ class ShopDao(
 
             val productPairs = getPairs(cartProductsBarcode)
             productPairs.forEach { pair ->
-                updateSuggestions(userId, pair.first, pair.second, transaction)
+                if (pair.first != pair.second) updateSuggestions(userId, pair.first, pair.second)
             }
         }
     }

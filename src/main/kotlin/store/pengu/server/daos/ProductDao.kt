@@ -430,6 +430,7 @@ class ProductDao(
             .from(SUGGESTIONS)
             .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
             .and(tableField1.eq(barcode))
+            .and(tableField1.notEqual(tableField2))
             .fetch().map() {
                 MatrixEntry(
                     id = it[SUGGESTIONS.USER_ID],
