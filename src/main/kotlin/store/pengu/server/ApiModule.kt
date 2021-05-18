@@ -24,7 +24,7 @@ object ApiModule {
             val config = get<APIConfig>().database
             Flyway.configure()
                 .dataSource(HikariDataSource(config.toHikariConfig()))
-                .locations("filesystem:src/main/resources/db/migrations")
+                .locations("filesystem:/app/resources/db/migrations")
                 .load()
         }
         single(named("database")) {
