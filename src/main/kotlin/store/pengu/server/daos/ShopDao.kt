@@ -491,36 +491,29 @@ class ShopDao(
     }
 
     // Carts
-    fun buyCart(userId: Long, cart: List<Cart>, create: DSLContext = dslContext): Boolean {
-        val itr = cart.iterator()
-        val cartProductsBarcode = mutableListOf<String>()
-        var condition = DSL.noCondition() // Alternatively, use trueCondition()
-        itr.forEach {
-            condition = DSL.noCondition()
-            condition = condition.and(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(it.product_id)))
-            condition = condition.and(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(it.pantry_id)))
+    fun buyCart(userId: Long, cart: List<Cart>, create: DSLContext = dslContext) {
+        val cartProductsBarcode = create.select(PRODUCTS.BARCODE)
+            .from(PRODUCTS)
+            .where(PRODUCTS.ID.`in`(cart.map { it.productId }))
+            .fetch().getValues(PRODUCTS.BARCODE)
 
-            create.select()
-                .from(PRODUCTS)
-                .where(PRODUCTS.ID.eq(ULong.valueOf(it.product_id)))
-                .fetchOne()?.let {
-                    it[PRODUCTS.BARCODE]?.let {
-                        cartProductsBarcode.add(it)
-                    }
-                }
+        create.transaction { configuration ->
+            val transaction = DSL.using(configuration)
 
-            create.update(PANTRY_PRODUCTS)
-                .set(PANTRY_PRODUCTS.HAVE_QTY, PANTRY_PRODUCTS.HAVE_QTY + it.amount)
-                .where(condition)
-                .execute()
+            cart.forEach {
+                transaction.update(PANTRY_PRODUCTS)
+                    .set(PANTRY_PRODUCTS.HAVE_QTY, PANTRY_PRODUCTS.HAVE_QTY + it.amount)
+                    .set(PANTRY_PRODUCTS.WANT_QTY, PANTRY_PRODUCTS.WANT_QTY - it.amount)
+                    .where(PANTRY_PRODUCTS.PRODUCT_ID.eq(ULong.valueOf(it.productId)))
+                    .and(PANTRY_PRODUCTS.PANTRY_ID.eq(ULong.valueOf(it.pantryId)))
+                    .execute()
+            }
+
+            val productPairs = getPairs(cartProductsBarcode)
+            productPairs.forEach { pair ->
+                updateSuggestions(userId, pair.first, pair.second, transaction)
+            }
         }
-
-        val productPairs = getPairs(cartProductsBarcode)
-        productPairs.forEach { pair ->
-            updateSuggestions(userId, pair.first, pair.second)
-        }
-
-        return true
     }
 
     private fun getPairs(cart: List<String>): List<Pair<String, String>> {
