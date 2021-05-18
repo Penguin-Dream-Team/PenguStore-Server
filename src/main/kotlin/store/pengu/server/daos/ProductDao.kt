@@ -436,14 +436,14 @@ class ProductDao(
                     id = it[SUGGESTIONS.USER_ID],
                     row_number = it[tableField1],
                     col_number = it[tableField2],
-                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                    cell_val = it[SUGGESTIONS.CVAL]
                 )
             }
     }
 
     fun getProductSuggestion(userId: Long, barcode: String, requestUrl: String): Product {
-        val rowEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.ROW_NUMBER, SUGGESTIONS.COL_NUMBER)
-        val colEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.COL_NUMBER, SUGGESTIONS.ROW_NUMBER)
+        val rowEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.RNUMBER, SUGGESTIONS.CNUMBER)
+        val colEntries = getSuggestionEntries(userId, barcode, SUGGESTIONS.CNUMBER, SUGGESTIONS.RNUMBER)
 
         val suggestions = rowEntries + colEntries
         if (suggestions.isEmpty()) throw NotFoundException("No suggestion found")

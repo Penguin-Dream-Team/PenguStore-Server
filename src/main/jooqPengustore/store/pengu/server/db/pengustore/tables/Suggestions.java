@@ -56,19 +56,19 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
     public final TableField<SuggestionsRecord, ULong> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
 
     /**
-     * The column <code>suggestions.row_number</code>.
+     * The column <code>suggestions.rnumber</code>.
      */
-    public final TableField<SuggestionsRecord, String> ROW_NUMBER = createField(DSL.name("row_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+    public final TableField<SuggestionsRecord, String> RNUMBER = createField(DSL.name("rnumber"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>suggestions.col_number</code>.
+     * The column <code>suggestions.cnumber</code>.
      */
-    public final TableField<SuggestionsRecord, String> COL_NUMBER = createField(DSL.name("col_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+    public final TableField<SuggestionsRecord, String> CNUMBER = createField(DSL.name("cnumber"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>suggestions.cell_val</code>.
+     * The column <code>suggestions.cval</code>.
      */
-    public final TableField<SuggestionsRecord, Integer> CELL_VAL = createField(DSL.name("cell_val"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<SuggestionsRecord, Integer> CVAL = createField(DSL.name("cval"), SQLDataType.INTEGER.nullable(false), this, "");
 
     private Suggestions(Name alias, Table<SuggestionsRecord> aliased) {
         this(alias, aliased, null);
@@ -110,7 +110,7 @@ public class Suggestions extends TableImpl<SuggestionsRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.SUGGESTIONS_COL_NUMBER, Indexes.SUGGESTIONS_ROW_NUMBER);
+        return Arrays.<Index>asList(Indexes.SUGGESTIONS_CNUMBER, Indexes.SUGGESTIONS_RNUMBER);
     }
 
     @Override

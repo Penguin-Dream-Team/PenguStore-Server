@@ -56,19 +56,19 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
     public final TableField<SmartSortingRecord, ULong> SHOPPING_LIST_ID = createField(DSL.name("shopping_list_id"), SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
 
     /**
-     * The column <code>smart_sorting.row_number</code>.
+     * The column <code>smart_sorting.rnumber</code>.
      */
-    public final TableField<SmartSortingRecord, String> ROW_NUMBER = createField(DSL.name("row_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+    public final TableField<SmartSortingRecord, String> RNUMBER = createField(DSL.name("rnumber"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>smart_sorting.col_number</code>.
+     * The column <code>smart_sorting.cnumber</code>.
      */
-    public final TableField<SmartSortingRecord, String> COL_NUMBER = createField(DSL.name("col_number"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+    public final TableField<SmartSortingRecord, String> CNUMBER = createField(DSL.name("cnumber"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>smart_sorting.cell_val</code>.
+     * The column <code>smart_sorting.cval</code>.
      */
-    public final TableField<SmartSortingRecord, Integer> CELL_VAL = createField(DSL.name("cell_val"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<SmartSortingRecord, Integer> CVAL = createField(DSL.name("cval"), SQLDataType.INTEGER.nullable(false), this, "");
 
     private SmartSorting(Name alias, Table<SmartSortingRecord> aliased) {
         this(alias, aliased, null);
@@ -110,7 +110,7 @@ public class SmartSorting extends TableImpl<SmartSortingRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.SMART_SORTING_COL_NUMBER, Indexes.SMART_SORTING_ROW_NUMBER);
+        return Arrays.<Index>asList(Indexes.SMART_SORTING_CNUMBER, Indexes.SMART_SORTING_RNUMBER);
     }
 
     @Override

@@ -38,47 +38,47 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
     }
 
     /**
-     * Setter for <code>suggestions.row_number</code>.
+     * Setter for <code>suggestions.rnumber</code>.
      */
-    public SuggestionsRecord setRowNumber(String value) {
+    public SuggestionsRecord setRnumber(String value) {
         set(1, value);
         return this;
     }
 
     /**
-     * Getter for <code>suggestions.row_number</code>.
+     * Getter for <code>suggestions.rnumber</code>.
      */
-    public String getRowNumber() {
+    public String getRnumber() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>suggestions.col_number</code>.
+     * Setter for <code>suggestions.cnumber</code>.
      */
-    public SuggestionsRecord setColNumber(String value) {
+    public SuggestionsRecord setCnumber(String value) {
         set(2, value);
         return this;
     }
 
     /**
-     * Getter for <code>suggestions.col_number</code>.
+     * Getter for <code>suggestions.cnumber</code>.
      */
-    public String getColNumber() {
+    public String getCnumber() {
         return (String) get(2);
     }
 
     /**
-     * Setter for <code>suggestions.cell_val</code>.
+     * Setter for <code>suggestions.cval</code>.
      */
-    public SuggestionsRecord setCellVal(Integer value) {
+    public SuggestionsRecord setCval(Integer value) {
         set(3, value);
         return this;
     }
 
     /**
-     * Getter for <code>suggestions.cell_val</code>.
+     * Getter for <code>suggestions.cval</code>.
      */
-    public Integer getCellVal() {
+    public Integer getCval() {
         return (Integer) get(3);
     }
 
@@ -112,17 +112,17 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public Field<String> field2() {
-        return Suggestions.SUGGESTIONS.ROW_NUMBER;
+        return Suggestions.SUGGESTIONS.RNUMBER;
     }
 
     @Override
     public Field<String> field3() {
-        return Suggestions.SUGGESTIONS.COL_NUMBER;
+        return Suggestions.SUGGESTIONS.CNUMBER;
     }
 
     @Override
     public Field<Integer> field4() {
-        return Suggestions.SUGGESTIONS.CELL_VAL;
+        return Suggestions.SUGGESTIONS.CVAL;
     }
 
     @Override
@@ -132,17 +132,17 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public String component2() {
-        return getRowNumber();
+        return getRnumber();
     }
 
     @Override
     public String component3() {
-        return getColNumber();
+        return getCnumber();
     }
 
     @Override
     public Integer component4() {
-        return getCellVal();
+        return getCval();
     }
 
     @Override
@@ -152,17 +152,17 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public String value2() {
-        return getRowNumber();
+        return getRnumber();
     }
 
     @Override
     public String value3() {
-        return getColNumber();
+        return getCnumber();
     }
 
     @Override
     public Integer value4() {
-        return getCellVal();
+        return getCval();
     }
 
     @Override
@@ -173,19 +173,19 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
 
     @Override
     public SuggestionsRecord value2(String value) {
-        setRowNumber(value);
+        setRnumber(value);
         return this;
     }
 
     @Override
     public SuggestionsRecord value3(String value) {
-        setColNumber(value);
+        setCnumber(value);
         return this;
     }
 
     @Override
     public SuggestionsRecord value4(Integer value) {
-        setCellVal(value);
+        setCval(value);
         return this;
     }
 
@@ -212,12 +212,12 @@ public class SuggestionsRecord extends UpdatableRecordImpl<SuggestionsRecord> im
     /**
      * Create a detached, initialised SuggestionsRecord
      */
-    public SuggestionsRecord(ULong userId, String rowNumber, String colNumber, Integer cellVal) {
+    public SuggestionsRecord(ULong userId, String rnumber, String cnumber, Integer cval) {
         super(Suggestions.SUGGESTIONS);
 
         setUserId(userId);
-        setRowNumber(rowNumber);
-        setColNumber(colNumber);
-        setCellVal(cellVal);
+        setRnumber(rnumber);
+        setCnumber(cnumber);
+        setCval(cval);
     }
 }

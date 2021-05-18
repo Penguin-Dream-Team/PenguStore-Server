@@ -38,47 +38,47 @@ public class SmartSortingRecord extends UpdatableRecordImpl<SmartSortingRecord> 
     }
 
     /**
-     * Setter for <code>smart_sorting.row_number</code>.
+     * Setter for <code>smart_sorting.rnumber</code>.
      */
-    public SmartSortingRecord setRowNumber(String value) {
+    public SmartSortingRecord setRnumber(String value) {
         set(1, value);
         return this;
     }
 
     /**
-     * Getter for <code>smart_sorting.row_number</code>.
+     * Getter for <code>smart_sorting.rnumber</code>.
      */
-    public String getRowNumber() {
+    public String getRnumber() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>smart_sorting.col_number</code>.
+     * Setter for <code>smart_sorting.cnumber</code>.
      */
-    public SmartSortingRecord setColNumber(String value) {
+    public SmartSortingRecord setCnumber(String value) {
         set(2, value);
         return this;
     }
 
     /**
-     * Getter for <code>smart_sorting.col_number</code>.
+     * Getter for <code>smart_sorting.cnumber</code>.
      */
-    public String getColNumber() {
+    public String getCnumber() {
         return (String) get(2);
     }
 
     /**
-     * Setter for <code>smart_sorting.cell_val</code>.
+     * Setter for <code>smart_sorting.cval</code>.
      */
-    public SmartSortingRecord setCellVal(Integer value) {
+    public SmartSortingRecord setCval(Integer value) {
         set(3, value);
         return this;
     }
 
     /**
-     * Getter for <code>smart_sorting.cell_val</code>.
+     * Getter for <code>smart_sorting.cval</code>.
      */
-    public Integer getCellVal() {
+    public Integer getCval() {
         return (Integer) get(3);
     }
 
@@ -112,17 +112,17 @@ public class SmartSortingRecord extends UpdatableRecordImpl<SmartSortingRecord> 
 
     @Override
     public Field<String> field2() {
-        return SmartSorting.SMART_SORTING.ROW_NUMBER;
+        return SmartSorting.SMART_SORTING.RNUMBER;
     }
 
     @Override
     public Field<String> field3() {
-        return SmartSorting.SMART_SORTING.COL_NUMBER;
+        return SmartSorting.SMART_SORTING.CNUMBER;
     }
 
     @Override
     public Field<Integer> field4() {
-        return SmartSorting.SMART_SORTING.CELL_VAL;
+        return SmartSorting.SMART_SORTING.CVAL;
     }
 
     @Override
@@ -132,17 +132,17 @@ public class SmartSortingRecord extends UpdatableRecordImpl<SmartSortingRecord> 
 
     @Override
     public String component2() {
-        return getRowNumber();
+        return getRnumber();
     }
 
     @Override
     public String component3() {
-        return getColNumber();
+        return getCnumber();
     }
 
     @Override
     public Integer component4() {
-        return getCellVal();
+        return getCval();
     }
 
     @Override
@@ -152,17 +152,17 @@ public class SmartSortingRecord extends UpdatableRecordImpl<SmartSortingRecord> 
 
     @Override
     public String value2() {
-        return getRowNumber();
+        return getRnumber();
     }
 
     @Override
     public String value3() {
-        return getColNumber();
+        return getCnumber();
     }
 
     @Override
     public Integer value4() {
-        return getCellVal();
+        return getCval();
     }
 
     @Override
@@ -173,19 +173,19 @@ public class SmartSortingRecord extends UpdatableRecordImpl<SmartSortingRecord> 
 
     @Override
     public SmartSortingRecord value2(String value) {
-        setRowNumber(value);
+        setRnumber(value);
         return this;
     }
 
     @Override
     public SmartSortingRecord value3(String value) {
-        setColNumber(value);
+        setCnumber(value);
         return this;
     }
 
     @Override
     public SmartSortingRecord value4(Integer value) {
-        setCellVal(value);
+        setCval(value);
         return this;
     }
 
@@ -212,12 +212,12 @@ public class SmartSortingRecord extends UpdatableRecordImpl<SmartSortingRecord> 
     /**
      * Create a detached, initialised SmartSortingRecord
      */
-    public SmartSortingRecord(ULong shoppingListId, String rowNumber, String colNumber, Integer cellVal) {
+    public SmartSortingRecord(ULong shoppingListId, String rnumber, String cnumber, Integer cval) {
         super(SmartSorting.SMART_SORTING);
 
         setShoppingListId(shoppingListId);
-        setRowNumber(rowNumber);
-        setColNumber(colNumber);
-        setCellVal(cellVal);
+        setRnumber(rnumber);
+        setCnumber(cnumber);
+        setCval(cval);
     }
 }

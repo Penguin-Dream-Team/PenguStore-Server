@@ -289,10 +289,10 @@ class ShopDao(
             if (smartSortingEntry == null) smartSortingEntry = createSmartSortingEntry(shoppingListId, barcode, item)
 
             create.update(SMART_SORTING)
-                .set(SMART_SORTING.CELL_VAL, smartSortingEntry.cell_val + 1)
+                .set(SMART_SORTING.CVAL, smartSortingEntry.cell_val + 1)
                 .where(SMART_SORTING.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
-                .and(SMART_SORTING.ROW_NUMBER.eq(smartSortingEntry.row_number))
-                .and(SMART_SORTING.COL_NUMBER.eq(smartSortingEntry.col_number))
+                .and(SMART_SORTING.RNUMBER.eq(smartSortingEntry.row_number))
+                .and(SMART_SORTING.CNUMBER.eq(smartSortingEntry.col_number))
                 .execute()
         }
 
@@ -338,14 +338,14 @@ class ShopDao(
         return create.select()
             .from(SMART_SORTING)
             .where(SMART_SORTING.SHOPPING_LIST_ID.eq(ULong.valueOf(shoppingListId)))
-            .and(SMART_SORTING.ROW_NUMBER.eq(productBarcode1))
-            .and(SMART_SORTING.COL_NUMBER.eq(productBarcode2))
+            .and(SMART_SORTING.RNUMBER.eq(productBarcode1))
+            .and(SMART_SORTING.CNUMBER.eq(productBarcode2))
             .fetchOne()?.map {
                 MatrixEntry(
                     id = it[SMART_SORTING.SHOPPING_LIST_ID],
-                    row_number = it[SMART_SORTING.ROW_NUMBER],
-                    col_number = it[SMART_SORTING.COL_NUMBER],
-                    cell_val = it[SMART_SORTING.CELL_VAL]
+                    row_number = it[SMART_SORTING.RNUMBER],
+                    col_number = it[SMART_SORTING.CNUMBER],
+                    cell_val = it[SMART_SORTING.CVAL]
                 )
             }
     }
@@ -359,9 +359,9 @@ class ShopDao(
         create.insertInto(
             SMART_SORTING,
             SMART_SORTING.SHOPPING_LIST_ID,
-            SMART_SORTING.ROW_NUMBER,
-            SMART_SORTING.COL_NUMBER,
-            SMART_SORTING.CELL_VAL
+            SMART_SORTING.RNUMBER,
+            SMART_SORTING.CNUMBER,
+            SMART_SORTING.CVAL
         )
             .values(ULong.valueOf(shoppingListId), productBarcode1, productBarcode2, 0)
             .execute()
@@ -539,10 +539,10 @@ class ShopDao(
             createSuggestionEntry(userId, productBarcode1, productBarcode2)
 
         create.update(SUGGESTIONS)
-            .set(SUGGESTIONS.CELL_VAL, suggestionEntry.cell_val + 1)
+            .set(SUGGESTIONS.CVAL, suggestionEntry.cell_val + 1)
             .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
-            .and(SUGGESTIONS.ROW_NUMBER.eq(suggestionEntry.row_number))
-            .and(SUGGESTIONS.COL_NUMBER.eq(suggestionEntry.col_number))
+            .and(SUGGESTIONS.RNUMBER.eq(suggestionEntry.row_number))
+            .and(SUGGESTIONS.CNUMBER.eq(suggestionEntry.col_number))
             .execute()
 
         return suggestionEntry.cell_val + 1
@@ -557,14 +557,14 @@ class ShopDao(
         return create.select()
             .from(SUGGESTIONS)
             .where(SUGGESTIONS.USER_ID.eq(ULong.valueOf(userId)))
-            .and(SUGGESTIONS.ROW_NUMBER.eq(productBarcode1))
-            .and(SUGGESTIONS.COL_NUMBER.eq(productBarcode2))
+            .and(SUGGESTIONS.RNUMBER.eq(productBarcode1))
+            .and(SUGGESTIONS.CNUMBER.eq(productBarcode2))
             .fetchOne()?.map() {
                 MatrixEntry(
                     id = it[SUGGESTIONS.USER_ID],
-                    row_number = it[SUGGESTIONS.ROW_NUMBER],
-                    col_number = it[SUGGESTIONS.COL_NUMBER],
-                    cell_val = it[SUGGESTIONS.CELL_VAL]
+                    row_number = it[SUGGESTIONS.RNUMBER],
+                    col_number = it[SUGGESTIONS.CNUMBER],
+                    cell_val = it[SUGGESTIONS.CVAL]
                 )
             }
     }
@@ -578,9 +578,9 @@ class ShopDao(
         create.insertInto(
             SUGGESTIONS,
             SUGGESTIONS.USER_ID,
-            SUGGESTIONS.ROW_NUMBER,
-            SUGGESTIONS.COL_NUMBER,
-            SUGGESTIONS.CELL_VAL
+            SUGGESTIONS.RNUMBER,
+            SUGGESTIONS.CNUMBER,
+            SUGGESTIONS.CVAL
         )
             .values(ULong.valueOf(userId), productBarcode1, productBarcode2, 0)
             .execute()

@@ -18,27 +18,27 @@ public class Suggestions implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ULong   userId;
-    private final String  rowNumber;
-    private final String  colNumber;
-    private final Integer cellVal;
+    private final String  rnumber;
+    private final String  cnumber;
+    private final Integer cval;
 
     public Suggestions(Suggestions value) {
         this.userId = value.userId;
-        this.rowNumber = value.rowNumber;
-        this.colNumber = value.colNumber;
-        this.cellVal = value.cellVal;
+        this.rnumber = value.rnumber;
+        this.cnumber = value.cnumber;
+        this.cval = value.cval;
     }
 
     public Suggestions(
         ULong   userId,
-        String  rowNumber,
-        String  colNumber,
-        Integer cellVal
+        String  rnumber,
+        String  cnumber,
+        Integer cval
     ) {
         this.userId = userId;
-        this.rowNumber = rowNumber;
-        this.colNumber = colNumber;
-        this.cellVal = cellVal;
+        this.rnumber = rnumber;
+        this.cnumber = cnumber;
+        this.cval = cval;
     }
 
     /**
@@ -49,24 +49,24 @@ public class Suggestions implements Serializable {
     }
 
     /**
-     * Getter for <code>suggestions.row_number</code>.
+     * Getter for <code>suggestions.rnumber</code>.
      */
-    public String getRowNumber() {
-        return this.rowNumber;
+    public String getRnumber() {
+        return this.rnumber;
     }
 
     /**
-     * Getter for <code>suggestions.col_number</code>.
+     * Getter for <code>suggestions.cnumber</code>.
      */
-    public String getColNumber() {
-        return this.colNumber;
+    public String getCnumber() {
+        return this.cnumber;
     }
 
     /**
-     * Getter for <code>suggestions.cell_val</code>.
+     * Getter for <code>suggestions.cval</code>.
      */
-    public Integer getCellVal() {
-        return this.cellVal;
+    public Integer getCval() {
+        return this.cval;
     }
 
     @Override
@@ -74,9 +74,9 @@ public class Suggestions implements Serializable {
         StringBuilder sb = new StringBuilder("Suggestions (");
 
         sb.append(userId);
-        sb.append(", ").append(rowNumber);
-        sb.append(", ").append(colNumber);
-        sb.append(", ").append(cellVal);
+        sb.append(", ").append(rnumber);
+        sb.append(", ").append(cnumber);
+        sb.append(", ").append(cval);
 
         sb.append(")");
         return sb.toString();

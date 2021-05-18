@@ -18,27 +18,27 @@ public class SmartSorting implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final ULong   shoppingListId;
-    private final String  rowNumber;
-    private final String  colNumber;
-    private final Integer cellVal;
+    private final String  rnumber;
+    private final String  cnumber;
+    private final Integer cval;
 
     public SmartSorting(SmartSorting value) {
         this.shoppingListId = value.shoppingListId;
-        this.rowNumber = value.rowNumber;
-        this.colNumber = value.colNumber;
-        this.cellVal = value.cellVal;
+        this.rnumber = value.rnumber;
+        this.cnumber = value.cnumber;
+        this.cval = value.cval;
     }
 
     public SmartSorting(
         ULong   shoppingListId,
-        String  rowNumber,
-        String  colNumber,
-        Integer cellVal
+        String  rnumber,
+        String  cnumber,
+        Integer cval
     ) {
         this.shoppingListId = shoppingListId;
-        this.rowNumber = rowNumber;
-        this.colNumber = colNumber;
-        this.cellVal = cellVal;
+        this.rnumber = rnumber;
+        this.cnumber = cnumber;
+        this.cval = cval;
     }
 
     /**
@@ -49,24 +49,24 @@ public class SmartSorting implements Serializable {
     }
 
     /**
-     * Getter for <code>smart_sorting.row_number</code>.
+     * Getter for <code>smart_sorting.rnumber</code>.
      */
-    public String getRowNumber() {
-        return this.rowNumber;
+    public String getRnumber() {
+        return this.rnumber;
     }
 
     /**
-     * Getter for <code>smart_sorting.col_number</code>.
+     * Getter for <code>smart_sorting.cnumber</code>.
      */
-    public String getColNumber() {
-        return this.colNumber;
+    public String getCnumber() {
+        return this.cnumber;
     }
 
     /**
-     * Getter for <code>smart_sorting.cell_val</code>.
+     * Getter for <code>smart_sorting.cval</code>.
      */
-    public Integer getCellVal() {
-        return this.cellVal;
+    public Integer getCval() {
+        return this.cval;
     }
 
     @Override
@@ -74,9 +74,9 @@ public class SmartSorting implements Serializable {
         StringBuilder sb = new StringBuilder("SmartSorting (");
 
         sb.append(shoppingListId);
-        sb.append(", ").append(rowNumber);
-        sb.append(", ").append(colNumber);
-        sb.append(", ").append(cellVal);
+        sb.append(", ").append(rnumber);
+        sb.append(", ").append(cnumber);
+        sb.append(", ").append(cval);
 
         sb.append(")");
         return sb.toString();
