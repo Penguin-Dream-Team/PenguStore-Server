@@ -14,13 +14,15 @@ val kotest_version: String by project
 val hikari_version: String by project
 val config4k_version: String by project
 val jackson_datatype_version: String by project
+val flyway_version: String by project
+
 
 plugins {
     application
     kotlin("jvm") version "1.4.31"
     id("nu.studer.jooq") version "5.2.1"
     id("com.bmuschko.docker-java-application") version "6.7.0"
-    id("org.flywaydb.flyway") version "7.6.0"
+    id("org.flywaydb.flyway") version "7.7.3"
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -74,6 +76,9 @@ dependencies {
 
     implementation("org.jooq", "jooq", jooq_version)
     implementation("com.zaxxer", "HikariCP", hikari_version)
+    implementation("org.flywaydb", "flyway-core", flyway_version)
+    runtimeOnly("org.flywaydb", "flyway-gradle-plugin", flyway_version)
+
 
     implementation("org.koin", "koin-core", koin_version)
     implementation("io.mockk", "mockk", mockk_version)

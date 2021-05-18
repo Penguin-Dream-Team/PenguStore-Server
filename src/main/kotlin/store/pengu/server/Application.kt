@@ -18,6 +18,7 @@ import io.ktor.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
+import org.flywaydb.core.Flyway
 import org.jooq.exception.DataAccessException
 import org.koin.core.context.startKoin
 import org.slf4j.event.Level
@@ -43,6 +44,10 @@ fun Application.module(testing: Boolean = false) {
     val koin = startKoin {
         modules(ApiModule.module)
     }.koin
+
+    val flyway = koin.get<Flyway>()
+    flyway.migrate()
+
 
     install(AutoHeadResponse)
     install(CachingHeaders) {

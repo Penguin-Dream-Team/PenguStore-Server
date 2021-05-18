@@ -495,7 +495,7 @@ class ShopDao(
         val cartProductsBarcode = create.select(PRODUCTS.BARCODE)
             .from(PRODUCTS)
             .where(PRODUCTS.ID.`in`(cart.map { it.productId }))
-            .fetch().getValues(PRODUCTS.BARCODE)
+            .fetch().getValues(PRODUCTS.BARCODE).filterNotNull()
 
         create.transaction { configuration ->
             val transaction = DSL.using(configuration)
